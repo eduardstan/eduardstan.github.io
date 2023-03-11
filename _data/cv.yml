@@ -4,12 +4,7 @@
     - name: Full Name
       value: Eduard Ionel Stan
     - name: Languages
-      value: 
-        - Romanian (native)
-        - Italian (professional) 
-        - English (professional) 
-        - Spanish (professional)
-        - French (base)
+      value: Romanian (native), Italian (pro), English (pro), Spanish (pro), French (base)
 
 - title: Education
   type: time_table
