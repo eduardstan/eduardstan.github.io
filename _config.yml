@@ -257,7 +257,7 @@ display_tags: ['formatting', 'images', 'links', 'math', 'code'] # this tags will
 scholar:
 
   last_name: [Stan]
-  first_name: [Eduard, I.]
+  first_name: [I. E.]
 
   style: apa
   locale: en
