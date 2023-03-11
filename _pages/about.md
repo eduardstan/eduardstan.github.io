@@ -3,8 +3,7 @@ layout: about
 title: about
 permalink: /
 subtitle: >
-    <p><b>Research Assistant</b> @ <a href='https://dbs.inf.unibz.it/'>Database Systems Group</a></p>
-    <p><b>Previously</b> <a href=''>UNIPR</a>, <a href=''>UNIUD</a>, <a href=''>UNIFE</a></p>
+    <p><b>Research Assistant</b> at <a href='https://dbs.inf.unibz.it/'>Database Systems Group</a> and <a href='https://aclai.unife.it/en/'>ACLAI Laboratory</a></p>
 
 profile:
   align: right
