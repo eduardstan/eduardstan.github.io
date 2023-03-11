@@ -5,8 +5,11 @@
       value: Eduard Ionel Stan
     - name: Languages
       value: 
-      	- Romanian (native)
-      	- Italian (professional), English (professional), Spanish (professional), French (base)
+        - Romanian (native)
+        - Italian (professional) 
+        - English (professional) 
+        - Spanish (professional)
+        - French (base)
 
 - title: Education
   type: time_table
@@ -15,8 +18,8 @@
       institution: University of Parma, Parma, Italy
       year: 2023
       description:
-        - Title: Foundations of Modal Symbolic Learning
-        - Score: Eccellent with Honors
+        - Title = Foundations of Modal Symbolic Learning
+        - Score = Eccellent with Honors
         - title: Description 3.
           contents:
             - Sub-description 1.
