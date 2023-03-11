@@ -18,4 +18,4 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true  # includes social icons at the bottom of the page
 ---
 
-Hi, and thanks for landing by! <i class="fa-solid fa-hand-wave"></i>
+Hi, and thanks for landing by! :wave:
