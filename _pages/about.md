@@ -2,11 +2,13 @@
 layout: about
 title: about
 permalink: /
-subtitle: Research Assistant @ <a href='https://dbs.inf.unibz.it/'>Database Systems Group</a>
+subtitle: >
+    <p><b>Research Assistant</b> @ <a href='https://dbs.inf.unibz.it/'>Database Systems Group</a></p>
+    <p><b>Previously</b> <a href=''>UNIPR</a>, <a href=''>UNIUD</a>, <a href=''>UNIFE</a></p>
 
 profile:
   align: right
-  image: prof_pic.jpg
+  image: eduard-grey.jpg
   image_circular: true # crops the image to make it circular
   address: >
     <p>555 your office number</p>
