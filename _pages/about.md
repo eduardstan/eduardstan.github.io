@@ -12,7 +12,8 @@ profile:
   address: >
     <p>Free University of Bozen-Bolzano</p>
     <p>Faculty of Computer Science</p>
-    <p>Dominikanerplatz - Piazza Domenicani 3, Floor 2, Office 2.11</p>
+    <p>Dominikanerplatz - Piazza Domenicani 3</p>
+    <p>Floor 2, Office 2.11</p>
     <p>Bozen-Bolzano, 39100, Italy</p>
 
 news: true  # includes a list of news items
