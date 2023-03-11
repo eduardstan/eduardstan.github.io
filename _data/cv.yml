@@ -13,23 +13,23 @@
       institution: University of Parma, Parma, Italy
       year: 2023
       description:
-        - "Title:" Foundations of Modal Symbolic Learning
-        - "Advisor:" Prof. Guido Sciavicco
-        - "Score:" Eccellent with Honors
+        - "Title: Foundations of Modal Symbolic Learning"
+        - "Advisor: Prof. Guido Sciavicco"
+        - "Score: Eccellent with Honors"
     - title: MSc in Computer Science, Minor in Automated Reasoning
       institution: University of Udine, Udine, Italy
       year: 2019
       description:
-        - "Title:" Multiple Formulas and Multiple Models Finite Interval-based Model Checking
-        - "Advisor:" Prof. Guido Sciavicco
-        - "Score:" 110/110 with Honors
+        - "Title: Multiple Formulas and Multiple Models Finite Interval-based Model Checking"
+        - "Advisor: Prof. Guido Sciavicco"
+        - "Score: 110/110 with Honors"
     - title: BSc in Computer Science
       institution: University of Ferrara, Ferrara, Italy
       year: 2017
       description:
-        - "Title:" Implementation of a Tableau-based Satisfiability Checker for the Logic HS<sub>3</sub>
-        - "Advisor:" Prof. Guido Sciavicco
-        - "Score:" 110/110 with Honors
+        - "Title: Implementation of a Tableau-based Satisfiability Checker for the Logic HS3"
+        - "Advisor: Prof. Guido Sciavicco"
+        - "Score: 110/110 with Honors"
 
 - title: Experience
   type: time_table
