@@ -23,9 +23,9 @@ Hi, and thanks for landing by! :wave:
 
 I'm Eduard, nice to meet you! I'm a scientist living amidst computer science and mathematics. 
 
-My curiosity combined with the quest for fundamental understanding has led me to pursue a PhD in mathematics after my prior studies in computer science. 
+My curiosity combined with the quest for fundamental understanding has led me to pursue a PhD in Mathematics after my prior studies in Computer Science. 
 
-In my PhD thesis, by systematically exploiting inductive biases, I present the mathematical **Foundations of Modal Symbolic Learning** for learning symbolically from unstructured data, which is the intersection between the fields of machine learning and modal logic(s).
+In my PhD thesis, by systematically exploiting inductive biases, I present the mathematical **Foundations of Modal Symbolic Learning** for learning symbolically from unstructured data, which is the intersection between the fields of Machine Learning and Modal Logic(s).
 
 I like interdisciplinarity and I get excited when people are motivated. I like to share knowledge with others and to work with people that come from different research areas. Moreover, I love animals (especially dogs), working out, and snowboarding.
 
