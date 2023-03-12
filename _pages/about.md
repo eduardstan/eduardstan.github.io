@@ -8,7 +8,7 @@ subtitle: >
 profile:
   align: right
   image: eduard-grey.jpg
-  image_circular: true # crops the image to make it circular
+  image_circular: false # crops the image to make it circular
   address: >
     <p>Free University of Bozen-Bolzano</p>
     <p>Faculty of Computer Science</p>
