@@ -6,7 +6,7 @@ subtitle: >
     <p><b>Data Science and Machine Learning Researcher</b> at <a href='https://dbs.inf.unibz.it/'>Database Systems Group</a> and <a href='https://aclai.unife.it/en/'>ACLAI Laboratory</a></p>
 
 profile:
-  align: top
+  align: right
   image: eduard-grey.jpg
   image_circular: false # crops the image to make it circular
   address: >
