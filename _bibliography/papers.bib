@@ -1,9 +1,13 @@
 % PhD Thesis
 @phdthesis{phd_thesis,
-  author  = {{I. E.} Stan},
-  title   = {Foundations of Modal Symbolic Learning},
-  school  = {University of Parma},
-  year    = {2023}
+  author    = {{I. E.} Stan},
+  title     = {Foundations of Modal Symbolic Learning},
+  school    = {University of Parma},
+  year      = {2023},
+  selected  = {true},
+  pdf       = {publications/theses/phd_thesis2023.pdf},
+  preview   = {publications/theses/phd_thesis2023.png},
+  abstract  = {Traditional symbolic learning is the sub-field of machine learning that aims to learn symbolic models from structured data, representing propositional logic theories, and its investigation initiated with the early days of artificial intelligence. Such an approach is yet outstanding in terms of academic performance (e.g., accuracy) and industrial one (e.g., interpretability, bias, ethical concerns) over modern techniques (e.g., deep neural networks) on structured data, but it suffers to natively address the problem of learning from unstructured data (e.g., time series, images, and graphs). By systematically exploiting inductive biases, we present the mathematical framework of modal symbolic learning for learning symbolically from unstructured data, which is the intersection between the fields of machine learning and modal logic(s) in terms of academic discipline. We study its properties from a learning perspective, enhancing standard decision trees, the quintessential expression of conventional symbolic learning, to learn modal logic theories. We demonstrate how modal data emerges from unstructured one to conduct modal symbolic learning. We experimentally prove how models learned with this framework are more accurate, precise, and sensible than classic propositional ones and at least comparable with those learned with non-symbolic ones. In addition, we show how our approach can be generalized from trees to more complex learning techniques (e.g., fuzzy and neural-symbolic trees), and we point to several ambitious and challenging directions in which modal symbolic learning, as a field, can expand. Modal symbolic learning is still in its infancy, and investigating its foundations allows a more organic and substantial development of the matter. Nevertheless, it has already shown enormous application potential, both theoretical (giving modal logic languages a new application field and fostering the study of new ones) and practical (symbolically addressing real-world problems and thus offering interpretable models for further research).}
 }
 
 % Journals
@@ -17,7 +21,12 @@
   volume    = {137},
   pages     = {102486},
   year      = {2023},
-  selected  = {true}
+  selected  = {true},
+  abbr      = {ArtMed},
+  pdf       = {publications/2023/artmed2023.pdf},
+  preview   = {publications/2023/artmed2023.png},
+  html      = {https://doi.org/10.1016/j.artmed.2022.102486},
+  abstract  = {Symbolic learning is the logic-based approach to machine learning, and its mission is to provide algorithms and methodologies to extract logical information from data and express it in an interpretable way. Interval temporal logic has been recently proposed as a suitable tool for symbolic learning, specifically via the design of an interval temporal logic decision tree extraction algorithm. In order to improve their performances, interval temporal decision trees can be embedded into interval temporal random forests, mimicking the corresponding schema at the propositional level. In this article we consider a dataset of cough and breath sample recordings of volunteer subjects, labeled with their COVID-19 status, originally collected by the University of Cambridge. By interpreting such recordings as multivariate time series, we study the problem of their automated classification using interval temporal decision trees and forests. While this problem has been approached with the same dataset as well as with other datasets, in all cases, non-symbolic learning methods (usually, deep learning-based) have been applied to solve it; in this article we apply a symbolic approach, and show that it does not only outperform the state-of-the-art obtained with the same dataset, but its results are also superior to those of most non-symbolic techniques applied on other datasets. As an added bonus, thanks to the symbolic nature of our approach, we are also able to extract explicit knowledge to help physicians characterize typical COVID-positive cough and breath.}
 }
 
 @article{DBLP:journals/fss/ConradieMMSS23,
@@ -36,22 +45,31 @@
   timestamp = {Sat, 04 Mar 2023 00:33:57 +0100},
   biburl    = {https://dblp.org/rec/journals/fss/ConradieMMSS23.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org},
-  selected  = {true}
+  selected  = {true},
+  abbr      = {FSS},
+  pdf       = {publications/2023/fss2023.pdf},
+  html      = {https://doi.org/10.1016/j.fss.2022.05.014},
+  abstract  = {The most representative interval temporal logic, called HS, was introduced by Halpern and Shoham in the nineties. Recently, HS has been proposed as a suitable formalism for modern artificial intelligence applications; however, when dealing with real-life data one is not always able to express temporal relations and propositional labels in a definite, crisp way. In this paper, following the seminal ideas of Fitting and Zadeh, we present a fuzzy generalization of HS, called FHS, that partially solves such problems of expressive power. We study FHS from both a theoretical and an application standpoint: first, we discuss its syntax, semantics, expressive power, and satisfiability problem; then, we define and solve the time series FHS finite model checking problem, to serve as the basis of future applications.}
 }
 
 @article{10.1115/1.4056287,
-    author  = {G. Bechini and 
+  author    = {G. Bechini and 
                E. Losi and 
                L. Manservigi and 
                G. Pagliarini and 
                G. Sciavicco and 
                {I. E.} Stan and 
                M. Venturini},
-    title   = {Statistical Rule Extraction for Gas Turbine Trip Prediction},
-    journal = {Journal of Engineering for Gas Turbines and Power},
-    volume  = {145},
-    number  = {5},
-    year    = {2023}
+  title     = {Statistical Rule Extraction for Gas Turbine Trip Prediction},
+  journal   = {Journal of Engineering for Gas Turbines and Power},
+  volume    = {145},
+  number    = {5},
+  year      = {2023},
+  abbr      = {J. Eng. Gas},
+  pdf       = {publications/2023/j_eng_gas2023.pdf},
+  preview   = {publications/2023/j_eng_gas2023.png},
+  html      = {https://doi.org/10.1115/1.4056287},
+  abstract  = {Gas turbine trip is an operational event that arises when undesirable operating conditions are approached or exceeded, and predicting its onset is a largely unexplored area. The application of novel artificial intelligence methods to this problem is interesting both from the computer science and the engineering point of view, and the results may be relevant in both the academia and the industry. In this paper, we consider data gathered from a fleet of Siemens industrial gas turbines in operation that includes several thermodynamic variables observed during a long period of operation. To assess the possibility of predicting trip events, we first apply a new, systematic statistical analysis to identify the most important variables, then we use a novel machine learning technique known as temporal decision tree, which differs from canonical decision tree because it allows a native treatment of the temporal component, and has an elegant logical interpretation that eases the posthoc validation of the results. Finally, we use the learned models to extract statistical rules. As a result, we are able to select the five most informative variables, build a predictive model with an average accuracy of 73%, and extract several rules. To our knowledge, this is the first attempt to use such an approach not only in the gas turbine field but also in the whole industry domain.}
 }
 
 @article{DBLP:journals/algorithms/Lucena-SanchezS21,
@@ -64,7 +82,11 @@
   volume    = {14},
   number    = {3},
   pages     = {76},
-  year      = {2021}
+  year      = {2021},
+  abbr      = {Algorithms},
+  pdf       = {publications/2021/algorithms2021.pdf},
+  html      = {https://doi.org/10.3390/a14030076},
+  abstract  = {Air quality modelling that relates meteorological, car traffic, and pollution data is a fundamental problem, approached in several different ways in the recent literature. In particular, a set of such data sampled at a specific location and during a specific period of time can be seen as a multivariate time series, and modelling the values of the pollutant concentrations can be seen as a multivariate temporal regression problem. In this paper, we propose a new method for symbolic multivariate temporal regression, and we apply it to several data sets that contain real air quality data from the city of Wrocław (Poland). Our experiments show that our approach is superior to classical, especially symbolic, ones, both in statistical performances and the interpretability of the results.}
 }
 
 @article{DBLP:journals/ai/Munoz-VelascoPS19,
@@ -78,7 +100,12 @@
   volume    = {266},
   pages     = {1--26},
   year      = {2019},
-  selected  = {true}
+  selected  = {true},
+  abbr      = {AI},
+  pdf       = {publications/2019/ai2019.pdf},
+  preview   = {publications/2019/ai2019.png},
+  html      = {https://doi.org/10.1016/j.artint.2018.09.001},
+  abstract  = {The primary characteristic of interval temporal logic is that intervals, rather than points, are taken as the primitive ontological entities. Given their generally bad computational behavior of interval temporal logics, several techniques exist to produce decidable and computationally affordable temporal logics based on intervals. In this paper we take inspiration from Golumbic and Shamir's coarser interval algebras, which generalize the classical Allen's Interval Algebra, in order to define two previously unknown variants of Halpern and Shoham's logic (HS) based on coarser relations. We prove that, perhaps surprisingly, the satisfiability problem for the coarsest of the two variants, namely HS3, not only is decidable, but PSpace-complete in the finite/discrete case, and PSpace-hard in any other case; besides proving its complexity bounds, we implement a tableau-based satisfiability checker for it and test it against a systematically generated benchmark. Our results are strengthened by showing that not all coarser-than-Allen's relations are a guarantee of decidability, as we prove that the second variant, namely HS7, remains undecidable in all interesting cases.}
 }
 
 % Conference Proceedings

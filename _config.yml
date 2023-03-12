@@ -118,12 +118,12 @@ bing_site_verification:  # out your bing-site-verification ID (Bing Webmaster)
 
 blog_name: blog # blog_name will be displayed in your blog page
 blog_nav_title: blog # your blog must have a title for it to be displayed in the nav bar
-blog_description: a simple whitespace theme for academics (!!under construction!!)
+blog_description: a simple whitespace theme for academics
 permalink: /blog/:year/:title/
 
 # Pagination
 pagination:
-  enabled: true
+  enabled: false
 
 related_blog_posts:
   enabled: false
@@ -269,8 +269,8 @@ scholar:
   # https://github.com/alshedivat/al-folio/issues/330
   sort_by: date
   order: descending
-  type_order: [phdthesis, article, inbook, book, unpublished, misc, report, conference, incollections, inproceedings, proceedings]
-  type_names: {unpublished: working papers, report: reports, article: journal articles, inproceedings: conference articles & others}
+  type_order: [phdthesis, thesis, article, inbook, book, unpublished, misc, report, conference, incollections, inproceedings, proceedings]
+  type_names: {thesis: phd thesis, phdthesis: phd thesis, unpublished: working papers, report: reports, article: journal articles, inproceedings: conference articles & others}
   
   # Note: if you have latex math in your bibtex, the latex filter
   # preprocessing may conflict with MathJAX if the latter is enabled.
