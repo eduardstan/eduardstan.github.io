@@ -3,7 +3,13 @@ layout: about-custom
 title: about
 permalink: /
 subtitle: >
-    <p><b>Data Science and Machine Learning Researcher</b> at <a href='https://dbs.inf.unibz.it/'>Database Systems Group</a> and <a href='https://aclai.unife.it/en/'>ACLAI Laboratory</a></p>
+    <p>
+    	<b>Data Science and Machine Learning Researcher</b> 
+    	<ul>
+    	<li><a href='https://dbs.inf.unibz.it/'>Database Systems Group</a></li> 
+    	<li><a href='https://aclai.unife.it/en/'>ACLAI Laboratory</a></li>
+    	</ul>
+    </p>
 
 profile:
   align: right
