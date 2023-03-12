@@ -2,13 +2,25 @@
  * Themes
  ******************************************************************************/
  
+ // Day theme colors
+$burnt-orange-color:          #E65100 !default;                         // orange 900 material.io
+$light-burnt-orange-color:    #FF9800 !default;                         // orange 500 material.io
+// $light-burnt-orange-color:    lighten($burnt-orange-color, 10%);
+
+// Night theme colors
+$bluish-green-color:           #2ce0a1 !default;
+$dark-bluish-green-color:      darken($bluish-green-color, 10%); 
+$card-grey-color:              #212121 !default;
+ 
 :root {
   --global-bg-color: #{$white-color};
   --global-code-bg-color: #{$code-bg-color-light};
   --global-text-color: #{$black-color};
   --global-text-color-light: #{$grey-color};
-  --global-theme-color: #{$purple-color};
-  --global-hover-color: #{$purple-color};
+  --global-theme-color: #{$burnt-orange-color};
+  --global-hover-color: #{$light-burnt-orange-color};
+  // --global-theme-color: #{$purple-color};
+  // --global-hover-color: #{$purple-color};
   --global-footer-bg-color: #{$grey-color-dark};
   --global-footer-text-color: #{$grey-color-light};
   --global-footer-link-color: #{$white-color};
