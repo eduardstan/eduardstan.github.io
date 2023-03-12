@@ -21,7 +21,7 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true  # includes social icons at the bottom of the page
 --- 
 
-# About me
+# about me
 
 Hi, and thanks for landing by! :wave:
 
@@ -34,3 +34,9 @@ In my PhD thesis, by systematically exploiting inductive biases, I present the m
 I like interdisciplinarity and I get excited when people are motivated. I like to share knowledge with others and to work with people that come from different research areas. Moreover, I love animals (especially dogs), working out, and snowboarding.
 
 I'm always looking to grow my personal and professional network. Feel free to reach out for a virtual coffee :coffee:.
+
+***
+
+# about the website
+
+**Under construction!!** :construction_worker:
