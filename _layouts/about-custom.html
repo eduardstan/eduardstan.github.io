@@ -10,6 +10,7 @@ layout: default
           </h1>
           <p class="desc">{{ page.subtitle }}</p>
           
+          <!-- Image; works only with page.profile.align=right -->
           {% if page.profile -%}
           <div class="profile float-{%- if page.profile.align == 'left' -%}left{%- else -%}right{%- endif -%}">
             {%- if page.profile.image %}
