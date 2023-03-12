@@ -35,8 +35,6 @@ I like interdisciplinarity and I get excited when people are motivated. I like t
 
 I'm always looking to grow my personal and professional network. Feel free to reach out for a virtual coffee :coffee:.
 
-***
-
 # about the website
 
 **Under construction!!** :construction_worker:
