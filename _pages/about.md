@@ -21,6 +21,8 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true  # includes social icons at the bottom of the page
 --- 
 
+# About me
+
 Hi, and thanks for landing by! :wave:
 
 I'm a scientist living amidst Computer Science and Mathematics. 

@@ -26,7 +26,9 @@ $card-grey-color:              #212121 !default;
   --global-footer-text-color: #{$grey-color-light};
   --global-footer-link-color: #{$white-color};
   --global-distill-app-color: #{$grey-color};
-  --global-divider-color: rgba(0,0,0,.1);
+  // This was the default color
+  // --global-divider-color: rgba(0,0,0,.1);
+  --global-divider-color: #{$burnt-orange-color};
   --global-card-bg-color: #{$white-color};
 
   .fa-sun {
@@ -60,7 +62,9 @@ html[data-theme='dark'] {
   --global-footer-text-color: #{$grey-color-dark};
   --global-footer-link-color: #{$black-color};
   --global-distill-app-color: #{$grey-color-light};
-  --global-divider-color: #424246;
+  // This was the default color
+  // --global-divider-color: #424246;
+  --global-divider-color: #{$bluish-green-color};
   // This was the default color
   // --global-card-bg-color: #{$grey-900};
   --global-card-bg-color: #{$card-grey-color};
