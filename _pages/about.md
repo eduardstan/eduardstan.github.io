@@ -6,7 +6,7 @@ subtitle: >
     <p><b>Data Science and Machine Learning Researcher</b> at <a href='https://dbs.inf.unibz.it/'>Database Systems Group</a> and <a href='https://aclai.unife.it/en/'>ACLAI Laboratory</a></p>
 
 profile:
-  align: right
+  align: top
   image: eduard-grey.jpg
   image_circular: false # crops the image to make it circular
   address: >
@@ -23,7 +23,7 @@ social: true  # includes social icons at the bottom of the page
 
 Hi, and thanks for landing by! :wave:
 
-I'm a scientist living amidst computer science and mathematics. 
+I'm a scientist living amidst Computer Science and Mathematics. 
 
 My curiosity combined with the quest for fundamental understanding has led me to pursue a PhD in Mathematics after my prior studies in Computer Science. 
 
