@@ -3,7 +3,7 @@ layout: about
 title: about
 permalink: /
 subtitle: >
-    <p><b>Data Science and Machine Learning Researcher</b> <br><a href='https://dbs.inf.unibz.it/'>Database Systems Group</a> and <a href='https://aclai.unife.it/en/'>Applied Computational Logic and Artificial Intelligence Laboratory</a></p>
+    <p><b>Data Science and Artificial Intelligence Researcher</b><br><a href='https://dbs.inf.unibz.it/'>Database Systems Group</a> and <a href='https://aclai.unife.it/en/'>Applied Computational Logic and Artificial Intelligence Laboratory</a></p>
 
 profile:
   align: right
