@@ -37,7 +37,7 @@ I like interdisciplinarity, and I get excited when people are motivated. Moreove
 
 I love animals (especially dogs), working out, and snowboarding.
 
-I am always looking to grow my personal and professional network. So feel free to reach out for a virtual coffee :coffee:.
+I am always looking to grow my personal and professional network. So feel free to reach out for a virtual coffee.
 
 ## cluster map
 {% include cluster_map.html %}
