@@ -29,11 +29,11 @@
       "url": "http://www.ivl.disco.unimib.it",
       "startDate": "2024-07-16",
       "endDate": "?",
-      "summary": "AdvaNced Technologies for Human-centrEd Medicine (ANTHEM) project of the Piano Nazionale Complementare (PNC).",
+      "summary": "Working on the AdvaNced Technologies for Human-centrEd Medicine (ANTHEM) project of the Piano Nazionale Complementare (PNC).",
       "highlights": [
-        "Signal Processing", 
+        "Signal Processing (Time Series, EEG, ECG, EMG, Images, Videos)", 
         "Explainable Artificial Intelligence", 
-        "Machine Learning"
+        "Neuro-Symbolic Machine Learning"
       ]
     },
     {
@@ -43,11 +43,10 @@
       "url": "https://dbs.inf.unibz.it",
       "startDate": "2023-03-01",
       "endDate": "2024-06-30",
-      "summary": "Interconnected Nord-Est Innovation Ecosystem (iNEST) project of the Piano Nazionale di Ripresa e Resilienza (PNRR).",
+      "summary": "Worked on the Interconnected Nord-Est Innovation Ecosystem (iNEST) project of the Piano Nazionale di Ripresa e Resilienza (PNRR).",
       "highlights": [
-        "Data Analytics", 
-        "Data Science", 
-        "Artificial Intelligence", 
+        "Time Series Data", 
+        "Data Analytics and Data Science", 
         "Machine Learning"
       ]
     },
@@ -58,11 +57,10 @@
       "url": "https://aclai.unife.it",
       "startDate": "2019-11-01",
       "endDate": "2024-07-01",
-      "summary": "",
+      "summary": "Coordinated many theses with keen students receiving excellent feedback. Some of these works have been published in international journals and conferences.",
       "highlights": [
-        "(Fuzzy) Modal Logic", 
-        "Interval Temporal Logic", 
-        "Symbolic Machine Learning"
+        "(Fuzzy) Modal Logic and Interval Temporal Logic", 
+        "Modal Symbolic Machine Learning"
       ]
     },
     {
@@ -95,9 +93,9 @@
       ]
     },
     {
-      "organization": "Department of Mathematics and Computer Science, University of Ferrara",
+      "organization": "Department Council (Consiglio di Dipartimento), Department of Mathematics and Computer Science, University of Ferrara",
       "location": "Ferrara, Italy",
-      "position": "PhD Students' Representative (Rappresentante dei Dottorandi)",
+      "position": "PhDs' Representative (Rappresentante dei Dottorandi)",
       "url": "https://dmi.unife.it/it",
       "startDate": "2019-10-01",
       "endDate": "2022-09-30",
@@ -106,14 +104,29 @@
       ]
     },
     {
-      "organization": "Academic Board, Universities of Ferrara, Modena-Reggio Emilia, and Parma",
+      "organization": "Academic Board (Collegio Docenti), PhD in Mathematics, Universities of Ferrara, Modena-Reggio Emilia, and Parma",
       "location": "Parma, Italy",
-      "position": "35th cycle PhD Students' Representative (Rappresentante dei Dottorandi del 35° ciclo)",
+      "position": "35th cycle PhDs' Representative (Rappresentante dei Dottorandi del 35° ciclo)",
       "url": "https://smfi.unipr.it/",
       "startDate": "2020-11-01",
       "endDate": "2022-10-31",
       "summary": "",
       "highlights": [
+      ]
+    },
+    {
+      "organization": "Quality Assurance Commission (Commissione Assicurazione Qualità), Department of Mathematics, Computer Science, and Physics, University of Udine",
+      "location": "Udine, Italy",
+      "position": "Students' Reppresentative (Rappresentante degli Studenti)",
+      "url": "https://smfi.unipr.it/",
+      "startDate": "2018-10-01",
+      "endDate": "2019-09-30",
+      "summary": "",
+      "highlights": [
+        "Bachelor's Degree in Computer Science",
+        "Bachelor's Degree in Internet of Things, Big Data and Web",
+        "Master's Degree in Computer Science",
+        "International Master's Degree in Computer Science (joint collaboration with the University of Klagenfurt)"
       ]
     }
   ],
@@ -160,11 +173,11 @@
   ],
   "awards": [
     {
-      "title": "Nobel Prize in Physics",
-      "date": "1921-11-01",
-      "awarder": "Royal Swedish Academy of Sciences",
-      "url": "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/",
-      "summary": "The Nobel Prizes are five separate prizes that, according to Alfred Nobel's will of 1895, are awarded to 'those who, during the preceding year, have conferred the greatest benefit to humankind.'"
+      "title": "Erasmus+ Scholarship",
+      "date": "2016-09-01",
+      "awarder": "Department of Mathematics and Computer Science, University of Ferrara, Italy",
+      "url": "",
+      "summary": "Awarded a 5-month full scholarship through the Erasmus+ program and spent the duration of the scholarship in Murcia, Spain."
     }
   ],
   "publications": [
