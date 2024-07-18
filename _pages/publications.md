@@ -9,6 +9,8 @@ nav_order: 2
 
 <!-- _pages/publications.md -->
 
+:construction_worker: Under construction!
+
 <!-- Bibsearch Feature -->
 
 {% include bib_search.liquid %}

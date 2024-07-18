@@ -2,24 +2,37 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Moto. Etc.
+subtitle: >
+    <p><b>Assistant Professor (RTD/a)</b>
+    <br>
+    <a href='http://www.ivl.disco.unimib.it'>Imaging and Vision Laboratory (IVL)</a>
+    <br>
+    <a href='http://www.disco.unimib.it'>Department of Informatics, Systems and Communication (DISCo)</a>
+    <br>
+    <a href='http://unimib.it'>University of Milan-Bicocca (UNIMIB)</a>
 
 profile:
   align: right
   image: prof_pic.jpg
   image_circular: false # crops the image to make it circular
   more_info: >
-    <p>555 your office number</p>
-    <p>123 your address street</p>
-    <p>Your City, State 12345</p>
+    <p>University of Milan-Bicocca</p>
+    <p>Department of Informatics, Systems and Communication</p>
+    <p>Viale Sarca 336</p>
+    <p>20125 Milan, Italy</p>
 
 news: true # includes a list of news items
-selected_papers: true # includes a list of papers marked as "selected={true}"
+selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-Write your biography here. Tell the world about yourself. Link to your favorite [subreddit](http://reddit.com). You can put a picture in, too. The code is already in, just name your picture `prof_pic.jpg` and put it in the `img/` folder.
+<!--- _pages/about.md --->
+:construction_worker: UNDER CONSTRUCTION :construction_worker:
 
-Put your address / P.O. box / other info right below your picture. You can also disable any of these elements by editing `profile` property of the YAML header of your `_pages/about.md`. Edit `_bibliography/papers.bib` and Jekyll will render your [publications page](/al-folio/publications/) automatically.
+As an Assistant Professor at the University of Milan-Bicocca, my research focuses on formal explainable AI, integrating symbolic methods and data science. With a solid background in modal logic(s) and formal methods, I specialize in creating interpretable AI models that leverage robust data representation techniques. 📊💡
 
-Link to your social media connections, too. This theme is set up to use [Font Awesome icons](https://fontawesome.com/) and [Academicons](https://jpswalsh.github.io/academicons/), like the ones below. Add your Facebook, Twitter, LinkedIn, Google Scholar, or just disable all of them.
+My expertise bridges the gap between logic and AI, enabling innovative data interpretation and machine learning solutions with practical applications. I have developed symbolic methods that ensure data is accurately represented. My approach combines theoretical rigor with practical insights. 🤖🔍
+
+I am thrilled to integrate my symbolic background with deep learning methodologies at the ANTHEM project. This collaboration is not just an opportunity to expand my skills in deep learning, but also a chance to contribute to groundbreaking advancements in healthcare. The excitement is palpable, and I can't wait to make a real impact. 🏥🚀
+
+I am always open to exploring collaborations in AI, data science, and formal methods. I am genuinely excited about the potential opportunities and advancements we could achieve together. I am eager to connect with you to share insights and discuss potential collaborations. Let's work together to push the boundaries of what AI can achieve! 🤝🌟
