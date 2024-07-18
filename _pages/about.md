@@ -36,3 +36,6 @@ My expertise bridges the gap between logic and AI, enabling innovative data inte
 I am thrilled to integrate my symbolic background with deep learning methodologies at the ANTHEM project. This collaboration is not just an opportunity to expand my skills in deep learning, but also a chance to contribute to groundbreaking advancements in healthcare. The excitement is palpable, and I can't wait to make a real impact. 🏥🚀
 
 I am always open to exploring collaborations in AI, data science, and formal methods. I am genuinely excited about the potential opportunities and advancements we could achieve together. I am eager to connect with you to share insights and discuss potential collaborations. Let's work together to push the boundaries of what AI can achieve! 🤝🌟
+
+## cluster map
+{% include cluster_map.html %}
