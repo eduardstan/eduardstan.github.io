@@ -3,7 +3,7 @@ layout: about
 title: about
 permalink: /
 subtitle: >
-    <p><b>Assistant Professor (RTD/a)</b>
+    <p><b>Assistant Professor (RTD/A)</b>
     <br>
     <a href='http://www.ivl.disco.unimib.it'>Imaging and Vision Laboratory (IVL)</a>
     <br>
