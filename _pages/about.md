@@ -13,8 +13,8 @@ subtitle: >
 
 profile:
   align: right
-  image: prof_pic.jpg
-  image_circular: false # crops the image to make it circular
+  image: eduard_car.jpeg
+  image_circular: true # crops the image to make it circular
   more_info: >
     <p>University of Milan-Bicocca</p>
     <p>Department of Informatics, Systems and Communication</p>
