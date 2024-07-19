@@ -174,11 +174,25 @@
   ],
   "awards": [
     {
+      "title": "Finalist (2nd Place) & Team Leader",
+      "date": "2021-11-01",
+      "awarder": "Huawei Italy University Challenge",
+      "url": "",
+      "summary": "In the final round, a proposal on \"Embedded AI Solutions/AI Architectures\" was presented, focusing on integrating a symbolic machine learning model into Huawei's devices."
+    },
+    {
       "title": "MIUR Scholarship",
-      "date": "2016-09-01",
+      "date": "2019-09-01",
       "awarder": "Department of Mathematical, Physical, and Computer Sciences, University of Parma, Italy",
       "url": "",
-      "summary": "Awarded a 3-years scholarship founded by the Italian  Ministry of Education, Universities and Research (Ministero  dell'Istruzione, dell'Università e della Ricerca - MIUR) for the  PhD in Mathematics."
+      "summary": "Granted a 3-years scholarship founded by the Italian  Ministry of Education, Universities and Research (Ministero  dell'Istruzione, dell'Università e della Ricerca - MIUR) for the  PhD in Mathematics."
+    },
+    {
+      "title": "Best Graduate",
+      "date": "2019-09-01",
+      "awarder": "University of Udine, Italy",
+      "url": "",
+      "summary": "Recipient of the Rector's award for outstanding achievement as the top graduate in the MSc degree in Computer Science, with a prize of €1000, at the Dacia Area, Udine's football stadium."
     },
     {
       "title": "Erasmus+ Scholarship",
