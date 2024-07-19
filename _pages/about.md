@@ -3,13 +3,13 @@ layout: about
 title: about
 permalink: /
 subtitle: >
-    <p><b>Assistant Professor (RTD/A)</b>
-    <br>
-    <a href='http://www.ivl.disco.unimib.it'>Imaging and Vision Laboratory (IVL)</a>
-    <br>
-    <a href='http://www.disco.unimib.it'>Department of Informatics, Systems and Communication (DISCo)</a>
-    <br>
-    <a href='http://unimib.it'>University of Milan-Bicocca (UNIMIB)</a>
+  <p><b>Assistant Professor (RTD/A)</b>
+  <br>
+  <a href='http://www.ivl.disco.unimib.it'>Imaging and Vision Laboratory (IVL)</a>
+  <br>
+  <a href='http://www.disco.unimib.it'>Department of Informatics, Systems and Communication (DISCo)</a>
+  <br>
+  <a href='http://unimib.it'>University of Milan-Bicocca (UNIMIB)</a>
 
 profile:
   align: right
@@ -27,6 +27,7 @@ social: true # includes social icons at the bottom of the page
 ---
 
 <!--- _pages/about.md --->
+
 :construction_worker: UNDER CONSTRUCTION :construction_worker:
 
 As an Assistant Professor at the University of Milan-Bicocca, my research focuses on formal explainable AI, integrating symbolic methods and data science. With a solid background in modal logic(s) and formal methods, I specialize in creating interpretable AI models that leverage robust data representation techniques. 📊💡
@@ -38,4 +39,5 @@ I am thrilled to integrate my symbolic background with deep learning methodologi
 I am always open to exploring collaborations in AI, data science, and formal methods. I am genuinely excited about the potential opportunities and advancements we could achieve together. I am eager to connect with you to share insights and discuss potential collaborations. Let's work together to push the boundaries of what AI can achieve! 🤝🌟
 
 ## cluster map
+
 {% include cluster_map.html %}

@@ -31,8 +31,8 @@
       "endDate": "",
       "summary": "Working on the AdvaNced Technologies for Human-centrEd Medicine (ANTHEM) project of the Piano Nazionale Complementare (PNC).",
       "highlights": [
-        "Signal Processing (Time Series, EEG, ECG, EMG, Images, Videos)", 
-        "Explainable Artificial Intelligence", 
+        "Signal Processing (Time Series, EEG, ECG, EMG, Images, Videos)",
+        "Explainable Artificial Intelligence",
         "Neuro-Symbolic Machine Learning"
       ]
     },
@@ -54,11 +54,7 @@
       "startDate": "2023-03-01",
       "endDate": "2024-06-30",
       "summary": "Worked on the Interconnected Nord-Est Innovation Ecosystem (iNEST) project of the Piano Nazionale di Ripresa e Resilienza (PNRR).",
-      "highlights": [
-        "Time Series Data", 
-        "Data Analytics and Data Science", 
-        "Machine Learning"
-      ]
+      "highlights": ["Time Series Data", "Data Analytics and Data Science", "Machine Learning"]
     },
     {
       "name": "Applied Computational Logic and Artificial Intelligence Laboratory (ACLAI), Department of Mathematics and Computer Science, University of Ferrara",
@@ -68,10 +64,7 @@
       "startDate": "2019-11-01",
       "endDate": "2024-07-01",
       "summary": "Coordinated many theses with keen students receiving excellent feedback. Some of these works have been published in international journals and conferences.",
-      "highlights": [
-        "(Fuzzy) Modal Logic and Interval Temporal Logic", 
-        "Modal Symbolic Machine Learning"
-      ]
+      "highlights": ["(Fuzzy) Modal Logic and Interval Temporal Logic", "Modal Symbolic Machine Learning"]
     },
     {
       "name": "Department of Mathematics and Computer Science, University of Ferrara",
@@ -81,11 +74,7 @@
       "startDate": "2019-10-01",
       "endDate": "2023-02-31",
       "summary": "",
-      "highlights": [
-        "Algorithms and Data Structures", 
-        "Databases and Laboratory", 
-        "Statistics and Probability Calculus"
-      ]
+      "highlights": ["Algorithms and Data Structures", "Databases and Laboratory", "Statistics and Probability Calculus"]
     }
   ],
   "volunteer": [
@@ -97,8 +86,7 @@
       "startDate": "2019-10-01",
       "endDate": "2022-09-30",
       "summary": "",
-      "highlights": [
-      ]
+      "highlights": []
     },
     {
       "organization": "Associazione Dottorandi e Dottori di Ricerca in Italia (ADI)",
@@ -121,8 +109,7 @@
       "startDate": "2020-11-01",
       "endDate": "2022-10-31",
       "summary": "",
-      "highlights": [
-      ]
+      "highlights": []
     },
     {
       "organization": "Addressing Committee for periodic consultations with the labour market (Comitato di indirizzamento per le consultazioni periodiche con il mondo del lavoro), Department of Mathematics, Computer Science, and Physics, University of Udine",
