@@ -33,7 +33,8 @@
       "highlights": [
         "Signal Processing (Time Series, EEG, ECG, EMG, Images, Videos)",
         "Explainable Artificial Intelligence",
-        "Neuro-Symbolic Machine Learning"
+        "Neuro-Symbolic Artificial Intelligence",
+        "Telemonitoring and Telemedicine"
       ]
     },
     {
@@ -43,8 +44,11 @@
       "url": "http://www.disco.unimib.it/",
       "startDate": "2024-07-16",
       "endDate": "",
-      "summary": "TBA",
-      "highlights": []
+      "summary": "Engaging in teaching activities, guiding students through their theses, and providing mentorship to students.",
+      "highlights": [
+        "Databases and Laboraotory",
+        "Intelligent Consumer Technologies"
+      ]
     },
     {
       "name": "Database Systems Group (DBS), Faculty of Engineering, Free University of Bozen-Bolzano",
@@ -204,16 +208,24 @@
   ],
   "skills": [
     {
-      "name": "Physics",
+      "name": "Computer Science",
       "level": "Master",
       "icon": "fa-solid fa-hashtag",
       "keywords": [
-        "Quantum Mechanics",
-        "Quantum Computing",
-        "Quantum Information",
-        "Quantum Cryptography",
-        "Quantum Communication",
-        "Quantum Teleportation"
+        "Artificial Intelligence",
+        "Machine Learning",
+        "XAI"
+      ]
+    },
+    {
+      "name": "Mathematics",
+      "level": "Master",
+      "icon": "",
+      "keywords": [
+        "Mathematical Logic",
+        "Automatic Theorem Provers",
+        "Modal Logic",
+        "Computability and Complexity"
       ]
     }
   ],
