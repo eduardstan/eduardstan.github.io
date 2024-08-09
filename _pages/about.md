@@ -3,23 +3,23 @@ layout: about
 title: about
 permalink: /
 subtitle: >
-  <p><b>Assistant Professor (RTD/A)</b>
+  <p><b>Assistant Professor (RTD/A) of Computer Science</b>
   <br>
   <a href='https://www.ivl.disco.unimib.it'>Imaging and Vision Laboratory (IVL)</a>
   <br>
   <a href='https://www.disco.unimib.it'>Department of Informatics, Systems and Communication (DISCo)</a>
   <br>
-  <a href='https://unimib.it'>University of Milan-Bicocca</a>
+  <a href='https://unimib.it'>University of Milano-Bicocca</a>
 
 profile:
   align: right
   image: eduard_car.jpeg
   image_circular: true # crops the image to make it circular
   more_info: >
-    <p>University of Milan-Bicocca</p>
+    <p>University of Milano-Bicocca</p>
     <p>Department of Informatics, Systems and Communication</p>
     <p>Viale Sarca 336</p>
-    <p>20125 Milan, Italy</p>
+    <p>20125 Milano, Italy</p>
 
 news: true # includes a list of news items
 selected_papers: false # includes a list of papers marked as "selected={true}"
