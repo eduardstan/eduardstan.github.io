@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-New post: [Understanding the Future of Explainable Artificial Intelligence (XAI)---A Dive into XAI 2.0](http://127.0.0.1:4000/blog/2024/xai2-manifesto/)
+New post: [Understanding the Future of Explainable Artificial Intelligence (XAI)---A Dive into XAI 2.0](https://eduardstan.github.io/blog/2024/xai2-manifesto/)

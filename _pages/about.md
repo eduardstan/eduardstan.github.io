@@ -5,11 +5,11 @@ permalink: /
 subtitle: >
   <p><b>Assistant Professor (RTD/A) of Computer Science</b>
   <br>
-  <a href='https://www.ivl.disco.unimib.it'>Imaging and Vision Laboratory (IVL)</a>
+  <a href='http://www.ivl.disco.unimib.it/'>Imaging and Vision Laboratory (IVL)</a>
   <br>
-  <a href='https://www.disco.unimib.it'>Department of Informatics, Systems and Communication (DISCo)</a>
+  <a href='https://www.disco.unimib.it/'>Department of Informatics, Systems and Communication (DISCo)</a>
   <br>
-  <a href='https://unimib.it'>University of Milano-Bicocca</a>
+  <a href='https://www.unimib.it/'>University of Milano-Bicocca</a>
 
 profile:
   align: right
