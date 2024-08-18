@@ -27,16 +27,15 @@ social: true # includes social icons at the bottom of the page
 ---
 
 <!--- _pages/about.md --->
+## about 
 
-:construction_worker: UNDER CONSTRUCTION :construction_worker:
+I am an **Assistant Professor** (*Ricercatore a Tempo Determinato di tipo A---RTD/A*) at the University of Milano-Bicocca, where I bridge the gap between formal methods, symbolic reasoning, and cutting-edge AI technologies. My expertise lies in leveraging **formal logic and symbolic AI** to enhance the interpretability and transparency of machine learning models, particularly within the rapidly evolving field of **formal explainable AI (FXAI)**.
 
-As an Assistant Professor at the University of Milan-Bicocca, my research focuses on formal explainable AI, integrating symbolic methods and data science. With a solid background in modal logic(s) and formal methods, I specialize in creating interpretable AI models that leverage robust data representation techniques. 📊💡
+At the **Imaging and Vision Laboratory (IVL)**, I collaborate with a team of deep learning experts, bringing my background in symbolic methods to bear on the challenges of explainability. Our goal is to ensure that the AI systems we develop are effective *and* trustworthy, particularly in high-stakes applications like healthcare. This work is central to our contributions to the **ANTHEM project**, where we focus on developing smart environments and innovative sensors for proximity medicine, working alongside leading institutions and healthcare providers.
 
-My expertise bridges the gap between logic and AI, enabling innovative data interpretation and machine learning solutions with practical applications. I have developed symbolic methods that ensure data is accurately represented. My approach combines theoretical rigor with practical insights. 🤖🔍
+In addition to my research, I am deeply committed to my role as an educator. I actively seek out and **mentor students**, guiding them through their theses and fostering their development as future researchers. My teaching is informed by my belief in the importance of **transparency and ethics in AI**, principles that are increasingly critical as AI technologies become more integrated into society.
 
-I am thrilled to integrate my symbolic background with deep learning methodologies at the ANTHEM project. This collaboration is not just an opportunity to expand my skills in deep learning, but also a chance to contribute to advancements in healthcare. The excitement is palpable, and I can't wait to make a real impact. 🏥🚀
-
-I am always open to exploring collaborations in AI, data science, and formal methods. I am genuinely excited about the potential opportunities and advancements we could achieve together. I am eager to connect with you to share insights and discuss potential collaborations. Let's work together to push the boundaries of what AI can achieve! 🤝🌟
+A vision of AI drives my work as a tool for **enhancing human capabilities**, built on a foundation of trust, ethics, and collaboration. I am excited to continue exploring the potential of **neuro-symbolic AI** and FXAI, and I am always open to new partnerships that align with these goals. Let’s connect and push the boundaries of what AI can achieve together.
 
 ## cluster map
 
