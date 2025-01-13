@@ -13,7 +13,7 @@ subtitle: >
 
 profile:
   align: right
-  image: eduard_pro.png
+  image: eduard.jpg
   image_circular: true # crops the image to make it circular
   more_info: >
     <p>University of Milano-Bicocca</p>
