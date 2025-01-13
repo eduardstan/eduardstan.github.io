@@ -2,8 +2,8 @@
 layout: distill
 title: Mastering LaTeX
 description: An In-Depth Guide to Common Mistakes and Advanced Techniques
-tags: [""]
-category: "Reviews"
+tags: ["Tutorial"]
+category: ""
 giscus_comments: true
 date: 2025-01-13
 featured: true
