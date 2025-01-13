@@ -17,6 +17,9 @@ I am dedicated to actively contributing to the research community through profes
 - **International Conference on Learning Representations (ICLR)** (A++ ranking by [GII-GRIN-SCIE](https://scie.lcc.uma.es/)) 
   - **Reviewer**
     - ICLR2025
+- **International Joint Conference on Artificial Intelligence (IJCAI)** (A++ ranking by [GII-GRIN-SCIE](https://scie.lcc.uma.es/))
+  - **Program Committee Member**
+    - IJCAI2025
 - **International Joint Conference on Neural Networks (IJCNN)** (A- ranking by [GII-GRIN-SCIE](https://scie.lcc.uma.es/))
   - **Area Chair**
     - IJCNN2025
