@@ -14,13 +14,15 @@ I am dedicated to actively contributing to the research community through profes
   - **Program Committee Member**
     - AAAI2024
     - AAAI2025
-    - *AAAI is one of the premier international conferences in artificial intelligence*.   
 - **International Conference on Learning Representations (ICLR)** (A++ ranking by [GII-GRIN-SCIE](https://scie.lcc.uma.es/)) 
   - **Reviewer**
     - ICLR2025
-    - *ICLR is a leading conference in machine learning and representation learning*.
+- **International Joint Conference on Neural Networks (IJCNN)** (A- ranking by [GII-GRIN-SCIE](https://scie.lcc.uma.es/))
+  - **Area Chair**
+    - IJCNN2025
 
 ## Journal Reviewing
 - **IEEE Journal of Biomedical and Health Informatics** (Q1 in Health Informatics by [Scimago](https://www.scimagojr.com/journalsearch.php?q=21100256982&tip=sid&clean=0))
+- **Engineering Applications of Artificial Intelligence** (Q1 in Artificial Intelligence by [Scimago](https://www.scimagojr.com/journalsearch.php?q=24182&tip=sid&clean=0))
 - **PeerJ Computer Science** (Q1 in Computer Science by [Scimago](https://www.scimagojr.com/journalsearch.php?q=21100830173&tip=sid&clean=0))
 - **Information and Computation** (Q2 in Information Systems by [Scimago](https://www.scimagojr.com/journalsearch.php?q=25509&tip=sid&clean=0))

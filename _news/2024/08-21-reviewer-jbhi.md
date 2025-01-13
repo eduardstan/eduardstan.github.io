@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-Invited and accepted to serve as a **Reviewer** for the [IEEE Journal of Biomedical Health Informatics](https://www.embs.org/jbhi/).
+Invited and accepted to serve as a **Reviewer** for the [IEEE Journal of Biomedical Health Informatics](https://www.embs.org/jbhi/) journal.
