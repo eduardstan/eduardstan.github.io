@@ -5,7 +5,7 @@ permalink: /
 subtitle: >
   <p><b>Assistant Professor (RTD/A) of Computer Science</b>
   <br>
-  <a href='http://www.ivl.disco.unimib.it/'>Imaging and Vision Laboratory (IVL)</a>
+  <a href='https://islab.disco.unimib.it/'>Intelligent Sensing Lab (ISLab)</a>
   <br>
   <a href='https://www.disco.unimib.it/'>Department of Informatics, Systems and Communication (DISCo)</a>
   <br>
@@ -19,6 +19,7 @@ profile:
     <p>University of Milano-Bicocca</p>
     <p>Department of Informatics, Systems and Communication</p>
     <p>Viale Sarca 336</p>
+    <p>Room 1019, 1st Floor</p>
     <p>20125 Milano, Italy</p>
 
 news: true # includes a list of news items
