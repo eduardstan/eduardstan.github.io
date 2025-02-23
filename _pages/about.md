@@ -3,7 +3,7 @@ layout: about
 title: about
 permalink: /
 subtitle: >
-  <p><b>Assistant Professor (RTD/A) of Computer Science</b>
+  <p><b>Assistant Professor</b>
   <br>
   <a href='https://islab.disco.unimib.it/'>Intelligent Sensing Lab (ISLab)</a>
   <br>
