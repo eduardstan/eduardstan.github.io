@@ -18,6 +18,7 @@ I am dedicated to actively contributing to the research community through profes
 - **International Conference on Learning Representations (ICLR)** ([A* ranking](https://portal.core.edu.au/conf-ranks/2273/)) 
   - **Reviewer**
     - ICLR2025
+    - ICLR2026
 - **International Joint Conference on Artificial Intelligence (IJCAI)** ([A* ranking](https://portal.core.edu.au/conf-ranks/1313/))
   - **Program Committee Member**
     - IJCAI2025
@@ -27,6 +28,9 @@ I am dedicated to actively contributing to the research community through profes
 - **IEEE International Joint Conference on Neural Networks (IJCNN)** ([B ranking](https://portal.core.edu.au/conf-ranks/685/))
   - **Area Chair**
     - IJCNN2025
+- **IEEE International Conference on Acoustics, Speech, and Signal Processing (ICASSP)** ([B ranking](https://portal.core.edu.au/conf-ranks/2042/))
+  - **Area Chair**
+    - ICASSP2026
 
 ## Journal Reviewing
 - **IEEE Journal of Biomedical and Health Informatics** (Q1 in Health Informatics by [Scimago](https://www.scimagojr.com/journalsearch.php?q=21100256982&tip=sid&clean=0))
