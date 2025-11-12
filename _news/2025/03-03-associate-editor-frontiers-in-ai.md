@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-Invited and accepted to serve as an **Associate Editor** for the journal [Frontiers in Artificial Intelligence, Pattern Recognition](https://www.frontiersin.org/journals/artificial-intelligence/sections/pattern-recognition) section.
+Invited and accepted to serve as an **Associate Editor** for the [Frontiers in Artificial Intelligence](https://www.frontiersin.org/journals/artificial-intelligence/sections/pattern-recognition) journal, Pattern Recognition section.
