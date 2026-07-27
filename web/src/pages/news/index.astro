@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { dateFormat } from '../../lib/content';
 
 const items = (await getCollection('news')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
@@ -9,8 +10,6 @@ const items = (await getCollection('news')).sort(
 const rendered = await Promise.all(
   items.map(async (item) => ({ item, Content: (await render(item)).Content })),
 );
-
-const dateFormat = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeZone: 'UTC' });
 ---
 
 <BaseLayout title="News" description="Announcements and updates.">

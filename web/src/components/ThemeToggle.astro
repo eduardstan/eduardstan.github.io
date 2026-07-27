@@ -6,8 +6,8 @@
   type="button"
   id="theme-toggle"
   class="rounded border border-[var(--color-rule)] px-2 py-1 text-sm hover:border-[var(--color-accent)]"
-  aria-live="polite"
-  aria-label="Switch colour theme"
+  aria-pressed="false"
+  aria-label="Dark theme"
   data-pagefind-ignore
 >
   <span aria-hidden="true" class="dark:hidden">Dark</span>
@@ -16,9 +16,22 @@
 
 <script>
   const toggle = document.getElementById('theme-toggle');
+
+  const syncPressed = () => {
+    toggle?.setAttribute(
+      'aria-pressed',
+      String(document.documentElement.dataset.theme === 'dark'),
+    );
+  };
+
+  syncPressed();
+
   toggle?.addEventListener('click', () => {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next;
-    localStorage.setItem('theme', next);
+    try {
+      localStorage.setItem('theme', next);
+    } catch {}
+    syncPressed();
   });
 </script>

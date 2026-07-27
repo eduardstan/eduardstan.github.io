@@ -27,19 +27,19 @@ npm run check   # astro check (TypeScript + Astro diagnostics)
 ```
 
 Site search is powered by [Pagefind](https://pagefind.app/), which indexes `dist/`
-*after* `astro build`. It therefore works under `npm run preview` but not under
+_after_ `astro build`. It therefore works under `npm run preview` but not under
 `npm run dev`, where `/pagefind/*` does not exist yet.
 
 ## Layout
 
-| Path                        | Purpose                                                     |
-| --------------------------- | ----------------------------------------------------------- |
-| `src/content.config.ts`     | Typed schemas for the `blog`, `news` and `projects` collections |
-| `src/content/`              | Sample entries only — real content is migrated in a later task |
-| `src/layouts/BaseLayout.astro` | Shared document shell, with a named `head` slot            |
-| `src/components/`           | Header, footer, theme script and toggle                      |
-| `src/pages/`                | Routes, including `rss.xml.ts`                               |
-| `src/styles/global.css`     | Tailwind entry point, theme tokens and minimal prose styles  |
+| Path                           | Purpose                                                         |
+| ------------------------------ | --------------------------------------------------------------- |
+| `src/content.config.ts`        | Typed schemas for the `blog`, `news` and `projects` collections |
+| `src/content/`                 | Sample entries only — real content is migrated in a later task  |
+| `src/layouts/BaseLayout.astro` | Shared document shell, with a named `head` slot                 |
+| `src/components/`              | Header, footer, theme script and toggle                         |
+| `src/pages/`                   | Routes, including `rss.xml.ts`                                  |
+| `src/styles/global.css`        | Tailwind entry point, theme tokens and minimal prose styles     |
 
 ## Notable configuration
 
@@ -57,6 +57,11 @@ Site search is powered by [Pagefind](https://pagefind.app/), which indexes `dist
   The header toggle writes `localStorage.theme`.
 - **Tailwind 4** is wired through the `@tailwindcss/vite` plugin (there is no
   `tailwind.config.js`; theme tokens live in `@theme` inside `global.css`).
+- **Install scripts.** npm >= 11 blocks dependency install scripts until they are approved,
+  and records the approval as the `allowScripts` field in `package.json`. The single entry
+  there was written by `npm approve-scripts esbuild`. Do not delete it: without it, esbuild's
+  postinstall is skipped on a fresh `npm ci`, leaving no platform binary and breaking the
+  build. Run `npm approve-scripts --allow-scripts-pending` to see anything awaiting review.
 - **Formatting.** `web/.prettierrc` scopes Prettier settings to this directory so the
   repository-wide `prettier . --check` in `.github/workflows/prettier.yml` stays green.
   It deliberately declares no plugins, because that root check runs without this

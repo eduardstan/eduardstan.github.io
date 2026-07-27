@@ -1,12 +1,8 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { dateFormat, getPublishedPosts } from '../../lib/content';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-);
-
-const dateFormat = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeZone: 'UTC' });
+const posts = await getPublishedPosts();
 ---
 
 <BaseLayout title="Blog" description="Posts by Eduard I. Stan.">

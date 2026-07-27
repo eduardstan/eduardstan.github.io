@@ -5,6 +5,11 @@ name: Web (Astro) CI
 # deploy.yml, and cutover is a separate, explicitly approved change.
 
 on:
+  push:
+    branches: [master, main]
+    paths:
+      - "web/**"
+      - ".github/workflows/web-ci.yml"
   pull_request:
     paths:
       - "web/**"

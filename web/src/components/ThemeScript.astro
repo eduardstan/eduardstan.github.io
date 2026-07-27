@@ -7,7 +7,10 @@
 
 <script is:inline>
   (() => {
-    const stored = localStorage.getItem('theme');
+    let stored = null;
+    try {
+      stored = localStorage.getItem('theme');
+    } catch {}
     const dark =
       stored === 'dark' ||
       (stored === null && window.matchMedia('(prefers-color-scheme: dark)').matches);
