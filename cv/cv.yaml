@@ -14,7 +14,9 @@
 # -----------------------------------------------------------------------------
 # Inline markup allowed in any prose field (portable, not LaTeX):
 #   **bold**            -> \textbf{...}
-#   _italic_            -> \emph{...}
+#   _italic_            -> \emph{...}   (an underscore inside a word - a_b,
+#                       snake_case, file_name.txt - is literal, as in Markdown;
+#                       an unclosed _ or ** is an error, not silent emphasis)
 #   [text](https://...) -> \href{...}{text}
 #   *                   passes through literally (so "CORE Rank: A*" is safe)
 #

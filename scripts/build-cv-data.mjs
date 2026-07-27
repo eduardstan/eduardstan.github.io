@@ -7,14 +7,16 @@
 //
 // Outputs
 //   cv/generated/cv-data.tex             public, COMMITTED, checked for staleness
-//   cv/generated/cv-contact-private.tex  private overlay, gitignored, written only
-//                                        when cv/private.yaml is present
+//   cv/generated/cv-contact-private.tex  private overlay, gitignored, ALWAYS
+//                                        written - the real overlay when
+//                                        cv/private.yaml is present, a no-op
+//                                        otherwise (see main())
 //
 // cv.tex owns layout; this script owns nothing but the mapping from facts to
 // content macros. It never invents, reorders or rewords anything in cv.yaml.
 // =============================================================================
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load } from 'js-yaml';
@@ -74,9 +76,29 @@ function escapeUrl(url) {
 // Markup is tokenised BEFORE escaping so that a URL is never mangled and so that
 // the `_` of _italic_ is not turned into \_. A bare `*` is left alone, which
 // keeps "CORE Rank: A*" safe.
+//
+// `_` follows Markdown's intra-word rule: an underscore with a word character on
+// BOTH sides (a_b, snake_case, file_name.txt) is literal and never delimits an
+// emphasis span. The website renderer reads the same cv.yaml, so the two must
+// agree on what `_` means. Anything left over that still looks like a delimiter
+// is an unclosed span and raises - emitting valid LaTeX with silently wrong
+// emphasis is the one failure that passes every check and reaches the PDF.
 // -----------------------------------------------------------------------------
 
-const MARKUP = String.raw`\*\*([\s\S]+?)\*\*|_([^_\n]+?)_|\[([^\]\n]+)\]\(([^)\s]+)\)`;
+const W = 'A-Za-z0-9';
+const MARKUP = String.raw`\*\*([\s\S]+?)\*\*|(?<![${W}])_(?=[^\s_])([^_\n]+?)(?<=[^\s_])_(?![${W}])|\[([^\]\n]+)\]\(([^)\s]+)\)`;
+
+/** A delimiter-shaped `**` or `_` surviving outside every matched span. */
+const STRAY = new RegExp(String.raw`\*\*|(?<![${W}])_|_(?![${W}])`);
+
+/** Escape a run of plain text, refusing one that carries an unclosed delimiter. */
+function literal(chunk, src) {
+  const m = STRAY.exec(chunk);
+  if (m) {
+    throw new Error(`unbalanced inline markup: "${m[0]}" at "${chunk.slice(Math.max(0, m.index - 20), m.index + 20)}"\n` + `  in: ${src}\n` + '  Close the span, or write the underscore inside a word (a_b) where it stays literal.');
+  }
+  return escapeLatex(chunk);
+}
 
 function renderInline(text) {
   const src = String(text ?? '');
@@ -87,13 +109,13 @@ function renderInline(text) {
   let last = 0;
   let m;
   while ((m = re.exec(src)) !== null) {
-    out += escapeLatex(src.slice(last, m.index));
+    out += literal(src.slice(last, m.index), src);
     if (m[1] !== undefined) out += `\\textbf{${renderInline(m[1])}}`;
     else if (m[2] !== undefined) out += `\\emph{${renderInline(m[2])}}`;
     else out += `\\href{${escapeUrl(m[4])}}{${renderInline(m[3])}}`;
     last = m.index + m[0].length;
   }
-  return out + escapeLatex(src.slice(last));
+  return out + literal(src.slice(last), src);
 }
 
 /** Render a value that must survive as a LaTeX macro argument (never empty-unsafe). */
@@ -234,6 +256,11 @@ function renderPrivateOverlay(cv, priv) {
   ].join('\n');
 }
 
+/** The same file with nothing in it, written when there is no cv/private.yaml. */
+function renderEmptyOverlay() {
+  return ['% =============================================================================', '% GENERATED FILE - DO NOT EDIT, DO NOT COMMIT.', '%', '% No cv/private.yaml: this overlay deliberately defines nothing, so the CV keeps', '% the institutional contact line. It is written rather than deleted so latexmk', '% always has this dependency on record and rebuilds when the private contact is', '% added or removed.', '% =============================================================================', ''].join('\n');
+}
+
 // -----------------------------------------------------------------------------
 // Main
 // -----------------------------------------------------------------------------
@@ -266,17 +293,21 @@ function main() {
   writeFileSync(OUT_PUBLIC, publicTex);
   console.log(`wrote ${rel(OUT_PUBLIC)}`);
 
+  // Always write the overlay - the real one, or a no-op that defines nothing.
+  // Deleting it instead would leave latexmk with no dependency to notice (a
+  // failed \InputIfFileExists records none), so removing cv/private.yaml would
+  // report "All targets are up-to-date" and keep a PDF that still carries the
+  // private contact.
   if (existsSync(PRIVATE_YAML)) {
     const priv = loadYaml(PRIVATE_YAML)?.contact ?? {};
     writeFileSync(OUT_PRIVATE, renderPrivateOverlay(cv, priv));
     console.log(`wrote ${rel(OUT_PRIVATE)} (private contact merged in)`);
-  } else if (existsSync(OUT_PRIVATE)) {
-    // No private.yaml: drop the stale overlay so it cannot silently override.
-    rmSync(OUT_PRIVATE);
-    console.log(`removed stale ${rel(OUT_PRIVATE)} (no cv/private.yaml)`);
   } else {
-    console.log('no cv/private.yaml - public contact only');
+    writeFileSync(OUT_PRIVATE, renderEmptyOverlay());
+    console.log(`wrote ${rel(OUT_PRIVATE)} (no cv/private.yaml - public contact only)`);
   }
 }
 
-main();
+export { renderInline };
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) main();
