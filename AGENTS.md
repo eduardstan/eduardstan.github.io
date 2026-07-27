@@ -20,16 +20,14 @@ When changing either site, verify the other still builds.
   edits under `web/` re-run the Jekyll build and republish. That is safe only while `_config.yml`
   excludes `web/` — the output must stay byte-identical.
 - `.github/workflows/prettier.yml` runs `npx prettier . --check` over the **whole repo** with the
-  root `.prettierrc` and no per-project dependencies installed. `web/.prettierrc` scopes settings
-  for that subtree and deliberately declares no plugins, because the root check could not resolve
-  them.
+  root `.prettierrc` and no per-project dependencies installed, which constrains what a nested
+  `.prettierrc` may declare — see "Notable configuration" in `web/README.md`.
 - Jekyll needs Ruby native extensions. There is no local `ruby-dev`; build it in Docker
   (`ruby:3.2.2` plus `imagemagick build-essential zlib1g-dev jupyter-nbconvert`), matching
   `deploy.yml`. Note the Docker daemon cannot see the agent sandbox's `/tmp`, so bind-mount a path
   inside the worktree.
-- Astro 7 renders Markdown with Sätteri, whose plugin API is **not** remark/rehype compatible.
-  `web/astro.config.mjs` opts back into `unified()` from `@astrojs/markdown-remark` because the
-  posts need `remark-math` + `rehype-katex`.
+- Astro 7's default Markdown processor (Sätteri) is **not** remark/rehype compatible, so `web/`
+  opts back into the unified processor — see "Notable configuration" in `web/README.md`.
 
 ## Maintaining this file
 
