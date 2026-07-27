@@ -47,17 +47,18 @@ contact only. `cv/private.example.yaml` documents the shape.
 The CV's facts live in exactly one place and both the PDF and (later) the site
 are generated from it:
 
-| File | Owns |
-|---|---|
-| `cv/cv.yaml` | all CV facts - the single source of truth |
-| `cv/private.yaml` | private contact fields only; gitignored |
-| `_bibliography/papers.bib` | all publications, canonical for CV *and* website |
-| `cv/pres.bib` | talks and presentations |
-| `cv/cv.tex` | layout and styling only |
+| File                       | Owns                                             |
+| -------------------------- | ------------------------------------------------ |
+| `cv/cv.yaml`               | all CV facts - the single source of truth        |
+| `cv/private.yaml`          | private contact fields only; gitignored          |
+| `_bibliography/papers.bib` | all publications, canonical for CV _and_ website |
+| `cv/pres.bib`              | talks and presentations                          |
+| `cv/cv.tex`                | layout and styling only                          |
 
 - `node scripts/build-cv-data.mjs` renders `cv/cv.yaml` into
-  `cv/generated/cv-data.tex` (committed, public). It also writes the gitignored
-  private contact overlay when `cv/private.yaml` exists.
+  `cv/generated/cv-data.tex` (committed, public). It always writes the gitignored
+  private contact overlay too - the real one when `cv/private.yaml` exists, a
+  no-op otherwise, so latexmk always has the dependency on record.
 - `node scripts/build-cv-data.mjs --check` fails when the committed generated
   file is stale; CI runs it, so never hand-edit `cv/generated/`.
 - Build with **xelatex** - `latexmk -xelatex -cd cv/cv.tex`. pdflatex fails:

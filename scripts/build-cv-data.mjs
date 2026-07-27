@@ -16,43 +16,43 @@
 // content macros. It never invents, reorders or rewords anything in cv.yaml.
 // =============================================================================
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { load } from 'js-yaml';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { dirname, join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
+import { load } from "js-yaml";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CV_YAML = join(ROOT, 'cv', 'cv.yaml');
-const PRIVATE_YAML = join(ROOT, 'cv', 'private.yaml');
-const OUT_DIR = join(ROOT, 'cv', 'generated');
-const OUT_PUBLIC = join(OUT_DIR, 'cv-data.tex');
-const OUT_PRIVATE = join(OUT_DIR, 'cv-contact-private.tex');
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const CV_YAML = join(ROOT, "cv", "cv.yaml");
+const PRIVATE_YAML = join(ROOT, "cv", "private.yaml");
+const OUT_DIR = join(ROOT, "cv", "generated");
+const OUT_PUBLIC = join(OUT_DIR, "cv-data.tex");
+const OUT_PRIVATE = join(OUT_DIR, "cv-contact-private.tex");
 
 // -----------------------------------------------------------------------------
 // LaTeX escaping
 // -----------------------------------------------------------------------------
 
 const ESCAPES = {
-  '\\': '\\textbackslash{}',
-  '&': '\\&',
-  '%': '\\%',
-  $: '\\$',
-  '#': '\\#',
-  _: '\\_',
-  '{': '\\{',
-  '}': '\\}',
-  '~': '\\textasciitilde{}',
-  '^': '\\textasciicircum{}',
+  "\\": "\\textbackslash{}",
+  "&": "\\&",
+  "%": "\\%",
+  $: "\\$",
+  "#": "\\#",
+  _: "\\_",
+  "{": "\\{",
+  "}": "\\}",
+  "~": "\\textasciitilde{}",
+  "^": "\\textasciicircum{}",
 };
 
 // Characters the captain writes as real Unicode because they carry typographic
 // meaning. Applied after escaping, so their replacements are emitted verbatim.
 const TYPOGRAPHY = [
-  ['—', '---'], // em dash
-  ['–', '--'], // en dash
-  ['‑', '{-}'], // non-breaking hyphen: suppress the line break here
-  ['⁺', '$^{+}$'], // superscript plus, e.g. Erasmus+
-  ['€', '\\euro{}'], // euro sign
+  ["—", "---"], // em dash
+  ["–", "--"], // en dash
+  ["‑", "{-}"], // non-breaking hyphen: suppress the line break here
+  ["⁺", "$^{+}$"], // superscript plus, e.g. Erasmus+
+  ["€", "\\euro{}"], // euro sign
 ];
 
 /** Escape every LaTeX special, then map the typographic Unicode characters. */
@@ -67,7 +67,9 @@ function escapeLatex(text) {
  * verbatim, so only the characters TeX itself consumes need handling.
  */
 function escapeUrl(url) {
-  return String(url).replace(/\\/g, '\\\\').replace(/([%#&])/g, '\\$1');
+  return String(url)
+    .replace(/\\/g, "\\\\")
+    .replace(/([%#&])/g, "\\$1");
 }
 
 // -----------------------------------------------------------------------------
@@ -85,7 +87,7 @@ function escapeUrl(url) {
 // emphasis is the one failure that passes every check and reaches the PDF.
 // -----------------------------------------------------------------------------
 
-const W = 'A-Za-z0-9';
+const W = "A-Za-z0-9";
 const MARKUP = String.raw`\*\*([\s\S]+?)\*\*|(?<![${W}])_(?=[^\s_])([^_\n]+?)(?<=[^\s_])_(?![${W}])|\[([^\]\n]+)\]\(([^)\s]+)\)`;
 
 /** A delimiter-shaped `**` or `_` surviving outside every matched span. */
@@ -95,17 +97,21 @@ const STRAY = new RegExp(String.raw`\*\*|(?<![${W}])_|_(?![${W}])`);
 function literal(chunk, src) {
   const m = STRAY.exec(chunk);
   if (m) {
-    throw new Error(`unbalanced inline markup: "${m[0]}" at "${chunk.slice(Math.max(0, m.index - 20), m.index + 20)}"\n` + `  in: ${src}\n` + '  Close the span, or write the underscore inside a word (a_b) where it stays literal.');
+    throw new Error(
+      `unbalanced inline markup: "${m[0]}" at "${chunk.slice(Math.max(0, m.index - 20), m.index + 20)}"\n` +
+        `  in: ${src}\n` +
+        "  Close the span, or write the underscore inside a word (a_b) where it stays literal."
+    );
   }
   return escapeLatex(chunk);
 }
 
 function renderInline(text) {
-  const src = String(text ?? '');
+  const src = String(text ?? "");
   // A fresh matcher per call: renderInline recurses, and a shared regex's
   // lastIndex would be reset by the inner call and restart the outer scan.
-  const re = new RegExp(MARKUP, 'g');
-  let out = '';
+  const re = new RegExp(MARKUP, "g");
+  let out = "";
   let last = 0;
   let m;
   while ((m = re.exec(src)) !== null) {
@@ -119,7 +125,7 @@ function renderInline(text) {
 }
 
 /** Render a value that must survive as a LaTeX macro argument (never empty-unsafe). */
-const arg = (value) => renderInline(value ?? '');
+const arg = (value) => renderInline(value ?? "");
 
 // -----------------------------------------------------------------------------
 // Building blocks shared by several sections
@@ -127,8 +133,8 @@ const arg = (value) => renderInline(value ?? '');
 
 /** `\resumeItemListStart ... \resumeItemListEnd`, or nothing when there are no items. */
 function itemList(items) {
-  if (!items || !items.length) return '';
-  const body = items.map((i) => `  \\item ${renderInline(i)}`).join('\n');
+  if (!items || !items.length) return "";
+  const body = items.map((i) => `  \\item ${renderInline(i)}`).join("\n");
   return `\\resumeItemListStart\n${body}\n\\resumeItemListEnd`;
 }
 
@@ -148,7 +154,7 @@ function project({ title, detail, dates, items }) {
 
 /** A table body: one `a & b & c \\` line per row. */
 function tableRows(rows, fields) {
-  return rows.map((r) => `${fields.map((f) => arg(r[f])).join(' & ')} \\\\`).join('\n');
+  return rows.map((r) => `${fields.map((f) => arg(r[f])).join(" & ")} \\\\`).join("\n");
 }
 
 function macro(name, body) {
@@ -173,18 +179,20 @@ function contactLine(contact, priv) {
   if (contact.website) {
     parts.push(`\\href{${escapeUrl(contact.website.url)}}{${escapeLatex(contact.website.label)}}`);
   }
-  return parts.join('\n\\;|\\;\n');
+  return parts.join("\n\\;|\\;\n");
 }
 
 function profilesLine(profiles) {
   return profiles
     .map((p) => {
       if (!/^[a-z]+$/.test(p.kind)) {
-        throw new Error(`contact.profiles: kind "${p.kind}" must be lowercase letters only ` + `(it selects the \\cvicon<kind> macro defined in cv.tex)`);
+        throw new Error(
+          `contact.profiles: kind "${p.kind}" must be lowercase letters only ` + `(it selects the \\cvicon<kind> macro defined in cv.tex)`
+        );
       }
       return `\\cvicon${p.kind}\\,\\href{${escapeUrl(p.url)}}{${escapeLatex(p.label)}}`;
     })
-    .join('\n\\;|\\;\n');
+    .join("\n\\;|\\;\n");
 }
 
 // -----------------------------------------------------------------------------
@@ -192,73 +200,95 @@ function profilesLine(profiles) {
 // -----------------------------------------------------------------------------
 
 const BANNER = [
-  '% =============================================================================',
-  '% GENERATED FILE - DO NOT EDIT.',
-  '%',
-  '% Produced by `node scripts/build-cv-data.mjs` from `cv/cv.yaml`.',
-  '% Edit cv.yaml and regenerate; hand edits here are overwritten and CI rejects',
-  '% them (the workflow fails if this file is stale relative to cv.yaml).',
-  '%',
-  '% This file holds CONTENT ONLY. Layout, spacing and styling live in cv/cv.tex.',
-  '% =============================================================================',
-  '',
+  "% =============================================================================",
+  "% GENERATED FILE - DO NOT EDIT.",
+  "%",
+  "% Produced by `node scripts/build-cv-data.mjs` from `cv/cv.yaml`.",
+  "% Edit cv.yaml and regenerate; hand edits here are overwritten and CI rejects",
+  "% them (the workflow fails if this file is stale relative to cv.yaml).",
+  "%",
+  "% This file holds CONTENT ONLY. Layout, spacing and styling live in cv/cv.tex.",
+  "% =============================================================================",
+  "",
 ];
 
 function renderPublic(cv) {
   const t = cv.teaching;
   const blocks = [
-    macro('cvName', escapeLatex(cv.person.name)),
-    macro('cvContactLine', contactLine(cv.contact, null)),
-    macro('cvProfilesLine', profilesLine(cv.contact.profiles)),
-    macro('cvAffiliation', cv.contact.affiliation.map(escapeLatex).join(' \\\\\n')),
+    macro("cvName", escapeLatex(cv.person.name)),
+    macro("cvContactLine", contactLine(cv.contact, null)),
+    macro("cvProfilesLine", profilesLine(cv.contact.profiles)),
+    macro("cvAffiliation", cv.contact.affiliation.map(escapeLatex).join(" \\\\\n")),
 
-    macro('cvShortBio', renderInline(cv.short_bio)),
-    macro('cvResearchFocus', renderInline(cv.research_focus)),
+    macro("cvShortBio", renderInline(cv.short_bio)),
+    macro("cvResearchFocus", renderInline(cv.research_focus)),
 
-    macro('cvAppointments', cv.appointments.map((a) => subheading({ ...a, title: a.role })).join('\n')),
-    macro('cvEducation', cv.education.map((e) => subheading({ title: e.degree, location: e.location, organisation: e.institution, dates: e.dates })).join('\n')),
+    macro("cvAppointments", cv.appointments.map((a) => subheading({ ...a, title: a.role })).join("\n")),
+    macro(
+      "cvEducation",
+      cv.education.map((e) => subheading({ title: e.degree, location: e.location, organisation: e.institution, dates: e.dates })).join("\n")
+    ),
 
-    macro('cvTeachingUnimibHeading', subheading({ title: t.unimib.role, location: t.unimib.location, organisation: t.unimib.organisation, dates: t.unimib.dates })),
-    macro('cvTeachingUnimibRows', tableRows(t.unimib.courses, ['course', 'programme', 'topics', 'hours'])),
-    macro('cvTeachingAcademyHeading', subheading({ title: t.academy.role, location: t.academy.location, organisation: t.academy.organisation, dates: t.academy.dates })),
-    macro('cvTeachingAcademyRows', tableRows(t.academy.courses, ['course', 'programme', 'topics', 'hours'])),
-    macro('cvTeachingUnifeHeading', subheading({ title: t.unife.role, location: t.unife.location, organisation: t.unife.organisation, dates: t.unife.dates })),
-    macro('cvTeachingUnifeRows', tableRows(t.unife.courses, ['course', 'programme', 'topics', 'hours'])),
+    macro(
+      "cvTeachingUnimibHeading",
+      subheading({ title: t.unimib.role, location: t.unimib.location, organisation: t.unimib.organisation, dates: t.unimib.dates })
+    ),
+    macro("cvTeachingUnimibRows", tableRows(t.unimib.courses, ["course", "programme", "topics", "hours"])),
+    macro(
+      "cvTeachingAcademyHeading",
+      subheading({ title: t.academy.role, location: t.academy.location, organisation: t.academy.organisation, dates: t.academy.dates })
+    ),
+    macro("cvTeachingAcademyRows", tableRows(t.academy.courses, ["course", "programme", "topics", "hours"])),
+    macro(
+      "cvTeachingUnifeHeading",
+      subheading({ title: t.unife.role, location: t.unife.location, organisation: t.unife.organisation, dates: t.unife.dates })
+    ),
+    macro("cvTeachingUnifeRows", tableRows(t.unife.courses, ["course", "programme", "topics", "hours"])),
 
-    macro('cvService', cv.service.map((s) => project({ title: s.role, detail: s.detail, dates: s.dates, items: s.items })).join('\n\n')),
-    macro('cvProjects', cv.projects.map((p) => project(p)).join('\n\n')),
-    macro('cvAwards', cv.awards.map((a) => project(a)).join('\n\n')),
+    macro("cvService", cv.service.map((s) => project({ title: s.role, detail: s.detail, dates: s.dates, items: s.items })).join("\n\n")),
+    macro("cvProjects", cv.projects.map((p) => project(p)).join("\n\n")),
+    macro("cvAwards", cv.awards.map((a) => project(a)).join("\n\n")),
 
-    macro('cvSupervisionSummary', renderInline(cv.supervision.summary)),
-    macro('cvSupervisionTopics', renderInline(cv.supervision.topic_coverage)),
-    macro('cvSupervisionRows', tableRows(cv.supervision.breakdown, ['level', 'count', 'notes'])),
+    macro("cvSupervisionSummary", renderInline(cv.supervision.summary)),
+    macro("cvSupervisionTopics", renderInline(cv.supervision.topic_coverage)),
+    macro("cvSupervisionRows", tableRows(cv.supervision.breakdown, ["level", "count", "notes"])),
 
-    macro('cvLanguages', cv.languages.map((l) => `${escapeLatex(l.name)} (${escapeLatex(l.level)})`).join(', ')),
+    macro("cvLanguages", cv.languages.map((l) => `${escapeLatex(l.name)} (${escapeLatex(l.level)})`).join(", ")),
 
-    macro('cvDataProtectionHeading', renderInline(cv.data_protection.heading)),
-    macro('cvDataProtectionText', renderInline(cv.data_protection.text)),
+    macro("cvDataProtectionHeading", renderInline(cv.data_protection.heading)),
+    macro("cvDataProtectionText", renderInline(cv.data_protection.text)),
   ];
-  return `${BANNER.join('\n')}\n${blocks.join('\n\n')}\n`;
+  return `${BANNER.join("\n")}\n${blocks.join("\n\n")}\n`;
 }
 
 function renderPrivateOverlay(cv, priv) {
   return [
-    '% =============================================================================',
-    '% GENERATED FILE - DO NOT EDIT, DO NOT COMMIT.',
-    '%',
-    '% Private contact overlay, produced from cv/private.yaml. Gitignored.',
-    '% cv.tex inputs it only if it exists, so a checkout without cv/private.yaml',
-    '% builds the public CV with institutional contact only.',
-    '% =============================================================================',
-    '',
+    "% =============================================================================",
+    "% GENERATED FILE - DO NOT EDIT, DO NOT COMMIT.",
+    "%",
+    "% Private contact overlay, produced from cv/private.yaml. Gitignored.",
+    "% cv.tex inputs it only if it exists, so a checkout without cv/private.yaml",
+    "% builds the public CV with institutional contact only.",
+    "% =============================================================================",
+    "",
     `\\renewcommand{\\cvContactLine}{%\n${contactLine(cv.contact, priv)}%\n}`,
-    '',
-  ].join('\n');
+    "",
+  ].join("\n");
 }
 
 /** The same file with nothing in it, written when there is no cv/private.yaml. */
 function renderEmptyOverlay() {
-  return ['% =============================================================================', '% GENERATED FILE - DO NOT EDIT, DO NOT COMMIT.', '%', '% No cv/private.yaml: this overlay deliberately defines nothing, so the CV keeps', '% the institutional contact line. It is written rather than deleted so latexmk', '% always has this dependency on record and rebuilds when the private contact is', '% added or removed.', '% =============================================================================', ''].join('\n');
+  return [
+    "% =============================================================================",
+    "% GENERATED FILE - DO NOT EDIT, DO NOT COMMIT.",
+    "%",
+    "% No cv/private.yaml: this overlay deliberately defines nothing, so the CV keeps",
+    "% the institutional contact line. It is written rather than deleted so latexmk",
+    "% always has this dependency on record and rebuilds when the private contact is",
+    "% added or removed.",
+    "% =============================================================================",
+    "",
+  ].join("\n");
 }
 
 // -----------------------------------------------------------------------------
@@ -266,11 +296,11 @@ function renderEmptyOverlay() {
 // -----------------------------------------------------------------------------
 
 function loadYaml(path) {
-  return load(readFileSync(path, 'utf8'));
+  return load(readFileSync(path, "utf8"));
 }
 
 function main() {
-  const check = process.argv.includes('--check');
+  const check = process.argv.includes("--check");
   const cv = loadYaml(CV_YAML);
   const publicTex = renderPublic(cv);
   const rel = (p) => relative(ROOT, p);
@@ -280,9 +310,9 @@ function main() {
       console.error(`${rel(OUT_PUBLIC)} is missing. Run: node scripts/build-cv-data.mjs`);
       process.exit(1);
     }
-    if (readFileSync(OUT_PUBLIC, 'utf8') !== publicTex) {
+    if (readFileSync(OUT_PUBLIC, "utf8") !== publicTex) {
       console.error(`${rel(OUT_PUBLIC)} is stale relative to ${rel(CV_YAML)}.`);
-      console.error('Run `node scripts/build-cv-data.mjs` and commit the result.');
+      console.error("Run `node scripts/build-cv-data.mjs` and commit the result.");
       process.exit(1);
     }
     console.log(`${rel(OUT_PUBLIC)} is up to date with ${rel(CV_YAML)}.`);
