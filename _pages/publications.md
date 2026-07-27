@@ -15,6 +15,8 @@ nav_order: 2
 
 <div class="publications">
 
-{% bibliography %}
+<!-- The site lists published work only: papers.bib is shared with the CV, which keeps its own "Under review" section, so hide the under-review manuscripts and the @misc dataset artifacts here rather than removing them from the bibliography. -->
+
+{% bibliography --query !@misc[keywords!~underreview] %}
 
 </div>

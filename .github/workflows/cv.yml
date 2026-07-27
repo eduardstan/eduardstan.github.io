@@ -17,12 +17,14 @@ on:
       - "cv/**"
       - "_bibliography/papers.bib"
       - "scripts/build-cv-data.mjs"
+      - "scripts/build-cv-data.test.mjs"
       - ".github/workflows/cv.yml"
   pull_request:
     paths:
       - "cv/**"
       - "_bibliography/papers.bib"
       - "scripts/build-cv-data.mjs"
+      - "scripts/build-cv-data.test.mjs"
       - ".github/workflows/cv.yml"
   workflow_dispatch:
 
@@ -40,6 +42,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      # The generated-file check below cannot catch a renderInline regression:
+      # it only compares the committed cv-data.tex against what the current
+      # code produces, so a consistent regression regenerates it identically.
+      - name: Run the generator's unit tests
+        run: node --test scripts/build-cv-data.test.mjs
 
       # Guards against hand edits to the generated file: cv.yaml is the single
       # source of truth, so a committed cv-data.tex that no longer matches it
