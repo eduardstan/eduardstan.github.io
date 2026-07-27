@@ -38,6 +38,7 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
 | `src/content/`                 | Sample entries only — real content is migrated in a later task  |
 | `src/layouts/BaseLayout.astro` | Shared document shell, with a named `head` slot                 |
 | `src/components/`              | Header, footer, theme script and toggle                         |
+| `src/lib/content.ts`           | Shared post query (draft rule + sort order) and date formatter  |
 | `src/pages/`                   | Routes, including `rss.xml.ts`                                  |
 | `src/styles/global.css`        | Tailwind entry point, theme tokens and minimal prose styles     |
 
