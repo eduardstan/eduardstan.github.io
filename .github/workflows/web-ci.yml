@@ -1,0 +1,48 @@
+name: Web (Astro) CI
+
+# Build check only for the Astro rebuild under web/. This workflow must never
+# deploy or publish: the live site is still built from the Jekyll tree by
+# deploy.yml, and cutover is a separate, explicitly approved change.
+
+on:
+  pull_request:
+    paths:
+      - "web/**"
+      - ".github/workflows/web-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: web
+
+jobs:
+  build:
+    name: Build and type-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ⚙️
+        uses: actions/setup-node@v4
+        with:
+          # Astro 7 requires Node >= 22.12.0.
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install 💾
+        run: npm ci
+
+      - name: Type-check 🔎
+        run: npx astro check
+
+      - name: Build 🔧
+        run: npm run build

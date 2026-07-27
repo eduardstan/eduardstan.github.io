@@ -1,0 +1,25 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const dateFormat = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeZone: 'UTC' });
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article>
+    <h1 class="text-2xl font-semibold">{post.data.title}</h1>
+    <p class="mt-1 text-sm text-[var(--color-muted)]">
+      <time datetime={post.data.date.toISOString()}>{dateFormat.format(post.data.date)}</time>
+    </p>
+    <div class="prose mt-6"><Content /></div>
+  </article>
+</BaseLayout>

@@ -1,0 +1,24 @@
+---
+/** Persists an explicit light/dark choice; unset means "follow the OS". */
+---
+
+<button
+  type="button"
+  id="theme-toggle"
+  class="rounded border border-[var(--color-rule)] px-2 py-1 text-sm hover:border-[var(--color-accent)]"
+  aria-live="polite"
+  aria-label="Switch colour theme"
+  data-pagefind-ignore
+>
+  <span aria-hidden="true" class="dark:hidden">Dark</span>
+  <span aria-hidden="true" class="hidden dark:inline">Light</span>
+</button>
+
+<script>
+  const toggle = document.getElementById('theme-toggle');
+  toggle?.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('theme', next);
+  });
+</script>

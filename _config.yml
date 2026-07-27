@@ -246,6 +246,14 @@ exclude:
   - README.md
   - readme_preview/
   - vendor
+  # Astro rebuild (see web/README.md). Jekyll must ignore it entirely so the
+  # published site keeps being built from the al-folio tree above.
+  - web/
+  - cv/
+  - node_modules
+  # Repository documentation for agents; not part of the published site.
+  - AGENTS.md
+  - CLAUDE.md
 keep_files:
   - CNAME
   - .nojekyll

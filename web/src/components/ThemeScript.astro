@@ -1,0 +1,16 @@
+---
+/**
+ * Applies the stored theme before first paint to avoid a flash of the wrong
+ * mode. Must be rendered inside <head>, ahead of any stylesheet-driven paint.
+ */
+---
+
+<script is:inline>
+  (() => {
+    const stored = localStorage.getItem('theme');
+    const dark =
+      stored === 'dark' ||
+      (stored === null && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  })();
+</script>

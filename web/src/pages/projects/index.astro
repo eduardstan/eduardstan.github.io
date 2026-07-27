@@ -1,0 +1,32 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout title="Projects" description="Projects by Eduard I. Stan.">
+  <h1 class="text-2xl font-semibold">Projects</h1>
+  <p class="mt-4 text-[var(--color-muted)]">
+    Structural placeholder rendering the sample projects collection. Real
+    projects are migrated by a later task.
+  </p>
+  <ul class="mt-6 space-y-4">
+    {
+      projects.map((project) => (
+        <li>
+          <p class="font-medium">{project.data.title}</p>
+          <p class="text-sm">{project.data.description}</p>
+          {project.data.github && (
+            <a
+              href={project.data.github}
+              class="text-sm text-[var(--color-accent)] underline underline-offset-2"
+            >
+              GitHub
+            </a>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
