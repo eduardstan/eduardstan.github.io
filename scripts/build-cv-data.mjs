@@ -65,7 +65,7 @@ function escapeLatex(text) {
  * verbatim, so only the characters TeX itself consumes need handling.
  */
 function escapeUrl(url) {
-  return String(url).replace(/\\/g, '\\\\').replace(/([%#])/g, '\\$1');
+  return String(url).replace(/\\/g, '\\\\').replace(/([%#&])/g, '\\$1');
 }
 
 // -----------------------------------------------------------------------------
