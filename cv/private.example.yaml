@@ -1,0 +1,17 @@
+# =============================================================================
+# Template for `cv/private.yaml` (which is gitignored and must never be
+# committed - the repository is public).
+#
+#   cp cv/private.example.yaml cv/private.yaml   # then fill in the real values
+#   node scripts/build-cv-data.mjs               # writes the private overlay
+#   latexmk -xelatex -cd cv/cv.tex               # full-contact PDF
+#
+# Without cv/private.yaml the build simply omits these fields and the CV carries
+# institutional contact only. That is what CI builds.
+# =============================================================================
+
+contact:
+  # Shown first on the header contact line, as plain text.
+  mobile: "+39 000 0000000"
+  # Shown after the institutional address, as a mailto link.
+  personal_email: you@example.com

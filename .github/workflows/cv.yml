@@ -1,0 +1,78 @@
+name: Build CV
+
+# Builds the PDF CV from cv/cv.yaml + cv/cv.tex and uploads it as an artifact.
+#
+# This workflow deliberately does NOT deploy or publish the PDF: the live site is
+# still the old Jekyll one and a separate cutover task owns publishing.
+#
+# cv/private.yaml is gitignored and never present on a runner, so CI always
+# builds the public CV with institutional contact only.
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - "cv/**"
+      - "_bibliography/papers.bib"
+      - "scripts/build-cv-data.mjs"
+      - ".github/workflows/cv.yml"
+  pull_request:
+    paths:
+      - "cv/**"
+      - "_bibliography/papers.bib"
+      - "scripts/build-cv-data.mjs"
+      - ".github/workflows/cv.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Guards against hand edits to the generated file: cv.yaml is the single
+      # source of truth, so a committed cv-data.tex that no longer matches it
+      # must fail rather than silently diverge.
+      - name: Check generated cv-data.tex is up to date
+        run: node scripts/build-cv-data.mjs --check
+
+      - name: Regenerate cv-data.tex
+        run: node scripts/build-cv-data.mjs
+
+      # xelatex is required: the CV uses academicons, which needs TU encoding.
+      - name: Build the PDF
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: cv.tex
+          working_directory: cv
+          latexmk_use_xelatex: true
+
+      # Belt and braces: private.yaml can never reach a runner, but assert it
+      # anyway. Matched by shape, not by value, so the real number and address
+      # stay out of this public repository.
+      - name: Confirm no private contact details leaked into the PDF
+        run: |
+          sudo apt-get update && sudo apt-get install -y poppler-utils
+          if pdftotext cv/cv.pdf - | grep -qiE '@(gmail|googlemail|outlook|hotmail|yahoo|proton(mail)?)\.|\+[0-9]{1,3}[ .-]?[0-9]{6,}'; then
+            echo "::error::The built PDF looks like it contains a personal phone number or personal email address"
+            exit 1
+          fi
+          echo "PDF carries institutional contact only."
+
+      - name: Upload the PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: cv-pdf
+          path: cv/cv.pdf
+          if-no-files-found: error
