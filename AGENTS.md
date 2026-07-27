@@ -10,9 +10,14 @@ This file is the project's committed home for project-intrinsic agent knowledge:
 - **`web/`** — an in-progress from-scratch Astro rebuild. Not deployed. See `web/README.md`.
 
 Until an explicitly approved cutover, **nothing in `web/` may affect what is published.** The
-guards are: `web/`, `cv/` and `node_modules` in the `exclude:` list of `_config.yml`, and
+guards are: `web/` and `node_modules` in the `exclude:` list of `_config.yml`, and
 `.github/workflows/web-ci.yml` being build-only (`permissions: contents: read`, no deploy step).
 When changing either site, verify the other still builds.
+
+That same `exclude:` list carries a `cv/` entry. No such directory exists on this branch yet — the
+exclusion is deliberately in place _ahead_ of the task that creates it, because `cv/` will hold CV
+sources and generated output that must never be published. **Do not delete it as dead
+configuration**: removing it is what would publish that material once the directory lands.
 
 ## Sharp edges
 

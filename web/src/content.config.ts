@@ -25,8 +25,13 @@ const news = defineCollection({
   schema: z.object({
     title: z.string().optional(),
     date: z.coerce.date(),
-    /** Short items render inline in listings; long ones get their own page. */
+    /**
+     * Accepted and preserved so real news frontmatter validates; nothing reads
+     * it yet. Splitting long items onto their own page belongs to the
+     * content-migration task.
+     */
     inline: z.boolean().default(false),
+    /** Accepted and preserved; rendered by the content-migration task. */
     related_posts: z.array(z.string()).default([]),
   }),
 });

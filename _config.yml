@@ -249,6 +249,8 @@ exclude:
   # Astro rebuild (see web/README.md). Jekyll must ignore it entirely so the
   # published site keeps being built from the al-folio tree above.
   - web/
+  # CV sources and generated output that must never be published. The directory
+  # does not exist yet; this entry is in place ahead of it. Do not delete it.
   - cv/
   - node_modules
   # Repository documentation for agents; not part of the published site.

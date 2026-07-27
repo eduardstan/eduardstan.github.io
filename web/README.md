@@ -10,6 +10,11 @@ Nothing here is deployed. Jekyll ignores this directory via the `exclude` list i
 `permissions: contents: read` and no deploy step. Cutover is a separate, explicitly
 approved change.
 
+That `exclude` list also carries a `cv/` entry. No such directory exists on this branch
+yet; the exclusion is in place _ahead_ of the task that creates it, because `cv/` will
+hold CV sources and generated output that must never be published. Do not delete it as
+dead configuration.
+
 ## Requirements
 
 Node.js >= 22.12.0 (required by Astro 7).
