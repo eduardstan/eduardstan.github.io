@@ -297,6 +297,9 @@ body {
   letter-spacing: 0.06em;
   margin-left: 0.5rem;
   text-transform: none;
+  /* Paths have no break opportunities of their own, so they would run past the
+     column rule rather than wrap. */
+  overflow-wrap: anywhere;
 }
 
 #inspect:checked ~ .wrap .record-of {

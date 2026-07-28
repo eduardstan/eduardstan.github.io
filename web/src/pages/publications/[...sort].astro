@@ -150,7 +150,7 @@ const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.y
       <span>No.</span>
       {
         columns.map((column) => (
-          <a href={href(column.href)} aria-current={SORTS[active].column === column.column ? 'page' : undefined}>
+          <a href={href(column.href)} aria-current={column.href === active ? 'page' : undefined}>
             {column.label}
             {marker(column.column)}
           </a>

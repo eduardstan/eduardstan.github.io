@@ -28,6 +28,7 @@ const dateFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'short', timeZo
     {
       excluded.length > 0 && (
         <>
+          {' '}
           {excluded.length} file{excluded.length === 1 ? '' : 's'} could not be published; turn{' '}
           <b>inspect sources</b> on to see which and why.
         </>
