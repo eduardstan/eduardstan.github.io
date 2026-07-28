@@ -165,7 +165,8 @@ function serviceDetail({ venue, section, metric, years }) {
   if (years?.length) {
     const first = years[0].year;
     const last = years.at(-1).year;
-    parts.push(years.length === 1 ? String(first) : `${first}–${last}`);
+    const consecutiveAscending = years.every(({ year }, index) => index === 0 || year === years[index - 1].year + 1);
+    parts.push(years.length > 1 && consecutiveAscending ? `${first}–${last}` : years.map(({ year }) => year).join(", "));
   }
   const detail = parts.filter(Boolean).join(", ");
   return metric ? `${detail} **[${metric}]**` : detail;

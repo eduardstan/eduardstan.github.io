@@ -56,3 +56,20 @@ test("sparse service details do not print stray separators", () => {
   );
   assert.equal(serviceDetail({ venue: "PeerJ Computer Science Journal", metric: "IF: 2.5; Q1" }), "PeerJ Computer Science Journal **[IF: 2.5; Q1]**");
 });
+
+test("nonconsecutive or descending service years print each edition", () => {
+  assert.equal(
+    serviceDetail({
+      venue: "Example Conference",
+      years: [{ year: 2024 }, { year: 2026 }],
+    }),
+    "Example Conference, 2024, 2026"
+  );
+  assert.equal(
+    serviceDetail({
+      venue: "Example Conference",
+      years: [{ year: 2026 }, { year: 2025 }],
+    }),
+    "Example Conference, 2026, 2025"
+  );
+});
