@@ -10,12 +10,8 @@ Nothing here is deployed. Jekyll ignores this directory via the `exclude` list i
 `permissions: contents: read` and no deploy step. Cutover is a separate, explicitly
 approved change.
 
-That `exclude` list also carries a `cv/` entry. No such directory exists on this branch
-yet; the exclusion is in place _ahead_ of the task that creates it, because `cv/` will
-hold CV sources and generated output that must never appear on the published site. Do
-not delete it as dead configuration. It only stops publication, though — it does not
-keep anything out of the git repository, so whatever under `cv/` must never be committed
-is a plain `.gitignore` concern, separate from this exclude entry.
+That `exclude` list also carries a `cv/` entry, which is a publication guard and not dead
+configuration — see "Two sites live in this repo" in the repository root's `AGENTS.md`.
 
 ## Requirements
 
@@ -44,7 +40,7 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
 | `src/content.config.ts`        | Typed schemas for the `blog`, `news` and `projects` collections |
 | `src/content/`                 | Sample entries only — real content is migrated in a later task  |
 | `src/layouts/BaseLayout.astro` | Shared document shell, with a named `head` slot                 |
-| `src/components/`              | Header, footer, theme script and toggle                         |
+| `src/components/`              | Header, footer, page and section heads, source record, theme    |
 | `src/lib/content.ts`           | Shared post query (draft rule + sort order) and date formatter  |
 | `src/lib/record.ts`            | Build-time readers for the repository's own data files          |
 | `src/lib/strands.ts`           | The three research strands — the one piece of authored copy     |
@@ -117,8 +113,9 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
 
 ## Not done yet
 
-Content migration, the CV pipeline and deployment. The home page and
-`/publications/` render the real data; the `/cv/`, `/professional_activities/` and
-`/repositories/` routes are structural placeholders under the Ledger page furniture,
-and the blog, news and projects routes are wired to their collections but still
-render the sample entries.
+Content migration, the CV pipeline and deployment. The home page, `/publications/` and
+`/news/` render the real data — `/news/` reads `_news/` through `src/lib/record.ts`, not
+the `news` collection, so it and the home page cannot disagree; the `/cv/`,
+`/professional_activities/` and `/repositories/` routes are structural placeholders under
+the Ledger page furniture, and the blog and projects routes are wired to their collections
+but still render the sample entries.

@@ -3,6 +3,8 @@
 # -----------------------------------------------------------------------------
 
 title: blank # the website title (if blank, full name will be used instead)
+# Deliberate order: the publications are authored "Ionel Eduard Stan", so both
+# sites render the name that way. Not a typo — do not swap these back.
 first_name: Ionel
 middle_name: Eduard
 last_name: Stan
