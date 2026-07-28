@@ -1,4 +1,4 @@
-// Inline-markup rules for cv.yaml prose.
+// Rendering rules for cv.yaml facts.
 // Run: node --test scripts/build-cv-data.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";

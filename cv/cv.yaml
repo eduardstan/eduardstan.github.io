@@ -1,9 +1,9 @@
 # =============================================================================
 # cv.yaml - the single source of truth for the CV's facts.
 #
-# Both consumers read THIS file:
+# Consumers:
 #   * the LaTeX CV  - via `scripts/build-cv-data.mjs` -> `cv/generated/cv-data.tex`
-#   * the website   - by reading this YAML directly (no LaTeX involved)
+#   * the website   - can read this YAML directly when the CV migration lands
 #
 # Publications and talks are NOT here: they live in `_bibliography/papers.bib`
 # and `cv/pres.bib`, and are rendered by biblatex straight from those files.
@@ -20,10 +20,11 @@
 #   [text](https://...) -> \href{...}{text}
 #   *                   passes through literally (so "CORE Rank: A*" is safe)
 #
-# No URL in this file - a link target above or a `url:` field below - may contain
-# \ ~ _ ^ $ { }; percent-encode them (~ is %7E, _ is %5F, \ is %5C). Every \href
-# lands inside a \newcommand body, where TeX consumes those characters before
-# hyperref can rescue them, so the build raises rather than emitting a wrong link.
+# No URL in this file - a link target above or any URL-valued field below - may
+# contain \ ~ _ ^ $ { }; percent-encode them (~ is %7E, _ is %5F, \ is %5C).
+# Every \href lands inside a \newcommand body, where TeX consumes those characters
+# before hyperref can rescue them, so the build raises rather than emitting a
+# wrong link.
 #
 # Characters that carry typographic meaning, written as real Unicode:
 #   -- em dash   (U+2014)  ->  ---     e.g. "settings-especially healthcare"
@@ -228,8 +229,9 @@ teaching:
 # -----------------------------------------------------------------------------
 # Editorial, Reviewing & Conference Service
 #
-# `announced` timestamps service without editions. `years` records each
-# conference edition separately and may carry its own `announced` timestamp.
+# Each entry requires `role` and `venue`; `section`, `metric`, ISO 8601
+# `announced`, and `years` are optional. `announced` dates service without
+# editions; `years` stores each edition as a `year` plus optional `announced`.
 # The generator folds consecutive editions back into the compact CV range.
 # -----------------------------------------------------------------------------
 service:
