@@ -246,6 +246,19 @@ exclude:
   - README.md
   - readme_preview/
   - vendor
+  # Astro rebuild (see web/README.md). Jekyll must ignore it entirely so the
+  # published site keeps being built from the al-folio tree above.
+  - web/
+  # CV sources and generated output that must never appear on the published
+  # site. The directory does not exist yet; this entry is in place ahead of it.
+  # Do not delete it. This only keeps the directory out of the generated site —
+  # it does not keep anything out of the git repository; whatever under cv/ must
+  # never be committed is a plain .gitignore concern, separate from this entry.
+  - cv/
+  - node_modules
+  # Repository documentation for agents; not part of the published site.
+  - AGENTS.md
+  - CLAUDE.md
 keep_files:
   - CNAME
   - .nojekyll
