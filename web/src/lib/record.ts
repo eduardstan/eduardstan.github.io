@@ -143,7 +143,6 @@ export interface Publication {
   /** Volume / pages / publisher, already assembled into one record line. */
   detail: string;
   doi?: string;
-  url?: string;
   link?: Link;
   abstract?: string;
   /**
@@ -398,7 +397,6 @@ function toPublication(
     ...citationOf(fields, venue, venueField),
     detail,
     doi,
-    url: link?.href,
     link,
     abstract: fields.abstract ? deLatex(fields.abstract) : undefined,
     raw,
@@ -416,9 +414,8 @@ export interface Bibliography {
 
 let bibliographyCache: Bibliography | undefined;
 
-export function bibliography(): Bibliography {
-  if (bibliographyCache) return bibliographyCache;
-  const raw = read(SOURCES.bibliography);
+/** Every `@type{key, …}` in a BibTeX source, newest first. */
+export function parseEntries(raw: string): Publication[] {
   const entries: Publication[] = [];
   const entryPattern = /^@([a-zA-Z]+)\s*\{\s*([^,]+),/gm;
   let match: RegExpExecArray | null;
@@ -439,6 +436,12 @@ export function bibliography(): Bibliography {
     entries.push(toPublication(match[1].toLowerCase(), match[2].trim(), fields, source));
   }
   entries.sort((a, b) => b.year - a.year || a.title.localeCompare(b.title));
+  return entries;
+}
+
+export function bibliography(): Bibliography {
+  if (bibliographyCache) return bibliographyCache;
+  const entries = parseEntries(read(SOURCES.bibliography));
 
   const counts = new Map<string, number>();
   for (const entry of entries) counts.set(entry.kind, (counts.get(entry.kind) ?? 0) + 1);

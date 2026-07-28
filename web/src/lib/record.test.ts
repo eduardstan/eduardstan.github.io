@@ -12,7 +12,15 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { about, activities, bibliography, bibliographyGaps, news, SOURCES } from './record.ts';
+import {
+  about,
+  activities,
+  bibliography,
+  bibliographyGaps,
+  news,
+  parseEntries,
+  SOURCES,
+} from './record.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const bib = bibliography();
@@ -114,18 +122,41 @@ for (const entry of bib.entries) {
   assert.ok(!/[\\{}]/.test(entry.link.href), `${where}: unresolved LaTeX in a link`);
   assert.ok(!/[–—]/.test(entry.link.href), `${where}: a hyphen pair was typeset as a dash`);
 }
-assert.equal(
-  bib.entries.filter((entry) => entry.link).length + 6,
-  bib.entries.length,
-  'the six manuscripts under review are the only entries with no address field',
+// The loop above states the invariant per entry — an entry either links or has
+// none of the four address fields — but is vacuously true if nothing resolves.
+assert.ok(
+  bib.entries.some((entry) => entry.link),
+  'no entry resolved a link at all',
 );
 
 // Adding an `abstract` to an entry has to be the only action needed for it to
-// show, so nothing may gate on a list or a flag.
-assert.deepEqual(
-  bib.entries.filter((entry) => entry.abstract).map((entry) => entry.key),
-  bib.entries.filter((entry) => entry.fields.abstract).map((entry) => entry.key),
-  'the abstracts shown are not exactly the entries carrying one',
+// show, so nothing may gate on a list or a flag. The bibliography carries none
+// today, so the two states are put to the parser directly.
+const [withAbstract, withoutAbstract] = parseEntries(`
+@article{withabstract,
+  title = {A title},
+  author = {Stan, Ionel Eduard},
+  journal = {A journal},
+  year = {2026},
+  abstract = {The claim, stated once.},
+}
+@article{withoutabstract,
+  title = {B title},
+  author = {Stan, Ionel Eduard},
+  journal = {A journal},
+  year = {2026},
+}
+`);
+assert.equal(withAbstract.key, 'withabstract', 'synthetic entries did not parse in order');
+assert.equal(
+  withAbstract.abstract,
+  'The claim, stated once.',
+  'an `abstract` field did not reach the entry',
+);
+assert.equal(
+  withoutAbstract.abstract,
+  undefined,
+  'an abstract appeared on an entry that carries no `abstract` field',
 );
 
 // Accents, particles and both BibTeX name forms — the cases a naive parser gets
