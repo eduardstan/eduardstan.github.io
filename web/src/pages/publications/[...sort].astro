@@ -175,9 +175,41 @@ const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.y
                   </>
                 ))}
               </p>
-              <p class="vn">{entry.venue}</p>
+              <p class="vn">{entry.citation}</p>
+              {
+                /* The citation above is a rendered claim like any other, so it
+                   opens to the record it was assembled from: the entry it came
+                   from and the fields that were present in it. Both are read
+                   from the .bib at build time — the list of fields is the list
+                   the assembler actually used. */
+              }
+              <Record>
+                <p>
+                  <b>{SOURCES.bibliography}</b> — @{entry.type}
+                  {'{'}
+                  {entry.key}
+                  {'}'}; venue from <b>{entry.venueField ?? 'no venue field'}</b>, citation from{' '}
+                  {entry.citationFields.join(', ')};{' '}
+                  {entry.link ? (
+                    <>
+                      link from <b>{entry.link.field}</b>
+                    </>
+                  ) : (
+                    'no doi, url, html or pdf field, so no link'
+                  )}.
+                </p>
+              </Record>
             </div>
-            <span class="more" aria-hidden="true" />
+            <div class="acts">
+              {
+                entry.link && (
+                  <a class="go" href={entry.link.href}>
+                    {entry.link.label} ↗
+                  </a>
+                )
+              }
+              <span class="more" aria-hidden="true" />
+            </div>
           </summary>
           <div class="reveal">
             {entry.abstract && <p class="abstract">{entry.abstract}</p>}
@@ -192,6 +224,18 @@ const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.y
                 <>
                   <dt>DOI</dt>
                   <dd>{entry.doi}</dd>
+                </>
+              )}
+              {entry.link && entry.link.field !== 'doi' && (
+                <>
+                  <dt>{entry.link.field}</dt>
+                  <dd>{entry.link.href}</dd>
+                </>
+              )}
+              {!entry.link && (
+                <>
+                  <dt>Link</dt>
+                  <dd>No doi, url, html or pdf field in the BibTeX entry.</dd>
                 </>
               )}
               {!entry.abstract && (
@@ -210,9 +254,9 @@ const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.y
               </p>
               <pre>{entry.raw}</pre>
             </div>
-            {entry.url && (
-              <a class="open" href={entry.url}>
-                Open the paper →
+            {entry.link && (
+              <a class="open" href={entry.link.href}>
+                Open the {entry.link.label === 'DOI' ? 'paper by its DOI' : 'paper'} →
               </a>
             )}
           </div>

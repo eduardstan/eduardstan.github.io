@@ -946,6 +946,18 @@ body {
   overflow-wrap: anywhere;
 }
 
+/* The last column: the link where the entry has one, and the open/close cue.
+   The column is laid out whether or not there is a link, so a row that cannot
+   link shows nothing there rather than a control that goes nowhere. */
+.entry .acts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.6rem;
+  justify-self: start;
+}
+
+.entry .go,
 .entry .more {
   font-family: var(--font-mono);
   font-size: 0.625rem;
@@ -953,8 +965,13 @@ body {
   text-transform: uppercase;
   color: var(--color-accent);
   border-bottom: 1px solid var(--color-accent);
-  justify-self: start;
   white-space: nowrap;
+}
+
+/* The one thing inside the row that is not the row's own control. */
+.entry .go:hover {
+  color: var(--color-ink);
+  border-bottom-color: var(--color-ink);
 }
 
 .entry .more::after {
@@ -966,7 +983,9 @@ body {
 }
 
 @media (min-width: 900px) {
-  .entry .more {
+  .entry .acts {
+    flex-direction: column;
+    align-items: flex-end;
     justify-self: end;
   }
 }
@@ -991,8 +1010,7 @@ body {
     margin-top: 0.2rem;
   }
 
-  .entry .more {
-    display: inline-block;
+  .entry .acts {
     margin-top: 0.4rem;
   }
 }

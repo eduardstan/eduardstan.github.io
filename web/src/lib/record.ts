@@ -104,7 +104,26 @@ function deLatex(value: string): string {
   return out.replace(/\s{2,}/g, ' ').trim();
 }
 
+/**
+ * The same unescaping for an address rather than for prose.
+ *
+ * `deLatex` cannot be used on a URL or a DOI: it rewrites `--` as an en dash,
+ * and two hyphens in a path are two hyphens. Only the escapes that appear in
+ * the addresses this bibliography actually holds are undone — `paper\_29.pdf`
+ * is a real filename in it, and a backslash left in that link breaks it.
+ */
+const deLatexUrl = (value: string) => value.replace(/\\([_&%#$~])/g, '$1').replace(/[{}]/g, '');
+
 // ------------------------------------------------------------ BibTeX ------
+
+/** Somewhere to follow an entry to, and the field that said so. */
+export interface Link {
+  href: string;
+  /** The BibTeX field it came from — the record under the link. */
+  field: string;
+  /** `DOI` / `Paper` / `PDF`, the shortest true name for what is on the end. */
+  label: string;
+}
 
 export interface Publication {
   key: string;
@@ -115,10 +134,17 @@ export interface Publication {
   authors: string[];
   year: number;
   venue: string;
+  /** The BibTeX field `venue` was read from, so the row can say which. */
+  venueField?: string;
+  /** Venue, series, volume, number, pages, publisher — whichever this entry has. */
+  citation: string;
+  /** The fields `citation` was assembled from, in the order they appear in it. */
+  citationFields: string[];
   /** Volume / pages / publisher, already assembled into one record line. */
   detail: string;
   doi?: string;
   url?: string;
+  link?: Link;
   abstract?: string;
   /**
    * The entry exactly as it appears in the .bib file, braces and all. This is
@@ -252,19 +278,98 @@ function parseFields(body: string): Record<string, string> {
   return fields;
 }
 
+/**
+ * Where the work appeared, and which field said so.
+ *
+ * Manuscripts under review carry it in `note` ("Journal of Artificial
+ * Intelligence Research (Manuscript under review)") and released artifacts in
+ * `publisher`, so both are fallbacks rather than special cases — an entry with
+ * neither simply has no venue line. `publisher` is tried before `note` because
+ * the `@misc` artifacts have both, and their note is DBLP's unfilled
+ * "Accessed on YYYY-MM-DD." template rather than a venue.
+ */
+const VENUE_FIELDS = ['journal', 'booktitle', 'school', 'publisher', 'note'] as const;
+
+/**
+ * The venue line as a citation: venue, series, volume, number, pages,
+ * publisher — and only the ones this entry actually has.
+ *
+ * Not a citation style. There is no CSL here and no per-type template: the
+ * volume attaches to the series where there is one and to the venue where
+ * there is not, which is the whole of the difference between how a journal
+ * article and a conference paper read, and the rest is `join(', ')` over the
+ * fields that exist. Every part is dropped before the join rather than after
+ * it, so a separator is never printed with nothing on one side of it, and an
+ * entry down to a venue alone yields that venue and nothing else.
+ */
+function citationOf(
+  fields: Record<string, string>,
+  venue: string,
+  venueField: string | undefined,
+): { citation: string; citationFields: string[] } {
+  const used: string[] = [];
+  const take = (name: string) => {
+    const value = fields[name] && deLatex(fields[name]);
+    if (value) used.push(name);
+    return value || '';
+  };
+  const series = take('series');
+  // `number` qualifies a volume — 12(3). On its own it is the only number the
+  // entry has, so it takes the volume's place rather than printing "(3)".
+  const volume = take('volume');
+  const number = take('number');
+  const numbered = volume ? (number ? `${volume}(${number})` : volume) : number;
+  const pages = take('pages');
+  const publisher = take('publisher');
+
+  if (venueField) used.unshift(venueField);
+  // Where the volume goes: onto the series if the entry has one, onto the
+  // venue if it does not. A journal reads "Fuzzy Sets and Systems 456", a
+  // conference "…, LIPIcs 355".
+  const head = [venue, series ? '' : numbered].filter(Boolean).join(' ');
+  const line = [head, series && [series, numbered].filter(Boolean).join(' '), pages]
+    .filter(Boolean)
+    .join(', ');
+  // The publisher is already the venue for entries that have nothing else.
+  const parts = [line, publisher === venue ? '' : publisher].filter(Boolean).join('. ');
+  if (publisher && publisher === venue) used.splice(used.indexOf('publisher'), 1);
+  return {
+    citation: !parts ? '' : /[.!?]$/.test(parts) ? parts : `${parts}.`,
+    citationFields: used,
+  };
+}
+
+/**
+ * Where to follow the entry to, most durable identifier first.
+ *
+ * The DOI leads: it keeps resolving after a publisher reorganises its site,
+ * and for most entries here DBLP's `url` is that same doi.org address anyway.
+ * Then `html`, a landing page chosen by hand; then `url`; then `pdf`, which is
+ * a file rather than a record and so is the last resort. `html` and `pdf` are
+ * al-folio's fields and follow al-folio's own rule for them — an absolute
+ * address is used as it stands, anything else names a file under the site's
+ * assets (`_layouts/bib.liquid`).
+ */
+function linkOf(fields: Record<string, string>, doi: string | undefined): Link | undefined {
+  const asset = (name: string, directory: string) => {
+    const value = deLatexUrl(fields[name]);
+    return value.includes('://') ? value : `/assets/${directory}/${value}`;
+  };
+  if (doi) return { href: `https://doi.org/${doi}`, field: 'doi', label: 'DOI' };
+  if (fields.html) return { href: asset('html', 'html'), field: 'html', label: 'Paper' };
+  if (fields.url) return { href: deLatexUrl(fields.url), field: 'url', label: 'Paper' };
+  if (fields.pdf) return { href: asset('pdf', 'pdf'), field: 'pdf', label: 'PDF' };
+  return undefined;
+}
+
 function toPublication(
   type: string,
   key: string,
   fields: Record<string, string>,
   raw: string,
 ): Publication {
-  // Where the work appeared. Manuscripts under review carry it in `note`
-  // ("Journal of Artificial Intelligence Research (Manuscript under review)")
-  // and released artifacts in `publisher`, so both are fallbacks rather than
-  // special cases — an entry with neither simply has no venue line.
-  const venue = deLatex(
-    fields.journal ?? fields.booktitle ?? fields.school ?? fields.publisher ?? fields.note ?? '',
-  );
+  const venueField = VENUE_FIELDS.find((name) => fields[name]);
+  const venue = venueField ? deLatex(fields[venueField]) : '';
   const publisher = fields.publisher && deLatex(fields.publisher);
   const detail = [
     fields.series && deLatex(fields.series),
@@ -276,7 +381,8 @@ function toPublication(
   ]
     .filter(Boolean)
     .join(', ');
-  const doi = fields.doi ? deLatex(fields.doi) : undefined;
+  const doi = fields.doi ? deLatexUrl(fields.doi) : undefined;
+  const link = linkOf(fields, doi);
   return {
     key,
     type,
@@ -288,9 +394,12 @@ function toPublication(
       .map(formatAuthor),
     year: Number.parseInt(fields.year ?? '0', 10),
     venue,
+    venueField,
+    ...citationOf(fields, venue, venueField),
     detail,
     doi,
-    url: fields.html ?? fields.url ?? (doi ? `https://doi.org/${doi}` : undefined),
+    url: link?.href,
+    link,
     abstract: fields.abstract ? deLatex(fields.abstract) : undefined,
     raw,
     fields,
