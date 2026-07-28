@@ -230,6 +230,7 @@ exclude:
   - bin/
   - CONTRIBUTING.md
   - CUSTOMIZE.md
+  - cv/
   - Dockerfile
   - docker-compose.yml
   - docker-compose-slim.yml
@@ -325,7 +326,7 @@ display_categories: ["Reviews"] # these categories will be displayed on the fron
 
 scholar:
   last_name: [Stan]
-  first_name: [I.E.]
+  first_name: [I.E., Ionel Eduard]
 
   style: apa
   locale: en
