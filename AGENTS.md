@@ -32,12 +32,12 @@ Jekyll output risks colliding with that route.
   inside the worktree.
 - Astro 7's default Markdown processor (Sätteri) is **not** remark/rehype compatible, so `web/`
   opts back into the unified processor — see "Notable configuration" in `web/README.md`.
-- `web/` reads the repository root's data files (`_bibliography/`, `_news/`, `_pages/`,
-  `_config.yml`) at build time through `web/src/lib/record.ts`, so the two sites share one set of
-  sources. That module finds the root by walking up for `_config.yml` rather than from
-  `import.meta.url`, because Astro relocates the bundle during `astro build`. The Ledger design
-  requires every displayed count and source line to be derived there rather than written by hand —
-  see "Notable configuration" in `web/README.md`.
+- `web/` reads the repository root's data files (`_bibliography/`, `_posts/`, `_pages/`, `cv/`
+  and `_config.yml`) at build time through `web/src/lib/record.ts` and `web/src/lib/cv.ts`, so the
+  two sites share one set of sources. `record.ts` finds the root by walking up for `_config.yml`
+  rather than from `import.meta.url`, because Astro relocates the bundle during `astro build`.
+  The Ledger design requires every displayed count and source line to be derived there rather than
+  written by hand — see "Notable configuration" in `web/README.md`.
 - The CV and both sites share `_bibliography/papers.bib`. The Astro rebuild displays every entry,
   including under-review manuscripts and software artifacts; `web/README.md` owns that index's
   filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`
@@ -49,8 +49,8 @@ Jekyll output risks colliding with that route.
   walk-up-for-`_config.yml` only where a whole directory has to be read — or, as
   `announcements.ts` does, where the module also has to run under plain `node` in a self-check,
   which `?raw` cannot.
-- `.github/workflows/web-ci.yml` therefore triggers on `cv/**` and `_bibliography/**` as well as
-  `web/**`: an edit to either can break the Astro build without touching `web/`.
+- `.github/workflows/web-ci.yml` therefore triggers on `cv/**`, `_bibliography/**` and `_posts/**`
+  as well as `web/**`: an edit to any of them can break the Astro build without touching `web/`.
 - `_news/` still exists but **nothing in `web/` reads it**. It is kept only so the live Jekyll
   site's news section keeps working until the cutover, which deletes it — the same parity-first
   holding pattern `_pages/cv.md` was in. Every date it carried now lives on the fact itself, so do

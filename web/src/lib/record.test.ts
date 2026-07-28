@@ -166,6 +166,15 @@ for (const item of feed.items) {
   );
 }
 
+const linkedPublication = bib.entries.find((entry) => entry.link?.field === 'doi')!;
+const linkedAnnouncement = feed.items.find(
+  (item) => item.source === `${SOURCES.bibliography} (${linkedPublication.key})`,
+)!;
+assert.ok(
+  linkedAnnouncement.html.includes(`href="${linkedPublication.link!.href}"`),
+  `${linkedPublication.key}: resolved publication link did not reach its announcement`,
+);
+
 // Newest first, and the two same-day service announcements keep the order their
 // harvested times give them: IJCAI 2025 at 16:00 above EAAI at 10:00.
 for (let i = 1; i < feed.items.length; i++) {
@@ -178,6 +187,18 @@ const sameDay = feed.items.filter((item) => item.stamp.startsWith('2025-01-13'))
 assert.equal(sameDay.length, 3, `expected 3 announcements on 2025-01-13, got ${sameDay.length}`);
 assert.match(sameDay[0].text, /International Joint Conference/, 'IJCAI 2025 lost its place');
 assert.match(sameDay[1].text, /Engineering Applications/, 'EAAI lost its place');
+
+// Sorting follows the instant, but display follows the calendar date written in
+// the source stamp even when its offset puts that instant on the previous UTC day.
+const offsetStamp = '2025-01-01T00:30:00+02:00';
+const offsetAnnouncement = {
+  ...sameDay[0],
+  stamp: offsetStamp,
+  at: new Date(offsetStamp),
+  precision: 'minute' as const,
+};
+assert.equal(offsetAnnouncement.at.toISOString().slice(0, 10), '2024-12-31');
+assert.equal(formatStamp(offsetAnnouncement), '1 Jan 2025');
 
 // Facts are escaped on the way into the markdown templates and unescaped on the
 // way out, so a venue containing markup characters arrives intact.
