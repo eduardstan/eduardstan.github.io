@@ -40,7 +40,11 @@ const STRANDS: Omit<Strand, 'absent'>[] = [
   },
   {
     title: 'Agentic AI',
-    body: 'Systems that plan and act, not only predict. Taught at Bicocca, and continuous with earlier formal-methods work on strategic reasoning and synthesis for multi-agent systems.',
+    // Captain-approved wording, 2026-07-28. He rejected the earlier draft that
+    // called this strand "continuous with" the 2020 multi-agent synthesis
+    // project, because the CV does not draw that link. Do not reintroduce that
+    // framing here or anywhere else on the site.
+    body: 'Systems that plan and act, not only predict. Taught rather than published so far: it runs through two Bicocca courses, and the nearest work in the record is on strategic reasoning and automated synthesis for multi-agent systems.',
     evidence: ['cv/cv.yaml'],
   },
 ];
