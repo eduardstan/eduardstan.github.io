@@ -33,6 +33,7 @@ test("service details recompose sections, year ranges and metrics", () => {
       venue: "Frontiers in Artificial Intelligence Journal",
       section: "Pattern Recognition Section",
       metric: "IF: 4.7, Q2",
+      announced: "2025-03-03T10:00:00+02:00",
     }),
     "Frontiers in Artificial Intelligence Journal, Pattern Recognition Section **[IF: 4.7, Q2]**"
   );

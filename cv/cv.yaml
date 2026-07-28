@@ -228,9 +228,9 @@ teaching:
 # -----------------------------------------------------------------------------
 # Editorial, Reviewing & Conference Service
 #
-# `years` records each conference edition separately so the website can attach
-# an optional ISO `announced` date. The generator folds consecutive editions
-# back into the compact range printed in the CV.
+# `announced` timestamps service without editions. `years` records each
+# conference edition separately and may carry its own `announced` timestamp.
+# The generator folds consecutive editions back into the compact CV range.
 # -----------------------------------------------------------------------------
 service:
   - role: Associate Editor
@@ -238,6 +238,7 @@ service:
     metric: "IF: 6.5, Q1"
     url: https://www.sciencedirect.com/journal/neurocomputing
     rank_url: https://www.scimagojr.com/journalsearch.php?q=24807
+    announced: 2025-10-26T10:00:00+02:00
     dates: Oct 2025–Present
 
   - role: Associate Editor
@@ -246,6 +247,7 @@ service:
     metric: "IF: 4.7, Q2"
     url: https://www.frontiersin.org/journals/artificial-intelligence/sections/pattern-recognition
     rank_url: https://www.scimagojr.com/journalsearch.php?q=21101062817&tip=sid&clean=0
+    announced: 2025-03-03T10:00:00+02:00
     dates: Mar 2024–Present
     items:
       - >-
@@ -327,12 +329,14 @@ service:
     metric: "IF: 8.0; Q1"
     url: https://www.sciencedirect.com/journal/engineering-applications-of-artificial-intelligence
     rank_url: https://www.scimagojr.com/journalsearch.php?q=24182&tip=sid&clean=0
+    announced: 2025-01-13T10:00:00+02:00
 
   - role: Reviewer
     venue: IEEE Journal of Biomedical and Health Informatics
     metric: "IF: 6.7; Q1"
     url: https://www.embs.org/jbhi/
     rank_url: https://www.scimagojr.com/journalsearch.php?q=21100256982&tip=sid&clean=0
+    announced: 2024-08-21T10:00:00+02:00
 
   - role: Reviewer
     venue: AI Access Foundation Journal of Artificial Intelligence Research
