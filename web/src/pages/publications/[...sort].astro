@@ -201,16 +201,22 @@ const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.y
               </Record>
             </div>
             <div class="acts">
-              {
-                entry.link && (
-                  <a class="go" href={entry.link.href}>
-                    {entry.link.label} ↗
-                  </a>
-                )
-              }
               <span class="more" aria-hidden="true" />
             </div>
           </summary>
+          {
+            /* Interactive descendants are not permitted inside <summary>.
+               Keeping the real link beside it preserves the whole summary as
+               the row's open/close control without making the link unreliable
+               for keyboard and assistive-technology users. */
+          }
+          {
+            entry.link && (
+              <a class="go" href={entry.link.href}>
+                {entry.link.label} ↗
+              </a>
+            )
+          }
           <div class="reveal">
             {entry.abstract && <p class="abstract">{entry.abstract}</p>}
             <dl>

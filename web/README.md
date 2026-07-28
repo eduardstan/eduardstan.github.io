@@ -112,9 +112,11 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   outlives a publisher's URL scheme, and DBLP's `url` is usually that same doi.org address.
   `html` and `pdf` follow al-folio's own rule for them (`_layouts/bib.liquid`) — an address
   containing `://` is used as it stands, anything else names a file under `/assets/`. An
-  entry with none of the four renders no link rather than a dead one; the grid track is laid
-  out either way. URLs and DOIs go through `deLatexUrl`, **not** `deLatex`: the prose reader
-  rewrites `--` as an en dash, and `paper\_29.pdf` is a real filename in this bibliography.
+  entry with none of the four renders no link rather than a dead one. The link is a sibling
+  of the `<summary>`, visually placed beside it: interactive content is not nested inside
+  the summary, so the full row remains a dependable open/close control. URLs and DOIs go
+  through `deLatexUrl`, **not** `deLatex`: the prose reader rewrites `--` as an en dash, and
+  `paper\_29.pdf` is a real filename in this bibliography.
 - **Abstracts are per-entry and unconditional.** The reveal renders `entry.abstract` when
   the entry has one and says so when it does not, so adding an `abstract` field to a BibTeX
   entry is the only action needed for it to appear. There is no flag and no list to update.
