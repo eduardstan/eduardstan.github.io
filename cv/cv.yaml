@@ -120,6 +120,9 @@ appointments:
     organisation: University of Milano-Bicocca (Intelligent Sensing Laboratory—ISLab)
     url: https://islab.disco.unimib.it/
     dates: Jul 2024–Present
+    # The day the post was announced. `dates` above is month-precision, so this
+    # is a fact the CV does not otherwise carry. The generator ignores it.
+    announced: 2024-07-16T10:00:00+02:00
     items:
       - Teaching (Instructor of record), thesis supervision, and mentoring activities.
       - >-
