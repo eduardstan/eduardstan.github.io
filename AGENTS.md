@@ -14,11 +14,9 @@ guards are: `web/` and `node_modules` in the `exclude:` list of `_config.yml`, a
 `.github/workflows/web-ci.yml` being build-only (`permissions: contents: read`, no deploy step).
 When changing either site, verify the other still builds.
 
-That same `exclude:` list carries a `cv/` entry, and `cv/` now exists: it holds the CV sources and
-generated output, which must never appear on the published site. **Do not delete it as dead
-configuration** — removing it is what would publish that material. It is only a publication guard,
-though: it does not keep anything out of the git repository, so whatever under `cv/` must never be
-committed is a plain `.gitignore` concern, separate from this entry.
+That same `exclude:` list carries a `cv/` entry, and `cv/` now exists. **Do not delete it as dead
+configuration**: `/cv/` is already a page permalink, so copying the root source directory into the
+Jekyll output risks colliding with that route.
 
 ## Sharp edges
 
@@ -47,10 +45,8 @@ committed is a plain `.gitignore` concern, separate from this entry.
 
 ## This repository is public
 
-Never commit personal contact details. The captain's mobile number and personal
-email live only in `cv/private.yaml`, which is gitignored (together with
-`cv/generated/cv-contact-private.tex`). Public artefacts carry institutional
-contact only. `cv/private.example.yaml` documents the shape.
+The captain's mobile number must not be committed or included in the CV. The personal Gmail
+address is approved for publication.
 
 ## CV pipeline
 
@@ -60,15 +56,12 @@ are generated from it:
 | File                       | Owns                                             |
 | -------------------------- | ------------------------------------------------ |
 | `cv/cv.yaml`               | all CV facts - the single source of truth        |
-| `cv/private.yaml`          | private contact fields only; gitignored          |
 | `_bibliography/papers.bib` | all publications, canonical for CV _and_ website |
 | `cv/pres.bib`              | talks and presentations                          |
 | `cv/cv.tex`                | layout and styling only                          |
 
 - `node scripts/build-cv-data.mjs` renders `cv/cv.yaml` into
-  `cv/generated/cv-data.tex` (committed, public). It always writes the gitignored
-  private contact overlay too - the real one when `cv/private.yaml` exists, a
-  no-op otherwise, so latexmk always has the dependency on record.
+  `cv/generated/cv-data.tex` (committed, public).
 - `node scripts/build-cv-data.mjs --check` fails when the committed generated
   file is stale; CI runs it, so never hand-edit `cv/generated/`.
 - Build with **xelatex** - `latexmk -xelatex -cd cv/cv.tex`. pdflatex fails:

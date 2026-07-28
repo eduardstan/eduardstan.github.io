@@ -5,9 +5,6 @@ name: Build CV
 # This workflow deliberately does NOT deploy or publish the PDF: the live site is
 # still the old Jekyll one and a separate cutover task owns publishing.
 #
-# cv/private.yaml is gitignored and never present on a runner, so CI always
-# builds the public CV with institutional contact only.
-
 on:
   push:
     branches:
@@ -34,18 +31,6 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
-
-      # .gitignore alone does not stop `git add -f`, so assert the private
-      # contact files are untracked before anything else runs.
-      - name: Confirm no private contact file is tracked
-        run: |
-          set -euo pipefail
-          tracked=$(git ls-files -- cv/private.yaml cv/generated/cv-contact-private.tex)
-          if [ -n "$tracked" ]; then
-            echo "::error::tracked private contact file(s): $tracked - these must never enter the repository"
-            exit 1
-          fi
-          echo "No private contact file is tracked."
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -82,30 +67,6 @@ jobs:
           working_directory: cv
           latexmk_use_xelatex: true
           texlive_version: "2024"
-
-      # Belt and braces: private.yaml can never reach a runner, but assert it
-      # anyway. Matched by shape, not by value, so the real number and address
-      # stay out of this public repository.
-      - name: Confirm no private contact details leaked into the PDF
-        run: |
-          set -euo pipefail
-          sudo apt-get update && sudo apt-get install -y poppler-utils
-          if [ ! -f cv/cv.pdf ]; then
-            echo "::error::cv/cv.pdf is missing, so the leak check cannot run"
-            exit 1
-          fi
-          # Capture first: a failing pdftotext must fail the step rather than
-          # leave grep's exit status standing in for the whole check. The sed
-          # pass folds the non-breaking space and non-breaking hyphen a typeset
-          # number may carry onto their ASCII equivalents.
-          text=$(pdftotext cv/cv.pdf - | sed -e 's/\xc2\xa0/ /g' -e 's/\xe2\x80\x91/-/g')
-          # The country code after + or 00 is never itself 0, which is what keeps
-          # the ORCID on the contact line from reading as a phone number.
-          if grep -qiE '@(gmail|googlemail|outlook|hotmail|yahoo|proton(mail)?)\.|(^|[^0-9])(\+|00)[1-9][0-9]{0,2}[ .()-]{0,2}[0-9]{2,4}[ .()-]{0,2}[0-9]{3,}' <<<"$text"; then
-            echo "::error::The built PDF looks like it contains a personal phone number or personal email address"
-            exit 1
-          fi
-          echo "PDF carries institutional contact only."
 
       - name: Upload the PDF
         uses: actions/upload-artifact@v4

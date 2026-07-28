@@ -6,11 +6,7 @@
 //   node scripts/build-cv-data.mjs --check    fail if the committed file is stale
 //
 // Outputs
-//   cv/generated/cv-data.tex             public, COMMITTED, checked for staleness
-//   cv/generated/cv-contact-private.tex  private overlay, gitignored, ALWAYS
-//                                        written - the real overlay when
-//                                        cv/private.yaml is present, a no-op
-//                                        otherwise (see main())
+//   cv/generated/cv-data.tex  COMMITTED, checked for staleness
 //
 // cv.tex owns layout; this script owns nothing but the mapping from facts to
 // content macros. It never invents, reorders or rewords anything in cv.yaml.
@@ -23,10 +19,8 @@ import { load } from "js-yaml";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CV_YAML = join(ROOT, "cv", "cv.yaml");
-const PRIVATE_YAML = join(ROOT, "cv", "private.yaml");
 const OUT_DIR = join(ROOT, "cv", "generated");
 const OUT_PUBLIC = join(OUT_DIR, "cv-data.tex");
-const OUT_PRIVATE = join(OUT_DIR, "cv-contact-private.tex");
 
 // -----------------------------------------------------------------------------
 // LaTeX escaping
@@ -180,15 +174,10 @@ function macro(name, body) {
 
 const mailto = (address) => `\\href{mailto:${escapeUrl(address)}}{${escapeLatex(address)}}`;
 
-/**
- * Build the header contact line. `priv` is the parsed private.yaml contact block
- * or null; when null the mobile and personal address are simply not emitted.
- */
-function contactLine(contact, priv) {
+/** Build the header contact line from the public contact facts in cv.yaml. */
+function contactLine(contact) {
   const parts = [];
-  if (priv?.mobile) parts.push(escapeLatex(priv.mobile));
   if (contact.email) parts.push(mailto(contact.email));
-  if (priv?.personal_email) parts.push(mailto(priv.personal_email));
   if (contact.website) {
     parts.push(`\\href{${escapeUrl(contact.website.url)}}{${escapeLatex(contact.website.label)}}`);
   }
@@ -229,7 +218,7 @@ function renderPublic(cv) {
   const t = cv.teaching;
   const blocks = [
     macro("cvName", escapeLatex(cv.person.name)),
-    macro("cvContactLine", contactLine(cv.contact, null)),
+    macro("cvContactLine", contactLine(cv.contact)),
     macro("cvProfilesLine", profilesLine(cv.contact.profiles)),
     macro("cvAffiliation", cv.contact.affiliation.map(escapeLatex).join(" \\\\\n")),
 
@@ -274,36 +263,6 @@ function renderPublic(cv) {
   return `${BANNER.join("\n")}\n${blocks.join("\n\n")}\n`;
 }
 
-function renderPrivateOverlay(cv, priv) {
-  return [
-    "% =============================================================================",
-    "% GENERATED FILE - DO NOT EDIT, DO NOT COMMIT.",
-    "%",
-    "% Private contact overlay, produced from cv/private.yaml. Gitignored.",
-    "% cv.tex inputs it only if it exists, so a checkout without cv/private.yaml",
-    "% builds the public CV with institutional contact only.",
-    "% =============================================================================",
-    "",
-    `\\renewcommand{\\cvContactLine}{%\n${contactLine(cv.contact, priv)}%\n}`,
-    "",
-  ].join("\n");
-}
-
-/** The same file with nothing in it, written when there is no cv/private.yaml. */
-function renderEmptyOverlay() {
-  return [
-    "% =============================================================================",
-    "% GENERATED FILE - DO NOT EDIT, DO NOT COMMIT.",
-    "%",
-    "% No cv/private.yaml: this overlay deliberately defines nothing, so the CV keeps",
-    "% the institutional contact line. It is written rather than deleted so latexmk",
-    "% always has this dependency on record and rebuilds when the private contact is",
-    "% added or removed.",
-    "% =============================================================================",
-    "",
-  ].join("\n");
-}
-
 // -----------------------------------------------------------------------------
 // Main
 // -----------------------------------------------------------------------------
@@ -335,20 +294,6 @@ function main() {
   mkdirSync(OUT_DIR, { recursive: true });
   writeFileSync(OUT_PUBLIC, publicTex);
   console.log(`wrote ${rel(OUT_PUBLIC)}`);
-
-  // Always write the overlay - the real one, or a no-op that defines nothing.
-  // Deleting it instead would leave latexmk with no dependency to notice (a
-  // failed \InputIfFileExists records none), so removing cv/private.yaml would
-  // report "All targets are up-to-date" and keep a PDF that still carries the
-  // private contact.
-  if (existsSync(PRIVATE_YAML)) {
-    const priv = loadYaml(PRIVATE_YAML)?.contact ?? {};
-    writeFileSync(OUT_PRIVATE, renderPrivateOverlay(cv, priv));
-    console.log(`wrote ${rel(OUT_PRIVATE)} (private contact merged in)`);
-  } else {
-    writeFileSync(OUT_PRIVATE, renderEmptyOverlay());
-    console.log(`wrote ${rel(OUT_PRIVATE)} (no cv/private.yaml - public contact only)`);
-  }
 }
 
 export { renderInline };
