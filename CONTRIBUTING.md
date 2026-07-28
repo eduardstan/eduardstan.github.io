@@ -10,6 +10,13 @@ If you would like to implement a new feature or a bug, please make sure you (or 
 
 Note that since [#2048](https://github.com/alshedivat/al-folio/pull/2048) al-folio uses the [prettier formatter](https://prettier.io/) for its code, meaning all new submitted code must conform to its standard. If you don't have `prettier` installed for your setup and the `prettier` code check fails when submitting a PR, you can check the referred failed action in our repo. In that action there will be an artifact with an HTML diff showing the needed changes.
 
+CI installs the `prettier` version pinned in `package.json`/`package-lock.json` with `npm ci`, so run the same two commands locally to reproduce its result exactly — a globally installed `prettier` of a different version may disagree:
+
+```bash
+npm ci
+npx prettier . --check   # add --write to fix
+```
+
 ## Issues
 
 We use GitHub issues to track bugs and feature requests.

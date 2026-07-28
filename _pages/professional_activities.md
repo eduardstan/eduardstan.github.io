@@ -2,23 +2,25 @@
 layout: page
 permalink: /professional_activities/
 title: professional activities
-description: 
+description:
 nav: true
 nav_order: 5
 ---
 
-## Editorials 
+## Editorials
+
 - **Neurocomputing** ([Q1 in Artificial Intelligence](https://www.scimagojr.com/journalsearch.php?q=24807))
   - **Associate Editor** (2025--)
 - **Frontiers in Artificial Intelligence** ([Q2 in Artificial Intelligence](https://www.scimagojr.com/journalsearch.php?q=21101062817&tip=sid&clean=0))
   - **Associate Editor** (2025--)
 
 ## Conference Committees
-- **Association of the Advancement of Artificial Intelligence (AAAI) Conference on Artificial Intelligence** ([A*](https://portal.core.edu.au/conf-ranks/1629/))
+
+- **Association of the Advancement of Artificial Intelligence (AAAI) Conference on Artificial Intelligence** ([A\*](https://portal.core.edu.au/conf-ranks/1629/))
   - **Program Committee Member** (AAAI2024, AAAI2025, AAAI2026)
-- **International Conference on Learning Representations (ICLR)** ([A*](https://portal.core.edu.au/conf-ranks/2273/)) 
+- **International Conference on Learning Representations (ICLR)** ([A\*](https://portal.core.edu.au/conf-ranks/2273/))
   - **Reviewer** (ICLR2025, ICLR2026)
-- **International Joint Conference on Artificial Intelligence (IJCAI)** ([A*](https://portal.core.edu.au/conf-ranks/1313/))
+- **International Joint Conference on Artificial Intelligence (IJCAI)** ([A\*](https://portal.core.edu.au/conf-ranks/1313/))
   - **Program Committee Member** (IJCAI2025)
 - **European Conference on Artificial Intelligence** ([A](https://portal.core.edu.au/conf-ranks/473/))
   - **Program Committee Member** (ECAI2025)
@@ -28,6 +30,7 @@ nav_order: 5
   - **Area Chair** (ICASSP2026)
 
 ## Journal Reviewing
+
 - **Journal of Artificial Intelligence Research** ([Q1 in Artificial Intelligence](https://www.scimagojr.com/journalsearch.php?q=24330&tip=sid))
 - **IEEE Journal of Biomedical and Health Informatics** ([Q1 in Health Informatics](https://www.scimagojr.com/journalsearch.php?q=21100256982&tip=sid&clean=0))
 - **Engineering Applications of Artificial Intelligence** ([Q1 in Artificial Intelligence](https://www.scimagojr.com/journalsearch.php?q=24182&tip=sid&clean=0))
