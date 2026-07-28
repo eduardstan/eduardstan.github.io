@@ -32,7 +32,11 @@ const counts = [
 ];
 
 const dateFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'short', timeZone: 'UTC' });
-const shown = feed.items.slice(0, 12);
+// The whole feed, not a slice. A truncated column would need a "see all" link,
+// and the route that would go to still renders the foundation's sample
+// collection — so it would promise a page that does not exist yet. A broadsheet
+// runs its columns to unequal lengths anyway.
+const shown = feed.items;
 const excluded = feed.defects.filter((defect) => defect.excluded);
 const inconsistent = feed.defects.filter((defect) => !defect.excluded);
 ---
@@ -206,7 +210,6 @@ const inconsistent = feed.defects.filter((defect) => !defect.excluded);
           ))
         }
       </ul>
-      <p><a class="label" href="/news/">All {feed.items.length} items →</a></p>
       <Record>
         <p>
           <b>{SOURCES.news}/*/*.md</b> — {feed.fileCount} files read, {feed.items.length}{' '}
