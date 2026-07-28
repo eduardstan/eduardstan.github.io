@@ -260,7 +260,7 @@ function toPublication(
   // and released artifacts in `publisher`, so both are fallbacks rather than
   // special cases — an entry with neither simply has no venue line.
   const venue = deLatex(
-    fields.journal ?? fields.booktitle ?? fields.school ?? fields.note ?? fields.publisher ?? '',
+    fields.journal ?? fields.booktitle ?? fields.school ?? fields.publisher ?? fields.note ?? '',
   );
   const publisher = fields.publisher && deLatex(fields.publisher);
   const detail = [

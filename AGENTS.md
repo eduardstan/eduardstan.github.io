@@ -40,12 +40,10 @@ committed is a plain `.gitignore` concern, separate from this entry.
   `import.meta.url`, because Astro relocates the bundle during `astro build`. The Ledger design
   requires every displayed count and source line to be derived there rather than written by hand —
   see "Notable configuration" in `web/README.md`.
-- The bibliography is shared by the CV and the site, and **nothing filters it**: the captain's rule
-  is that the site shows everything the CV's bibliography carries, under-review manuscripts and
-  software artifacts included. `cv/cv.tex` names the categories via biblatex `defbibfilter`, and
-  `web/src/lib/record.ts` labels entries from the same entry types and keywords, so the two stay in
-  step. It also holds both BibTeX name forms (`First Last` and `Last, First`) — reading the second
-  as the first silently renames authors.
+- The CV and both sites share `_bibliography/papers.bib`. The Astro rebuild displays every entry,
+  including under-review manuscripts and software artifacts; `web/README.md` owns that index's
+  filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`
+  BibTeX name forms; reading the second as the first silently renames authors.
 
 ## This repository is public
 
@@ -77,10 +75,10 @@ are generated from it:
   `academicons` needs TU encoding.
 - The prose markup allowed in `cv.yaml` (`**bold**`, `_italic_`, `[text](url)`,
   and the typographic Unicode characters) is documented at the top of that file.
-- `_bibliography/papers.bib` carries al-folio rendering fields (`abstract`,
+- `_bibliography/papers.bib` may carry al-folio rendering fields (`abstract`,
   `pdf`, `html`, `selected`, ...) for the website. `cv.tex` strips them via
-  `\DeclareSourcemap`, because abstracts contain raw `%` that would break the
-  LaTeX pass. Do not "fix" the .bib to suit LaTeX.
+  `\DeclareSourcemap` when present, because abstracts can contain raw `%` that
+  would break the LaTeX pass. Do not "fix" the .bib to suit LaTeX.
 - `cv.tex` leaves one `\small{` group deliberately unclosed after the Short Bio,
   exactly as the original hand-written CV did. Closing it reflows the whole
   document. There is a comment marking it.
