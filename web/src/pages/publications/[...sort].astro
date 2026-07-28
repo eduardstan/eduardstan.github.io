@@ -160,63 +160,117 @@ const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.y
     </div>
     {
       entries.map((entry, index) => (
-        <details class="entry">
-          <summary>
-            <span class="no">{pad(index)}</span>
-            <span class="yr">{entry.year > 0 ? entry.year : '—'}</span>
-            <span class="ty">{entry.kind}</span>
-            <div class="body">
-              <h2 class="t">{entry.title}</h2>
-              <p class="au">
-                {entry.authors.map((author, position) => (
+        <div class="entry-row">
+          <details class="entry">
+            <summary>
+              <span class="no">{pad(index)}</span>
+              <span class="yr">{entry.year > 0 ? entry.year : '—'}</span>
+              <span class="ty">{entry.kind}</span>
+              <div class="body">
+                <h2 class="t">{entry.title}</h2>
+                <p class="au">
+                  {entry.authors.map((author, position) => (
+                    <>
+                      {position > 0 && ', '}
+                      {isHim(author) ? <b>{author}</b> : author}
+                    </>
+                  ))}
+                </p>
+                <p class="vn">{entry.citation}</p>
+                {
+                  /* The citation above is a rendered claim like any other, so it
+                     opens to the record it was assembled from: the entry it came
+                     from and the fields that were present in it. Both are read
+                     from the .bib at build time — the list of fields is the list
+                     the assembler actually used. */
+                }
+                <Record>
+                  <p>
+                    <b>{SOURCES.bibliography}</b> — @{entry.type}
+                    {'{'}
+                    {entry.key}
+                    {'}'}; venue from <b>{entry.venueField ?? 'no venue field'}</b>, citation from{' '}
+                    {entry.citationFields.join(', ')};{' '}
+                    {entry.link ? (
+                      <>
+                        link from <b>{entry.link.field}</b>
+                      </>
+                    ) : (
+                      'no doi, url, html or pdf field, so no link'
+                    )}.
+                  </p>
+                </Record>
+              </div>
+              <div class="acts">
+                <span class="more" aria-hidden="true" />
+              </div>
+            </summary>
+            <div class="reveal">
+              {entry.abstract && <p class="abstract">{entry.abstract}</p>}
+              <dl>
+                {entry.detail && (
                   <>
-                    {position > 0 && ', '}
-                    {isHim(author) ? <b>{author}</b> : author}
+                    <dt>Record</dt>
+                    <dd>{entry.detail}</dd>
                   </>
-                ))}
-              </p>
-              <p class="vn">{entry.venue}</p>
+                )}
+                {entry.doi && (
+                  <>
+                    <dt>DOI</dt>
+                    <dd>{entry.doi}</dd>
+                  </>
+                )}
+                {entry.link && entry.link.field !== 'doi' && (
+                  <>
+                    <dt>{entry.link.field}</dt>
+                    <dd>{entry.link.href}</dd>
+                  </>
+                )}
+                {!entry.link && (
+                  <>
+                    <dt>Link</dt>
+                    <dd>No doi, url, html or pdf field in the BibTeX entry.</dd>
+                  </>
+                )}
+                {!entry.abstract && (
+                  <>
+                    <dt>Abstract</dt>
+                    <dd>No abstract in the BibTeX entry.</dd>
+                  </>
+                )}
+              </dl>
+              <div class="bibtex">
+                <p class="bibtex-head">
+                  <span class="label">BibTeX</span>
+                  <button type="button" class="chip label copy" hidden aria-live="polite">
+                    Copy
+                  </button>
+                </p>
+                <pre>{entry.raw}</pre>
+              </div>
+              {entry.link && (
+                <a class="open" href={entry.link.href}>
+                  Open the {entry.link.label === 'DOI' ? 'paper by its DOI' : 'paper'} →
+                </a>
+              )}
             </div>
-            <span class="more" aria-hidden="true" />
-          </summary>
-          <div class="reveal">
-            {entry.abstract && <p class="abstract">{entry.abstract}</p>}
-            <dl>
-              {entry.detail && (
-                <>
-                  <dt>Record</dt>
-                  <dd>{entry.detail}</dd>
-                </>
-              )}
-              {entry.doi && (
-                <>
-                  <dt>DOI</dt>
-                  <dd>{entry.doi}</dd>
-                </>
-              )}
-              {!entry.abstract && (
-                <>
-                  <dt>Abstract</dt>
-                  <dd>No abstract in the BibTeX entry.</dd>
-                </>
-              )}
-            </dl>
-            <div class="bibtex">
-              <p class="bibtex-head">
-                <span class="label">BibTeX</span>
-                <button type="button" class="chip label copy" hidden aria-live="polite">
-                  Copy
-                </button>
-              </p>
-              <pre>{entry.raw}</pre>
-            </div>
-            {entry.url && (
-              <a class="open" href={entry.url}>
-                Open the paper →
-              </a>
-            )}
-          </div>
-        </details>
+          </details>
+        {
+          /* Outside the <details>, not inside <summary>: a link inside the
+             summary is an interactive descendant of the row's own control, and
+             anything inside the details but outside the summary is in
+             `::details-content` and so is not painted while the row is closed.
+             A sibling is the only place it is both reachable and visible
+             collapsed; it is positioned over the row's right edge. */
+        }
+        {
+          entry.link && (
+            <a class="go" href={entry.link.href}>
+              {entry.link.label} ↗
+            </a>
+          )
+        }
+        </div>
       ))
     }
   </div>
