@@ -77,10 +77,10 @@ are generated from it:
   `academicons` needs TU encoding.
 - The prose markup allowed in `cv.yaml` (`**bold**`, `_italic_`, `[text](url)`,
   and the typographic Unicode characters) is documented at the top of that file.
-- `_bibliography/papers.bib` carries al-folio rendering fields (`abstract`,
+- `_bibliography/papers.bib` may carry al-folio rendering fields (`abstract`,
   `pdf`, `html`, `selected`, ...) for the website. `cv.tex` strips them via
-  `\DeclareSourcemap`, because abstracts contain raw `%` that would break the
-  LaTeX pass. Do not "fix" the .bib to suit LaTeX.
+  `\DeclareSourcemap` when present, because abstracts can contain raw `%` that
+  would break the LaTeX pass. Do not "fix" the .bib to suit LaTeX.
 - `cv.tex` leaves one `\small{` group deliberately unclosed after the Short Bio,
   exactly as the original hand-written CV did. Closing it reflows the whole
   document. There is a comment marking it.
