@@ -78,4 +78,7 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
 ## Not done yet
 
 Visual design, content migration, the bibliography renderer, the CV pipeline and
-deployment. The pages under `src/pages/` are structural placeholders that prove routing.
+deployment. The home page and the `/cv/`, `/publications/`, `/professional_activities/`
+and `/repositories/` routes are structural placeholders that only prove routing; the
+blog, news and projects routes are wired to their collections but still render the
+sample entries.
