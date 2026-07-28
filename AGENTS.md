@@ -46,9 +46,38 @@ Jekyll output risks colliding with that route.
   rewrite it as `readFileSync(new URL('../../../cv/cv.yaml', import.meta.url))`: that builds and
   then fails at prerender with `ENOENT`, for the same relocation reason as the bullet above.
   `?raw` inlines the file at build time, so there is no path to resolve; use `record.ts`'s
-  walk-up-for-`_config.yml` only where a whole directory has to be read.
+  walk-up-for-`_config.yml` only where a whole directory has to be read — or, as
+  `announcements.ts` does, where the module also has to run under plain `node` in a self-check,
+  which `?raw` cannot.
 - `.github/workflows/web-ci.yml` therefore triggers on `cv/**` and `_bibliography/**` as well as
   `web/**`: an edit to either can break the Astro build without touching `web/`.
+- There is no `_news/` directory. Announcements are **generated** from the facts they announce —
+  `web/src/lib/announcements.ts` owns the sources and the dating rule. Do not reintroduce a second,
+  hand-written record of a fact that already lives in `cv.yaml` or a `.bib` file. The root Jekyll
+  site has no generator, so its news section renders empty; see "Announcements" below.
+- Text spliced into a generated announcement must go through that module's `md()` escaper: the
+  bibliography really contains `OVERLAY@AI*IA 2019` and DOIs ending `…-7_26`, which would otherwise
+  be read as markdown emphasis. `cv/pres.bib` is LaTeX like `papers.bib` is, so its fields need
+  `deLatex()` first.
+
+## Announcements
+
+Every announcement is derived from the fact it announces; there is no separate news content. A
+fact is announced on the date it already carries — a talk's ISO `date`, a post's front-matter
+`date`, an award's month, a paper's `year`. An `announced:` key is written **only** where the
+announcement demonstrably happened on a date the fact does not otherwise state (harvested from the
+deleted `_news/`); it is optional and additive everywhere, and `scripts/build-cv-data.mjs` ignores
+it, so adding one must leave `cv/generated/cv-data.tex` byte-identical — check with `--check`.
+
+Dates are shown at the precision their source states and no finer: an item whose source records
+only a year renders as a year. Never widen a date to a day the record does not support. A fact
+with no defensible date is listed in the feed's `undated` array and shown in the provenance block,
+not given an invented one.
+
+**The root Jekyll site has no generator for this**, so `_includes/news.liquid` renders
+"No news so far..." on the home page and at `/news/`. Only the (undeployed) Astro site shows the
+feed. Closing that gap is a captain decision: either the Jekyll site's news section is turned off,
+or the cutover to `web/` lands.
 
 ## This repository is public
 

@@ -47,7 +47,8 @@ export const SOURCES = {
   bibliography: '_bibliography/papers.bib',
   about: '_pages/about.md',
   activities: '_pages/professional_activities.md',
-  news: '_news',
+  talks: 'cv/pres.bib',
+  posts: '_posts',
   config: '_config.yml',
   // Read by `src/lib/cv.ts` through Vite's `?raw`, not by `read()` below: it is
   // named here so there is one registry of where the site's facts come from.
@@ -61,6 +62,28 @@ export const hasSource = (path: string) => existsSync(join(ROOT, path));
 
 /** Repository-relative path, so provenance blocks quote the real location. */
 const repoPath = (absolute: string) => relative(ROOT, absolute);
+
+/** Read a repository-relative file. Exported for `announcements.ts`. */
+export const readSource = read;
+
+/**
+ * Every file under a repository-relative directory, one level of subdirectory
+ * deep, as repository-relative paths. That is the shape both `_posts/` and the
+ * old `_news/` use: a year directory holding dated markdown files.
+ */
+export function listSources(directory: string, extension = '.md'): string[] {
+  const base = join(ROOT, directory);
+  if (!existsSync(base)) return [];
+  const found: string[] = [];
+  for (const entry of readdirSync(base)) {
+    const path = join(base, entry);
+    if (statSync(path).isDirectory()) {
+      for (const file of readdirSync(path))
+        if (file.endsWith(extension)) found.push(repoPath(join(path, file)));
+    } else if (entry.endsWith(extension)) found.push(repoPath(path));
+  }
+  return found.sort();
+}
 
 // ---------------------------------------------------------------- LaTeX ----
 
@@ -83,7 +106,7 @@ const ACCENTS: Record<string, Record<string, string>> = {
   '=': { a: 'ā', e: 'ē', i: 'ī', o: 'ō', u: 'ū' },
 };
 
-function deLatex(value: string): string {
+export function deLatex(value: string): string {
   let out = value.replace(/\s*\n\s*/g, ' ');
   // \'{\i} and \'{i} both mean í; the dotless-i form appears in DBLP records.
   out = out.replace(
@@ -412,11 +435,20 @@ export interface Bibliography {
   years: { first: number; last: number };
 }
 
-let bibliographyCache: Bibliography | undefined;
+export interface BibEntry {
+  type: string;
+  key: string;
+  fields: Record<string, string>;
+  raw: string;
+}
 
-/** Every `@type{key, …}` in a BibTeX source, newest first. */
-export function parseEntries(raw: string): Publication[] {
-  const entries: Publication[] = [];
+/**
+ * Split a BibTeX file into entries. Used for `_bibliography/papers.bib` here and
+ * for `cv/pres.bib` by `announcements.ts`, so the two files are read by one
+ * parser rather than by two that can drift apart.
+ */
+export function parseBib(raw: string): BibEntry[] {
+  const entries: BibEntry[] = [];
   const entryPattern = /^@([a-zA-Z]+)\s*\{\s*([^,]+),/gm;
   let match: RegExpExecArray | null;
   while ((match = entryPattern.exec(raw)) !== null) {
@@ -431,17 +463,24 @@ export function parseEntries(raw: string): Publication[] {
         if (depth === 0) break;
       }
     }
-    const fields = parseFields(raw.slice(start, cursor));
-    const source = raw.slice(match.index, cursor + 1);
-    entries.push(toPublication(match[1].toLowerCase(), match[2].trim(), fields, source));
+    entries.push({
+      type: match[1].toLowerCase(),
+      key: match[2].trim(),
+      fields: parseFields(raw.slice(start, cursor)),
+      raw: raw.slice(match.index, cursor + 1),
+    });
   }
-  entries.sort((a, b) => b.year - a.year || a.title.localeCompare(b.title));
   return entries;
 }
 
+let bibliographyCache: Bibliography | undefined;
+
 export function bibliography(): Bibliography {
   if (bibliographyCache) return bibliographyCache;
-  const entries = parseEntries(read(SOURCES.bibliography));
+  const entries = parseBib(read(SOURCES.bibliography)).map((entry) =>
+    toPublication(entry.type, entry.key, entry.fields, entry.raw),
+  );
+  entries.sort((a, b) => b.year - a.year || a.title.localeCompare(b.title));
 
   const counts = new Map<string, number>();
   for (const entry of entries) counts.set(entry.kind, (counts.get(entry.kind) ?? 0) + 1);
@@ -456,32 +495,7 @@ export function bibliography(): Bibliography {
   return bibliographyCache;
 }
 
-// --------------------------------------------------------------- news ------
-
-export interface NewsItem {
-  source: string;
-  date: Date;
-  /** Body as inline HTML: the markdown emphasis and links the file actually has. */
-  html: string;
-  text: string;
-  /** Derived from the filename slug, so the feed can be scanned by kind. */
-  kind: string;
-}
-
-export interface NewsDefect {
-  source: string;
-  problem: string;
-  /** True when the defect made the item unpublishable, not merely inconsistent. */
-  excluded: boolean;
-}
-
-const KIND_RULES: [RegExp, string][] = [
-  [/paper|accepted|online/, 'Paper'],
-  [/editor/, 'Editorial'],
-  [/position|hired/, 'Appointment'],
-  [/post|manifesto/, 'Writing'],
-  [/pc-|ac-|reviewer|committee|technical/, 'Service'],
-];
+// ---------------------------------------------------------------- prose ----
 
 /** `--` / `---` are the source files' own spelling of en and em dashes. */
 const dashes = (value: string) => value.replace(/---/g, '—').replace(/(?<!-)--(?!-)/g, '–');
@@ -494,8 +508,8 @@ const dashes = (value: string) => value.replace(/---/g, '—').replace(/(?<!-)--
  */
 const unescape = (value: string) => value.replace(/\\([\\`*_{}[\]()#+\-.!"'~<>|])/g, '$1');
 
-/** Markdown emphasis and links, inline only — news bodies are a single line. */
-function inlineHtml(markdown: string): string {
+/** Markdown emphasis and links, inline only — these bodies are a single line. */
+export function inlineHtml(markdown: string): string {
   const escaped = dashes(markdown)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -517,128 +531,13 @@ function inlineHtml(markdown: string): string {
   );
 }
 
-function stripMarkdown(markdown: string): string {
+export function stripMarkdown(markdown: string): string {
   return unescape(
     dashes(markdown)
       .replace(/\[([^\]]+)\]\([^)\s]+\)/g, '$1')
       .replace(/\*\*?([^*]+)\*\*?/g, '$1')
       .replace(/(?<![\w_])__?([^_]+)__?(?![\w_])/g, '$1'),
   ).trim();
-}
-
-export interface NewsFeed {
-  source: string;
-  items: NewsItem[];
-  defects: NewsDefect[];
-  fileCount: number;
-}
-
-let newsCache: NewsFeed | undefined;
-
-export function news(): NewsFeed {
-  if (newsCache) return newsCache;
-  const base = join(ROOT, SOURCES.news);
-  const files: string[] = [];
-  for (const year of readdirSync(base)) {
-    const directory = join(base, year);
-    if (!statSync(directory).isDirectory()) continue;
-    for (const file of readdirSync(directory))
-      if (file.endsWith('.md')) files.push(join(directory, file));
-  }
-  files.sort();
-
-  const items: NewsItem[] = [];
-  const defects: NewsDefect[] = [];
-  const seen = new Map<string, string>();
-  for (const file of files) {
-    const raw = readFileSync(file, 'utf8');
-    const source = repoPath(file);
-    const frontmatter = /^---\n([\s\S]*?)\n---\n?/.exec(raw);
-    const dateField = frontmatter && /^date:\s*(\d{4}-\d{2}-\d{2})/m.exec(frontmatter[1]);
-    if (!dateField) {
-      defects.push({
-        source,
-        problem: 'no `date` in the front matter; excluded from the feed',
-        excluded: true,
-      });
-      continue;
-    }
-    const body = raw.slice(frontmatter[0].length).trim();
-    const text = stripMarkdown(body);
-
-    // Two files carrying the same body announce one thing, not two. The copy is
-    // dropped, and the item its own filename names is therefore missing from the
-    // site — which is worth saying out loud rather than quietly rendering twice.
-    const duplicateOf = seen.get(normalise(text));
-    if (duplicateOf) {
-      defects.push({
-        source,
-        problem: `carries the body and date of ${duplicateOf}, so the item this filename names is not announced anywhere; excluded from the feed`,
-        excluded: true,
-      });
-      continue;
-    }
-    seen.set(normalise(text), source);
-
-    // Files are named MM-DD-… inside a YYYY directory, so the name is a second
-    // record of the date. A disagreement is reported, and the front matter —
-    // the field the site has always sorted by — wins.
-    const named = /^(\d{2})-(\d{2})-/.exec(file.split('/').pop()!);
-    if (named && `${named[1]}-${named[2]}` !== dateField[1].slice(5)) {
-      defects.push({
-        source,
-        problem: `filename says ${named[1]}-${named[2]}, front matter says ${dateField[1].slice(
-          5,
-        )}; dated from the front matter`,
-        excluded: false,
-      });
-    }
-    const kind = KIND_RULES.find(([pattern]) => pattern.test(source))?.[1] ?? 'Note';
-    items.push({
-      source,
-      date: new Date(`${dateField[1]}T00:00:00Z`),
-      html: inlineHtml(body),
-      text,
-      kind,
-    });
-  }
-  items.sort((a, b) => b.date.valueOf() - a.date.valueOf());
-  newsCache = { source: `${SOURCES.news}/*/*.md`, items, defects, fileCount: files.length };
-  return newsCache;
-}
-
-// ------------------------------------------------------------- the gap -----
-
-export interface Gap {
-  title: string;
-  announced: Date;
-  source: string;
-}
-
-const normalise = (value: string) =>
-  value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-
-/**
- * Papers the news feed announces as accepted that have no BibTeX entry. This is
- * the honest version of "the bibliography is behind": it is a set difference
- * between two files in this repository, so it shrinks by itself as entries are
- * added and disappears entirely when the bibliography catches up. Nothing states
- * a gap that is not currently true.
- */
-export function bibliographyGaps(): Gap[] {
-  const titles = new Set(bibliography().entries.map((entry) => normalise(entry.title)));
-  const gaps: Gap[] = [];
-  for (const item of news().items) {
-    const claim = /^(.+?)\s+has been accepted/.exec(item.text);
-    if (!claim) continue;
-    const title = claim[1];
-    if (titles.has(normalise(title))) continue;
-    gaps.push({ title, announced: item.date, source: item.source });
-  }
-  return gaps;
 }
 
 // --------------------------------------------------------------- about -----

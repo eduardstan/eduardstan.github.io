@@ -1,36 +1,32 @@
 ---
 /**
  * The whole feed. The home page shows only the newest few and links here, so
- * this route is the one that must be complete — every item the repository
- * publishes, plus what it could not.
+ * this route is the one that must be complete — every announcement the
+ * repository generates, plus the facts it could not date.
  *
- * It reads `_news/` through the same reader the home page uses rather than the
- * `news` collection, so the two cannot disagree about what "everything" is.
- * Migrating those files into the collection is the content task's job; when it
- * lands, this page swaps `news()` for `getCollection('news')` and the markup
- * stays as it is.
+ * There is no `_news/` directory behind this any more: every item is derived
+ * from the fact it announces. See `src/lib/announcements.ts` for why.
  */
 import PageHead from '../../components/PageHead.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Record from '../../components/Record.astro';
-import { news, SOURCES } from '../../lib/record';
+import { announcements, formatStamp } from '../../lib/announcements';
 
-const feed = news();
-const excluded = feed.defects.filter((defect) => defect.excluded);
-const dateFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'short', timeZone: 'UTC' });
+const feed = announcements();
 ---
 
 <BaseLayout title="News" description={`All ${feed.items.length} announcements and updates.`}>
   <PageHead title="News" />
   <p class="blurb">
-    All <b>{feed.items.length} items</b>, newest first, read from <b>{SOURCES.news}/*/*.md</b> when
-    this page was built.
+    All <b>{feed.items.length} items</b>, newest first, generated when this page was built from the
+    facts they announce rather than from a second set of files written by hand.
     {
-      excluded.length > 0 && (
+      feed.undated.length > 0 && (
         <>
           {' '}
-          {excluded.length} file{excluded.length === 1 ? '' : 's'} could not be published; turn{' '}
-          <b>inspect sources</b> on to see which and why.
+          {feed.undated.length} further fact{feed.undated.length === 1 ? '' : 's'} could be announced
+          but carr{feed.undated.length === 1 ? 'ies' : 'y'} no defensible date; turn{' '}
+          <b>inspect sources</b> on to see which.
         </>
       )
     }
@@ -40,9 +36,7 @@ const dateFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'short', timeZo
       feed.items.map((item) => (
         <li>
           <span class="when label">
-            <time datetime={item.date.toISOString().slice(0, 10)}>
-              {dateFormat.format(item.date)}
-            </time>
+            <time datetime={item.stamp}>{formatStamp(item)}</time>
             {' · '}
             {item.kind}
           </span>
@@ -53,13 +47,22 @@ const dateFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'short', timeZo
   </ul>
   <Record>
     <p>
-      <b>{SOURCES.news}/*/*.md</b> — {feed.fileCount} files read, {feed.items.length} published, all
-      of them shown here.
+      {feed.items.length} announcements, read at build from {
+        feed.sources.map((file, index) => (
+          <>
+            {index > 0 && ', '}
+            <b>{file}</b>
+          </>
+        ))
+      }. A fact is announced on the date it carries; an <code>announced</code> key is written onto a
+      fact only where the announcement happened on a date the fact does not otherwise state. Dates
+      are shown at the precision the source states and no finer, so an item shown as a year is one
+      whose source records only a year.
     </p>
     {
-      feed.defects.map((defect) => (
+      feed.undated.map((fact) => (
         <p>
-          <b>{defect.source}</b> — {defect.problem}
+          <b>{fact.source}</b> — “{fact.what}” is not announced: {fact.why}.
         </p>
       ))
     }
