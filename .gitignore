@@ -12,10 +12,6 @@ node_modules/
 vendor
 .idea
 
-# CV: private contact details (mobile, personal email) must never be committed
-cv/private.yaml
-cv/generated/cv-contact-private.tex
-
 # CV: LaTeX build artefacts (the PDF is a CI artifact, not a tracked file)
 cv/*.pdf
 cv/*.aux
