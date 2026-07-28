@@ -99,6 +99,27 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   review", `keyword=workshop` is "Workshop"); DBLP's `@misc` artifacts are labelled
   "Software" explicitly because the CV does not print that type. The shared bibliography is
   the record; the site mirrors it.
+- **The collapsed row carries a citation, not just a venue.** `citationOf()` in
+  `src/lib/record.ts` assembles venue, series, volume, number, pages and publisher from
+  whatever fields the entry has. It is deliberately **not** a citation style — no CSL, no
+  per-type template: the volume attaches to the series where there is one and to the venue
+  where there is not, which is the whole of the difference between how an `@article` and an
+  `@inproceedings` read, and the rest is a `join` over the parts that are non-empty. Every
+  field in this bibliography is optional in practice, so parts are dropped **before** the
+  join; that is what keeps a sparse entry from printing a dangling comma. Do not grow this
+  into a formatter — extend the field list and the tests instead.
+- **Links prefer the DOI.** `linkOf()` orders `doi` → `html` → `url` → `pdf`: the DOI
+  outlives a publisher's URL scheme, and DBLP's `url` is usually that same doi.org address.
+  `html` and `pdf` follow al-folio's own rule for them (`_layouts/bib.liquid`) — an address
+  containing `://` is used as it stands, anything else names a file under `/assets/`. An
+  entry with none of the four renders no link rather than a dead one. The link is a sibling
+  of the `<summary>`, visually placed beside it: interactive content is not nested inside
+  the summary, so the full row remains a dependable open/close control. URLs and DOIs go
+  through `deLatexUrl`, **not** `deLatex`: the prose reader rewrites `--` as an en dash, and
+  `paper\_29.pdf` is a real filename in this bibliography.
+- **Abstracts are per-entry and unconditional.** The reveal renders `entry.abstract` when
+  the entry has one and says so when it does not, so adding an `abstract` field to a BibTeX
+  entry is the only action needed for it to appear. There is no flag and no list to update.
 - **The CV page.** `/cv/` renders `cv/cv.yaml` — the same file `scripts/build-cv-data.mjs`
   turns into the printed CV — through `src/lib/cv.ts`, which reads it with Vite's `?raw`
   import (see the sharp-edge note in the repository's `AGENTS.md`: `import.meta.url` fails

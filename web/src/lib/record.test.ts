@@ -12,7 +12,15 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { about, activities, bibliography, bibliographyGaps, news, SOURCES } from './record.ts';
+import {
+  about,
+  activities,
+  bibliography,
+  bibliographyGaps,
+  news,
+  parseEntries,
+  SOURCES,
+} from './record.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const bib = bibliography();
@@ -45,6 +53,111 @@ for (const key of ['DBLP:data/11/MilellaPSS25', 'DBLP:data/11/MilellaPSS25a']) {
   assert.equal(software.venue, 'DROPS Artifacts', `${key}: incorrect venue`);
   assert.notEqual(software.venue, software.fields.note, `${key}: placeholder note used as venue`);
 }
+
+// The citation assembled for the collapsed row. The cases that matter are the
+// sparse ones: everything below volume, pages and publisher is optional in this
+// file, so the assembler is only ever one missing field away from printing a
+// separator with nothing on either side of it.
+for (const entry of bib.entries) {
+  const where = `${entry.key} (@${entry.type}): "${entry.citation}"`;
+  assert.ok(entry.citation, `${where}: no citation assembled`);
+  assert.ok(!/,\s*,|\.\s*\.|,\s*\.|;\s*[;.]/.test(entry.citation), `${where}: doubled separator`);
+  assert.ok(!/^[,.;\s]|[,;]\s*$/.test(entry.citation), `${where}: leading or trailing separator`);
+  assert.ok(!/\(\s*\)|\[\s*\]/.test(entry.citation), `${where}: empty parenthesis`);
+  assert.ok(!/\s{2,}/.test(entry.citation), `${where}: doubled space`);
+  assert.ok(!/[{}\\]/.test(entry.citation), `${where}: unresolved LaTeX`);
+  assert.ok(entry.citation.startsWith(entry.venue), `${where}: does not open with the venue`);
+  // The record under the citation names the fields it was built from, so every
+  // one of them has to be a field this entry really has.
+  for (const field of entry.citationFields) {
+    assert.ok(entry.fields[field], `${where}: cites a field it does not have (${field})`);
+  }
+  // A field that is present and belongs in a citation must reach it.
+  for (const field of ['volume', 'number', 'pages'] as const) {
+    if (entry.fields[field]) {
+      assert.ok(entry.citationFields.includes(field), `${where}: dropped ${field}`);
+    }
+  }
+}
+
+// An @article and an @inproceedings read differently: the volume belongs to the
+// journal in one and to the series in the other, and neither may print it twice.
+const article = bib.entries.find((entry) => entry.key === 'DBLP:journals/cem/StanAND26')!;
+assert.equal(article.citation, 'IEEE Consumer Electron. Mag. 15(1), 33–40.');
+const paper = bib.entries.find((entry) => entry.key === 'DBLP:conf/time/MilellaPSS25')!;
+assert.ok(
+  paper.citation.includes(', LIPIcs 355, 19:1–19:7.'),
+  `volume misplaced: ${paper.citation}`,
+);
+assert.ok(paper.citation.endsWith('Informatik.'), `publisher missing: ${paper.citation}`);
+
+// Sparse: no volume, no number, no pages, no publisher — a venue and nothing
+// else. It must come out as that venue, not as that venue plus punctuation.
+const sparse = bib.entries.find((entry) => entry.key === 'stan_jair2026')!;
+assert.equal(sparse.citation, `${sparse.venue}.`);
+assert.deepEqual(sparse.citationFields, ['note']);
+assert.equal(sparse.link, undefined, 'a link was invented for an entry with no address field');
+// No volume but pages present — the comma before the pages is the only one.
+const noVolume = bib.entries.find((entry) => entry.key === '11122906')!;
+assert.equal(noVolume.citation, 'IEEE Journal of Biomedical and Health Informatics, 1-22.');
+
+// Links. The DOI leads because it outlives the publisher's URL scheme, and an
+// entry with none of the four fields shows no link rather than a dead one.
+for (const entry of bib.entries) {
+  const where = `${entry.key}: ${entry.link?.href}`;
+  if (entry.doi) assert.equal(entry.link?.field, 'doi', `${where}: DOI not preferred`);
+  if (!entry.link) {
+    assert.ok(
+      !entry.doi && !entry.fields.url && !entry.fields.html && !entry.fields.pdf,
+      `${entry.key}: has an address field but no link`,
+    );
+    continue;
+  }
+  assert.ok(
+    /^(https?:\/\/|\/assets\/)/.test(entry.link.href),
+    `${where}: not a followable address`,
+  );
+  // `paper\_29.pdf` is a real filename in this file; a backslash left in the
+  // href is a 404, so URLs are unescaped without `deLatex`'s prose rules.
+  assert.ok(!/[\\{}]/.test(entry.link.href), `${where}: unresolved LaTeX in a link`);
+  assert.ok(!/[–—]/.test(entry.link.href), `${where}: a hyphen pair was typeset as a dash`);
+}
+// The loop above states the invariant per entry — an entry either links or has
+// none of the four address fields — but is vacuously true if nothing resolves.
+assert.ok(
+  bib.entries.some((entry) => entry.link),
+  'no entry resolved a link at all',
+);
+
+// Adding an `abstract` to an entry has to be the only action needed for it to
+// show, so nothing may gate on a list or a flag. The bibliography carries none
+// today, so the two states are put to the parser directly.
+const [withAbstract, withoutAbstract] = parseEntries(`
+@article{withabstract,
+  title = {A title},
+  author = {Stan, Ionel Eduard},
+  journal = {A journal},
+  year = {2026},
+  abstract = {The claim, stated once.},
+}
+@article{withoutabstract,
+  title = {B title},
+  author = {Stan, Ionel Eduard},
+  journal = {A journal},
+  year = {2026},
+}
+`);
+assert.equal(withAbstract.key, 'withabstract', 'synthetic entries did not parse in order');
+assert.equal(
+  withAbstract.abstract,
+  'The claim, stated once.',
+  'an `abstract` field did not reach the entry',
+);
+assert.equal(
+  withoutAbstract.abstract,
+  undefined,
+  'an abstract appeared on an entry that carries no `abstract` field',
+);
 
 // Accents, particles and both BibTeX name forms — the cases a naive parser gets
 // wrong. `Stan, Ionel Eduard` read as `First Last` yields `S. I. Eduard`.

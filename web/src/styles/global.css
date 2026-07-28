@@ -867,7 +867,10 @@ body {
   }
 }
 
-.entry {
+/* The row's own rule lives on the wrapper, not on the <details>: the link is a
+   sibling of the <details> and has to sit above that rule, not below it. */
+.entry-row {
+  position: relative;
   border-bottom: 1px solid var(--color-hair);
 }
 
@@ -946,6 +949,17 @@ body {
   overflow-wrap: anywhere;
 }
 
+/* Reserve the last column for the open/close cue. The real link is a sibling
+   of the <details> and is positioned over the same edge below. */
+.entry .acts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.6rem;
+  justify-self: start;
+}
+
+.entry-row .go,
 .entry .more {
   font-family: var(--font-mono);
   font-size: 0.625rem;
@@ -953,8 +967,20 @@ body {
   text-transform: uppercase;
   color: var(--color-accent);
   border-bottom: 1px solid var(--color-accent);
-  justify-self: start;
   white-space: nowrap;
+}
+
+/* The one control on the row that does not toggle it. */
+.entry-row .go:hover {
+  color: var(--color-ink);
+  border-bottom-color: var(--color-ink);
+}
+
+.entry-row > .go {
+  position: absolute;
+  top: 0.75rem;
+  right: 0;
+  z-index: 1;
 }
 
 .entry .more::after {
@@ -966,8 +992,11 @@ body {
 }
 
 @media (min-width: 900px) {
-  .entry .more {
+  .entry .acts {
+    flex-direction: column;
+    align-items: flex-end;
     justify-self: end;
+    padding-top: 1.25rem;
   }
 }
 
@@ -991,9 +1020,17 @@ body {
     margin-top: 0.2rem;
   }
 
-  .entry .more {
-    display: inline-block;
+  .entry .acts {
     margin-top: 0.4rem;
+  }
+
+  /* Stacked under the row's own control, tucked back up under the summary's
+     bottom padding so it still reads as part of the row above the rule. */
+  .entry-row > .go {
+    position: static;
+    display: block;
+    width: fit-content;
+    margin: -0.35rem 0 0.75rem;
   }
 }
 
