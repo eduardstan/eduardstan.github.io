@@ -67,6 +67,12 @@ for (const [key, block] of blocks) {
   text(block.dates, `teaching.${key}.dates`);
   assert.ok(block.courses?.length > 0, `teaching.${key}: no courses`);
 }
+// /cv/ separates the current contact-hours total from the all-blocks one by
+// this test; with no block running to Present it would print a current load of 0.
+assert.ok(
+  blocks.some(([, block]) => /present\s*$/i.test(block.dates)),
+  'no teaching block dates run to Present',
+);
 for (const course of courses) {
   text(course.course, 'course.course');
   text(course.programme, 'course.programme');
@@ -123,16 +129,61 @@ assert.equal(inline('a & b <i>c</i>'), 'a &amp; b &lt;i&gt;c&lt;/i&gt;');
 assert.equal(inline('[x](https://a/"onerror=b)'), '<a href="https://a/&quot;onerror=b">x</a>');
 
 // The real prose: both markers render, and no delimiter survives into the page.
+assert.ok(
+  inline(cv.short_bio).includes('<b>') && inline(cv.short_bio).includes('<i>'),
+  'short_bio lost its emphasis',
+);
+
+// Every string the page prints — the same field set the LaTeX generator routes
+// through `renderInline` — goes through `inline()`, so markup added to any of
+// them must render rather than print its delimiters.
 const rendered = [
   cv.research_focus,
   cv.short_bio,
   cv.supervision.summary,
   cv.supervision.topic_coverage,
-].map(inline);
-assert.ok(
-  rendered[1].includes('<b>') && rendered[1].includes('<i>'),
-  'short_bio lost its emphasis',
-);
+  ...cv.appointments.flatMap((row: Record<string, any>) => [
+    row.role,
+    row.organisation,
+    row.dates,
+    row.location,
+    ...(row.items ?? []),
+  ]),
+  ...cv.education.flatMap((row: Record<string, any>) => [
+    row.degree,
+    row.institution,
+    row.dates,
+    row.location,
+  ]),
+  ...blocks.flatMap(([, block]) => [block.organisation, block.role, block.location, block.dates]),
+  ...courses.flatMap((course: Record<string, any>) => [
+    course.course,
+    course.programme,
+    course.topics,
+    course.hours,
+  ]),
+  ...cv.supervision.breakdown.flatMap((row: Record<string, any>) => [
+    row.level,
+    row.notes,
+    String(row.count),
+  ]),
+  ...cv.awards.flatMap((row: Record<string, any>) => [
+    row.title,
+    row.detail,
+    row.dates,
+    ...(row.items ?? []),
+  ]),
+  ...cv.languages.flatMap((row: Record<string, any>) => [row.name, row.level]),
+  ...cv.archive.leadership.flatMap((row: Record<string, any>) => [
+    row.role,
+    row.detail,
+    row.dates,
+    row.location,
+    ...(row.items ?? []),
+  ]),
+]
+  .filter((value): value is string => typeof value === 'string')
+  .map(inline);
 for (const html of rendered) {
   assert.doesNotMatch(html, /\*\*/, `unrendered ** left in the page: ${html.slice(0, 60)}`);
   assert.doesNotMatch(

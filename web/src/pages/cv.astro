@@ -8,12 +8,12 @@
  * describes: the counts, the field names and the totals are computed here at
  * build time, so a change to the YAML changes the record with it.
  *
- * Two things in the file are deliberately not rendered: `data_protection` and
- * `archive.data_protection_optional_sentence`. Both are a GDPR consent written
- * for a selection procedure, which means nothing on a public page.
- *
- * `service[]` and `projects[]` are not here either — they belong to
- * /professional_activities/ and /projects/.
+ * What the page leaves out is derived the same way, from the file's own keys
+ * minus the ones rendered here, so the omission list cannot drift: the two
+ * data-protection notices are a GDPR consent written for a selection procedure,
+ * which means nothing on a public page; `service[]` and `projects[]` belong to
+ * /professional_activities/ and /projects/; `person` and `contact` are the
+ * printed CV's letterhead.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
@@ -28,8 +28,32 @@ const keysOf = (rows: object[]) => [...new Set(rows.flatMap((row) => Object.keys
 const teaching = Object.entries(cv.teaching);
 const courses = teaching.flatMap(([, block]) => block.courses);
 /** Sum of the leading number in each `hours:` field ("30 h/yr" → 30). */
-const contactHours = courses.reduce((total, course) => total + parseInt(course.hours, 10), 0);
+const hoursOf = (blocks: typeof teaching) =>
+  blocks.reduce(
+    (total, [, block]) =>
+      total + block.courses.reduce((sum, course) => sum + parseInt(course.hours, 10), 0),
+    0,
+  );
+/** A block whose `dates` still run to Present; the rest are roles that ended. */
+const running = teaching.filter(([, block]) => /present\s*$/i.test(block.dates ?? ''));
+const contactHours = hoursOf(teaching);
+const runningHours = hoursOf(running);
 const withItems = (rows: { items?: string[] }[]) => rows.filter((row) => row.items?.length).length;
+
+/** Top-level keys this page renders; every other key is named in a record. */
+const rendered = [
+  'research_focus',
+  'short_bio',
+  'appointments',
+  'education',
+  'teaching',
+  'supervision',
+  'awards',
+  'languages',
+  'archive',
+];
+const omitted = Object.keys(cv).filter((key) => !rendered.includes(key));
+const archiveOmitted = Object.keys(cv.archive).filter((key) => key !== 'leadership');
 
 const description =
   `Curriculum vitae — ${cv.appointments.length} appointments, ${cv.education.length} degrees, ` +
@@ -64,8 +88,8 @@ const description =
       cv.appointments.map((appointment) => (
         <li>
           <span class="k">
-            {appointment.role}
-            {appointment.location && <span class="sub">{appointment.location}</span>}
+            <Fragment set:html={inline(appointment.role)} />
+            {appointment.location && <span class="sub" set:html={inline(appointment.location)} />}
           </span>
           <span class="v">
             <span set:html={inline(appointment.organisation)} />
@@ -77,7 +101,7 @@ const description =
               </ul>
             )}
           </span>
-          <span class="when">{appointment.dates}</span>
+          <span class="when" set:html={inline(appointment.dates)} />
         </li>
       ))
     }
@@ -97,11 +121,11 @@ const description =
       cv.education.map((degree) => (
         <li>
           <span class="k">
-            {degree.degree}
-            {degree.location && <span class="sub">{degree.location}</span>}
+            <Fragment set:html={inline(degree.degree)} />
+            {degree.location && <span class="sub" set:html={inline(degree.location)} />}
           </span>
           <span class="v" set:html={inline(degree.institution)} />
-          <span class="when">{degree.dates}</span>
+          <span class="when" set:html={inline(degree.dates)} />
         </li>
       ))
     }
@@ -124,7 +148,9 @@ const description =
           <li>
             <span class="a" set:html={inline(block.organisation)} />
             <span class="b label">
-              {block.role} · {block.location} · {block.dates}
+              <Fragment set:html={inline(block.role)} /> ·{' '}
+              <Fragment set:html={inline(block.location)} /> ·{' '}
+              <Fragment set:html={inline(block.dates)} />
             </span>
           </li>
         </ul>
@@ -132,11 +158,11 @@ const description =
           {block.courses.map((course) => (
             <li>
               <span class="k">
-                {course.course}
-                <span class="sub">{course.programme}</span>
+                <Fragment set:html={inline(course.course)} />
+                <span class="sub" set:html={inline(course.programme)} />
               </span>
-              <span class="v">{course.topics}</span>
-              <span class="when">{course.hours}</span>
+              <span class="v" set:html={inline(course.topics)} />
+              <span class="when" set:html={inline(course.hours)} />
             </li>
           ))}
         </ul>
@@ -155,10 +181,14 @@ const description =
     </p>
     <p>
       {teaching.map(([key, block]) => `${key}: ${block.courses.length}`).join(', ')} courses. {
-        contactHours
-      } contact hours a year in total, summed from the leading number of each <b>hours</b> field ({
+        runningHours
+      } contact hours a year currently, across the {running.length} block{
+        running.length === 1 ? '' : 's'
+      } whose <b>dates</b> run to Present ({running.map(([key]) => key).join(', ')}); {contactHours} h/yr
+      summed across all {teaching.length} blocks on record, the ended ones included ({
         courses.map((course) => course.hours).join(' + ')
-      }). That total is computed here; it is not a figure written in the file.
+      }). Both totals are computed here from the leading number of each <b>hours</b> field; neither
+      is a figure written in the file.
     </p>
   </Record>
 
@@ -169,9 +199,9 @@ const description =
     {
       cv.supervision.breakdown.map((row) => (
         <li>
-          <span class="k">{row.level}</span>
+          <span class="k" set:html={inline(row.level)} />
           <span class="v" set:html={inline(row.notes)} />
-          <span class="when">{row.count}</span>
+          <span class="when" set:html={inline(String(row.count))} />
         </li>
       ))
     }
@@ -192,7 +222,7 @@ const description =
     {
       cv.awards.map((award) => (
         <li>
-          <span class="k">{award.title}</span>
+          <span class="k" set:html={inline(award.title)} />
           <span class="v">
             <span set:html={inline(award.detail)} />
             {award.items && (
@@ -203,7 +233,7 @@ const description =
               </ul>
             )}
           </span>
-          <span class="when">{award.dates}</span>
+          <span class="when" set:html={inline(award.dates)} />
         </li>
       ))
     }
@@ -223,8 +253,8 @@ const description =
       cv.archive.leadership.map((role) => (
         <li>
           <span class="k">
-            {role.role}
-            {role.location && <span class="sub">{role.location}</span>}
+            <Fragment set:html={inline(role.role)} />
+            {role.location && <span class="sub" set:html={inline(role.location)} />}
           </span>
           <span class="v">
             <span set:html={inline(role.detail)} />
@@ -236,7 +266,7 @@ const description =
               </ul>
             )}
           </span>
-          <span class="when">{role.dates}</span>
+          <span class="when" set:html={inline(role.dates)} />
         </li>
       ))
     }
@@ -246,9 +276,14 @@ const description =
       <b>{CV_SOURCE}</b> — <b>archive.leadership[]</b>, {cv.archive.leadership.length} entries with keys
       {keysOf(cv.archive.leadership)}. The file's <b>archive</b> block holds facts the printed CV does
       not currently print; the comment above it says the website may surface them, and this is the site
-      doing that. The <b>data_protection</b> notice and <b>archive.data_protection_optional_sentence</b
-      > are the two things in the file this page deliberately leaves out: a consent written for a selection
-      procedure has no meaning here.
+      doing that.
+    </p>
+    <p>
+      What this page leaves out is derived too — the file's top-level keys minus the ones rendered
+      above: {omitted.join(', ')}, and inside <b>archive</b>, {archiveOmitted.join(', ')}. The two
+      data-protection notices are a consent written for a selection procedure, which has no meaning
+      here; <b>service</b> and <b>projects</b> have their own pages; <b>person</b> and <b>contact</b> are
+      the printed CV's letterhead, not repeated on a page that already has one.
     </p>
   </Record>
 
@@ -257,8 +292,8 @@ const description =
     {
       cv.languages.map((language) => (
         <li>
-          <span class="a">{language.name}</span>
-          <span class="b label">{language.level}</span>
+          <span class="a" set:html={inline(language.name)} />
+          <span class="b label" set:html={inline(language.level)} />
         </li>
       ))
     }

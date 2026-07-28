@@ -57,5 +57,11 @@ jobs:
       - name: Type-check 🔎
         run: npx astro check
 
+      # The readers are asserted against the repository's real data files, so
+      # this is what catches a cv.yaml or bibliography edit that the build alone
+      # would render blank.
+      - name: Self-check 🧪
+        run: npm test
+
       - name: Build 🔧
         run: npm run build

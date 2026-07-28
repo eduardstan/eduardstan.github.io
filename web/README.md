@@ -124,9 +124,12 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   from `src/lib/cv.ts` reading `cv/cv.yaml` — one registry, `SOURCES`, either way. The
   bibliography gap is a set difference between the news feed and the bibliography, so it
   shrinks on its own as entries are added. Do not hand-write a number the page displays —
-  the site's whole argument is that its claims can be checked. `src/lib/record.test.ts` and
-  `src/lib/cv.test.ts` (`node --experimental-strip-types src/lib/<name>.test.ts`) assert the
-  readers still agree with the data.
+  the site's whole argument is that its claims can be checked. That includes what a page says
+  it leaves out: `/cv/` derives its omission list from the file's own keys minus the ones it
+  renders. `src/lib/record.test.ts` and `src/lib/cv.test.ts` (`npm test`, or
+  `node --experimental-strip-types src/lib/<name>.test.ts` for one of them) assert the readers
+  still agree with the data; `web-ci.yml` runs them before the build, which is what makes the
+  widened `cv/**` and `_bibliography/**` triggers useful.
 
 ## Not done yet
 
