@@ -93,10 +93,11 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   is exactly one canonical tag per page. Searching is Pagefind at `/search/`, not a second search box.
   Every row is a `<details>`: opening it reveals the abstract, the record and the entry's
   own BibTeX. **Nothing in the bibliography is filtered out** — manuscripts under review
-  and released software artifacts are entries like any other, labelled by the same entry
-  types and keywords `cv/cv.tex` filters on (`type=online and keyword=underreview` is
-  "Under review", `keyword=workshop` is "Workshop"). The CV bibliography is the record;
-  the site mirrors it.
+  and released software artifacts are entries like any other. Labels follow the entry types
+  and keywords `cv/cv.tex` filters on (`type=online and keyword=underreview` is "Under
+  review", `keyword=workshop` is "Workshop"); DBLP's `@misc` artifacts are labelled
+  "Software" explicitly because the CV does not print that type. The shared bibliography is
+  the record; the site mirrors it.
 - **The one script.** 378 bytes inline on the publications page, which copies a BibTeX
   entry to the clipboard. The button ships with `hidden` set and is revealed only where
   `navigator.clipboard` exists, so nothing unusable is ever shown, and the entry is plain

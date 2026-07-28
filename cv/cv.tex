@@ -220,10 +220,10 @@
 \addbibresource{../_bibliography/papers.bib}
 \addbibresource{pres.bib}
 
-% The shared bibliography also carries al-folio rendering fields used only by
-% the website. They are not part of the CV, and the abstracts contain raw % and
-% & that would break the LaTeX pass, so drop them during biber processing
-% instead of altering the .bib the website reads.
+% The shared bibliography may carry al-folio rendering fields used only by the
+% website. They are not part of the CV, and abstracts can contain raw % and &
+% that would break the LaTeX pass, so drop them during biber processing instead
+% of altering the .bib the website reads.
 \DeclareSourcemap{
   \maps[datatype=bibtex]{
     \map{
