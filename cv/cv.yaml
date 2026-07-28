@@ -38,6 +38,7 @@
 person:
   # Rendered by cv.tex as {\Huge\textbf{...}}
   name: Ionel Eduard STAN, Ph.D.
+  display_name: Ionel Eduard Stan
 
 # -----------------------------------------------------------------------------
 # Contact.
@@ -47,6 +48,7 @@ person:
 # -----------------------------------------------------------------------------
 contact:
   email: ioneleduard.stan@unimib.it
+  office: Room 1019, 1st Floor
   website:
     label: eduardstan.github.io
     url: https://eduardstan.github.io/
@@ -72,6 +74,13 @@ contact:
     - Assistant Professor (RTD/a), Intelligent Sensing Laboratory (ISLab)
     - Department of Informatics, Systems and Communication (DISCo),
     - University of Milano-Bicocca, Milan, 20125, Italy
+  affiliation_web:
+    - label: Intelligent Sensing Laboratory (ISLab)
+      url: https://islab.disco.unimib.it/
+    - label: Department of Informatics, Systems and Communication (DISCo)
+      url: https://www.disco.unimib.it/
+    - label: University of Milano-Bicocca
+      url: https://www.unimib.it/
 
 # -----------------------------------------------------------------------------
 # Short Bio
@@ -108,6 +117,7 @@ appointments:
   - role: Assistant Professor (RTD/a)
     location: Milan, Italy
     organisation: University of Milano-Bicocca (Intelligent Sensing Laboratory—ISLab)
+    url: https://islab.disco.unimib.it/
     dates: Jul 2024–Present
     items:
       - Teaching (Instructor of record), thesis supervision, and mentoring activities.
@@ -118,6 +128,7 @@ appointments:
   - role: Research Fellow / Postdoctoral Researcher
     location: Bozen-Bolzano, Italy
     organisation: Free University of Bozen-Bolzano (Database Group—DBS Group)
+    url: https://dbs.inf.unibz.it/
     dates: Mar 2023–Jun 2024
     items:
       - >-
@@ -127,6 +138,7 @@ appointments:
   - role: Research Assistant
     location: Ferrara, Italy
     organisation: University of Ferrara (Applied Computational Logic and AI Laboratory—ACLAI Lab)
+    url: https://aclai.unife.it/
     dates: Nov 2019–Jul 2024
     items:
       - Modal and interval temporal logic; symbolic / modal machine learning.
@@ -139,16 +151,19 @@ education:
   - degree: Ph.D. in Mathematics (Excellent cum laude)
     location: Parma, Italy
     institution: University of Parma
+    url: https://www.unipr.it/
     dates: Nov 2019–Feb 2023
 
   - degree: M.Sc. in Computer Science (110/110 cum laude)
     location: Udine, Italy
     institution: University of Udine
+    url: https://www.uniud.it/
     dates: Oct 2017–Oct 2019
 
   - degree: B.Sc. in Computer Science (110/110 cum laude)
     location: Ferrara, Italy
     institution: University of Ferrara
+    url: https://www.unife.it/
     dates: Oct 2014–Jun 2017
 
 # -----------------------------------------------------------------------------
@@ -162,6 +177,7 @@ teaching:
     role: Official Lecturer (Instructor of Record)
     location: Milan, Italy
     organisation: University of Milano-Bicocca (DISCo)
+    url: https://elearning.unimib.it/course/info.php?id=60729
     dates: Jul 2024–Present
     courses:
       - course: Databases
@@ -177,6 +193,7 @@ teaching:
     role: Official Lecturer (Instructor of Record)
     location: Milan, Italy
     organisation: Bicocca Academy (2nd-level Master, DAI4Health)
+    url: https://www.academy.unimib.it/dai4health-innovazione-digitale-e-intelligenza-artificiale-nel-settore-sanitario-0
     dates: Dec 2025–Present
     courses:
       - course: Foundations of Artificial Intelligence
@@ -190,6 +207,7 @@ teaching:
     role: Teaching Assistant
     location: Ferrara, Italy
     organisation: University of Ferrara
+    url: https://www.unife.it/
     dates: Oct 2019–Feb 2023
     courses:
       - course: Algorithms and Data Structures
@@ -209,14 +227,25 @@ teaching:
 
 # -----------------------------------------------------------------------------
 # Editorial, Reviewing & Conference Service
+#
+# `years` records each conference edition separately so the website can attach
+# an optional ISO `announced` date. The generator folds consecutive editions
+# back into the compact range printed in the CV.
 # -----------------------------------------------------------------------------
 service:
   - role: Associate Editor
-    detail: "Elsevier Neurocomputing Journal **[IF: 6.5, Q1]**"
+    venue: Elsevier Neurocomputing Journal
+    metric: "IF: 6.5, Q1"
+    url: https://www.sciencedirect.com/journal/neurocomputing
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=24807
     dates: Oct 2025–Present
 
   - role: Associate Editor
-    detail: "Frontiers in Artificial Intelligence Journal, Pattern Recognition Section **[IF: 4.7, Q2]**"
+    venue: Frontiers in Artificial Intelligence Journal
+    section: Pattern Recognition Section
+    metric: "IF: 4.7, Q2"
+    url: https://www.frontiersin.org/journals/artificial-intelligence/sections/pattern-recognition
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=21101062817&tip=sid&clean=0
     dates: Mar 2024–Present
     items:
       - >-
@@ -226,44 +255,102 @@ service:
         (25+ submissions to date).
 
   - role: Tutorials/Special Session Co-Chair
-    detail: IEEE International Conference on Intelligent Reality (ICIR), 2026
+    venue: IEEE International Conference on Intelligent Reality (ICIR)
+    url: https://icir.ieee.org/
+    years:
+      - year: 2026
 
   - role: Area Chair
-    detail: "IEEE International Joint Conference on Neural Networks (IJCNN), 2025–2026 **[CORE Rank: B]**"
+    venue: IEEE International Joint Conference on Neural Networks (IJCNN)
+    metric: "CORE Rank: B"
+    url: https://ijcnn.org/
+    rank_url: https://portal.core.edu.au/conf-ranks/685/
+    years:
+      - year: 2025
+        announced: 2025-01-11
+      - year: 2026
 
   - role: Area Chair
-    detail: >-
-      IEEE International Conference on Acoustics, Speech, and Signal Processing
-      (ICASSP), 2026 **[CORE Rank: B]**
+    venue: IEEE International Conference on Acoustics, Speech, and Signal Processing (ICASSP)
+    metric: "CORE Rank: B"
+    url: https://2026.ieeeicassp.org/
+    rank_url: https://portal.core.edu.au/conf-ranks/2042/
+    years:
+      - year: 2026
+        announced: 2025-09-09
 
   - role: Program Committee
-    detail: >-
-      Association for the Advancement of Artificial Intelligence (AAAI)
-      Conference on Artificial Intelligence, 2024–2026 **[CORE Rank: A*]**
+    venue: Association for the Advancement of Artificial Intelligence (AAAI) Conference on Artificial Intelligence
+    metric: "CORE Rank: A*"
+    url: https://aaai.org/conference/aaai/
+    rank_url: https://portal.core.edu.au/conf-ranks/1629/
+    years:
+      - year: 2024
+      - year: 2025
+        announced: 2024-06-10
+      - year: 2026
+        announced: 2025-07-18
 
   - role: Program Committee
-    detail: "International Conference on Learning Representations (ICLR), 2025–2026 **[CORE Rank: A*]**"
+    venue: International Conference on Learning Representations (ICLR)
+    metric: "CORE Rank: A*"
+    url: https://iclr.cc/
+    rank_url: https://portal.core.edu.au/conf-ranks/2273/
+    years:
+      - year: 2025
+        announced: 2024-08-28
+      - year: 2026
+        announced: 2025-09-23
 
   - role: Program Committee
-    detail: "International Joint Conference on Artificial Intelligence (IJCAI), 2025–2026 **[CORE Rank: A*]**"
+    venue: International Joint Conference on Artificial Intelligence (IJCAI)
+    metric: "CORE Rank: A*"
+    url: https://www.ijcai.org/
+    rank_url: https://portal.core.edu.au/conf-ranks/1313/
+    years:
+      - year: 2025
+        announced: 2025-01-13T16:00:00+02:00
+      - year: 2026
+        announced: 2025-12-10
 
   - role: Program Committee
-    detail: "European Conference on Artificial Intelligence (ECAI), 2025 **[CORE Rank: A]**"
+    venue: European Conference on Artificial Intelligence (ECAI)
+    metric: "CORE Rank: A"
+    url: https://eurai.org/ecai
+    rank_url: https://portal.core.edu.au/conf-ranks/473/
+    years:
+      - year: 2025
+        announced: 2025-04-22
 
   - role: Reviewer
-    detail: "Elsevier Engineering Applications of Artificial Intelligence Journal **[IF: 8.0; Q1]**"
+    venue: Elsevier Engineering Applications of Artificial Intelligence Journal
+    metric: "IF: 8.0; Q1"
+    url: https://www.sciencedirect.com/journal/engineering-applications-of-artificial-intelligence
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=24182&tip=sid&clean=0
 
   - role: Reviewer
-    detail: "IEEE Journal of Biomedical and Health Informatics **[IF: 6.7; Q1]**"
+    venue: IEEE Journal of Biomedical and Health Informatics
+    metric: "IF: 6.7; Q1"
+    url: https://www.embs.org/jbhi/
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=21100256982&tip=sid&clean=0
 
   - role: Reviewer
-    detail: "AI Access Foundation Journal of Artificial Intelligence Research **[IF: 4.6; Q1]**"
+    venue: AI Access Foundation Journal of Artificial Intelligence Research
+    metric: "IF: 4.6; Q1"
+    url: https://www.jair.org/
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=24330&tip=sid
 
   - role: Reviewer
-    detail: "PeerJ Computer Science Journal **[IF: 2.5; Q1]**"
+    venue: PeerJ Computer Science Journal
+    metric: "IF: 2.5; Q1"
+    url: https://peerj.com/computer-science/
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=21100830173&tip=sid&clean=0
 
   - role: Reviewer
-    detail: "Elsevier Information and Computation Journal **[IF: 1.0; Q2]**"
+    venue: Elsevier Information and Computation Journal
+    metric: "IF: 1.0; Q2"
+    url: https://www.sciencedirect.com/journal/information-and-computation
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=25509&tip=sid&clean=0
 
 # -----------------------------------------------------------------------------
 # Research Projects
@@ -275,6 +362,7 @@ service:
 projects:
   - title: ANTHEM — AdvaNced Technologies for Human-centred Medicine
     detail: Collaborator (University of Milano-Bicocca, ISLab)
+    url: https://fondazioneanthem.it/en/
     dates: Jul 2024–Present
     funding: €120M (programme total)
     items:
@@ -285,6 +373,7 @@ projects:
 
   - title: iNEST — Interconnected Nord-Est Innovation Ecosystem
     detail: Collaborator (Free University of Bozen-Bolzano, DBS Group)
+    url: https://www.consorzioinest.it/
     dates: Feb 2023–Jun 2024
     funding: €110M (programme total)
     items:
@@ -295,6 +384,7 @@ projects:
 
   - title: Certification, Monitoring, and Interpretability of Artificial Intelligent Systems
     detail: Research collaborator (University of Ferrara, ACLAI Lab) — GNCS / INdAM
+    url: https://www.altamatematica.it/gncs/
     dates: Jan 2023–Jan 2024
     funding: €1,700
     items:
@@ -305,6 +395,7 @@ projects:
 
   - title: Set-up and Optimization of an ML Model to Predict Gas Turbine Trip
     detail: Research collaborator (University of Ferrara, ACLAI Lab) — Siemens Energy Global GmbH & Co. KG
+    url: https://www.siemens-energy.com/global/en/home.html
     dates: Jan 2022–Jan 2023
     funding: €40,000
     items:
@@ -316,6 +407,7 @@ projects:
 
   - title: Symbolic and Numerical Analysis of Cyber-Physical Systems
     detail: Research collaborator (University of Ferrara, ACLAI Lab) — GNCS / INdAM
+    url: https://www.altamatematica.it/gncs/
     dates: Jan 2022–Jan 2023
     funding: €6,900
     items:
@@ -326,6 +418,7 @@ projects:
 
   - title: Modal Geometric Symbolic Learning
     detail: Research collaborator (University of Ferrara, ACLAI Lab) — University of Ferrara
+    url: https://www.unife.it/
     dates: May 2021–Jun 2022
     funding: €2,650
     items:
@@ -336,6 +429,7 @@ projects:
 
   - title: Natural Language Elaboration and Temporal Logic for Text Formalization
     detail: Research collaborator (University of Ferrara, ACLAI Lab) — GNCS / INdAM
+    url: https://www.altamatematica.it/gncs/
     dates: Jan 2021–Jan 2022
     funding: €3,000
     items:
@@ -346,6 +440,7 @@ projects:
 
   - title: Strategic Reasoning and Automated Synthesis of Multi-Agent Systems
     detail: Research collaborator (University of Ferrara, ACLAI Lab) — GNCS / INdAM
+    url: https://www.altamatematica.it/gncs/
     dates: Jan 2020–Jan 2021
     funding: €3,000
     items:
