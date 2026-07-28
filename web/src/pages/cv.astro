@@ -1,10 +1,275 @@
 ---
+/**
+ * The curriculum vitae, rendered from `cv/cv.yaml` — the same file the LaTeX CV
+ * is generated from, read directly rather than through the PDF.
+ *
+ * Nothing on this page is transcribed. Every row is one entry of one list in
+ * that file, and every source record below is derived from the object it
+ * describes: the counts, the field names and the totals are computed here at
+ * build time, so a change to the YAML changes the record with it.
+ *
+ * Two things in the file are deliberately not rendered: `data_protection` and
+ * `archive.data_protection_optional_sentence`. Both are a GDPR consent written
+ * for a selection procedure, which means nothing on a public page.
+ *
+ * `service[]` and `projects[]` are not here either — they belong to
+ * /professional_activities/ and /projects/.
+ */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Placeholder from '../components/Placeholder.astro';
+import PageHead from '../components/PageHead.astro';
+import Record from '../components/Record.astro';
+import SectionHead from '../components/SectionHead.astro';
+import { cv, CV_SOURCE } from '../lib/cv';
+import { inline } from '../lib/inline';
 
-const description = 'Curriculum vitae. The CV pipeline is a later task.';
+/** The field names an entry actually carries, so a record names real keys. */
+const keysOf = (rows: object[]) => [...new Set(rows.flatMap((row) => Object.keys(row)))].join(', ');
+
+const teaching = Object.entries(cv.teaching);
+const courses = teaching.flatMap(([, block]) => block.courses);
+/** Sum of the leading number in each `hours:` field ("30 h/yr" → 30). */
+const contactHours = courses.reduce((total, course) => total + parseInt(course.hours, 10), 0);
+const withItems = (rows: { items?: string[] }[]) => rows.filter((row) => row.items?.length).length;
+
+const description =
+  `Curriculum vitae — ${cv.appointments.length} appointments, ${cv.education.length} degrees, ` +
+  `${courses.length} courses and ${cv.awards.length} awards, read from ${CV_SOURCE} at build time.`;
 ---
 
-<BaseLayout title="CV" description={description}>
-  <Placeholder heading="CV" description={description} />
+<BaseLayout title="Curriculum vitae" description={description}>
+  <PageHead title="Curriculum vitae">
+    <p class="blurb" set:html={inline(cv.research_focus)} />
+    <p class="blurb">
+      This page is built from <b>{CV_SOURCE}</b>, the single file the printed CV is also generated
+      from, read when the page was built. Turn <b>inspect sources</b> on, in the bar above, to see which
+      part of that file each section comes from. Publications are not repeated here: they have <a
+        href="/publications/">their own index</a
+      >, read from the bibliography.
+    </p>
+  </PageHead>
+
+  <SectionHead source={`${CV_SOURCE} · short_bio`}>Short bio</SectionHead>
+  <p class="blurb" set:html={inline(cv.short_bio)} />
+  <Record>
+    <p>
+      <b>{CV_SOURCE}</b> — the <b>short_bio</b> and <b>research_focus</b> scalars, rendered with the file's
+      own inline grammar (<b>**bold**</b>, <b>_italic_</b>, <b>[text](url)</b>). The same two strings
+      are what <b>scripts/build-cv-data.mjs</b> turns into LaTeX for the PDF.
+    </p>
+  </Record>
+
+  <SectionHead source={`${CV_SOURCE} · appointments[]`}>Appointments</SectionHead>
+  <ul class="rows">
+    {
+      cv.appointments.map((appointment) => (
+        <li>
+          <span class="k">
+            {appointment.role}
+            {appointment.location && <span class="sub">{appointment.location}</span>}
+          </span>
+          <span class="v">
+            <span set:html={inline(appointment.organisation)} />
+            {appointment.items && (
+              <ul>
+                {appointment.items.map((item) => (
+                  <li set:html={inline(item)} />
+                ))}
+              </ul>
+            )}
+          </span>
+          <span class="when">{appointment.dates}</span>
+        </li>
+      ))
+    }
+  </ul>
+  <Record>
+    <p>
+      <b>{CV_SOURCE}</b> — <b>appointments[]</b>, {cv.appointments.length} entries in file order, newest
+      first as written. Keys read: {keysOf(cv.appointments)}. {withItems(cv.appointments)} of {
+        cv.appointments.length
+      } carry an <b>items</b> list, shown as the bullets under the organisation.
+    </p>
+  </Record>
+
+  <SectionHead source={`${CV_SOURCE} · education[]`}>Education</SectionHead>
+  <ul class="rows">
+    {
+      cv.education.map((degree) => (
+        <li>
+          <span class="k">
+            {degree.degree}
+            {degree.location && <span class="sub">{degree.location}</span>}
+          </span>
+          <span class="v" set:html={inline(degree.institution)} />
+          <span class="when">{degree.dates}</span>
+        </li>
+      ))
+    }
+  </ul>
+  <Record>
+    <p>
+      <b>{CV_SOURCE}</b> — <b>education[]</b>, {cv.education.length} entries. Keys read: {
+        keysOf(cv.education)
+      }. The classification in each degree line (<i>cum laude</i>, 110/110) is part of the <b
+        >degree</b
+      > string in the file, not added here.
+    </p>
+  </Record>
+
+  <SectionHead source={`${CV_SOURCE} · teaching`}>Teaching</SectionHead>
+  {
+    teaching.map(([key, block]) => (
+      <>
+        <ul class="defs">
+          <li>
+            <span class="a" set:html={inline(block.organisation)} />
+            <span class="b label">
+              {block.role} · {block.location} · {block.dates}
+            </span>
+          </li>
+        </ul>
+        <ul class="rows" data-block={key}>
+          {block.courses.map((course) => (
+            <li>
+              <span class="k">
+                {course.course}
+                <span class="sub">{course.programme}</span>
+              </span>
+              <span class="v">{course.topics}</span>
+              <span class="when">{course.hours}</span>
+            </li>
+          ))}
+        </ul>
+      </>
+    ))
+  }
+  <Record>
+    <p>
+      <b>{CV_SOURCE}</b> — <b>teaching</b>, a map of {teaching.length} blocks keyed {
+        teaching.map(([key]) => key).join(', ')
+      }, holding {courses.length} courses between them. Each block's heading line is its <b
+        >organisation</b
+      >, <b>role</b>, <b>location</b> and <b>dates</b>; each row is one entry of that block's <b
+        >courses[]</b
+      >, with keys {keysOf(courses)}.
+    </p>
+    <p>
+      {teaching.map(([key, block]) => `${key}: ${block.courses.length}`).join(', ')} courses. {
+        contactHours
+      } contact hours a year in total, summed from the leading number of each <b>hours</b> field ({
+        courses.map((course) => course.hours).join(' + ')
+      }). That total is computed here; it is not a figure written in the file.
+    </p>
+  </Record>
+
+  <SectionHead source={`${CV_SOURCE} · supervision`}>Supervision</SectionHead>
+  <p class="blurb" set:html={inline(cv.supervision.summary)} />
+  <p class="blurb" set:html={inline(cv.supervision.topic_coverage)} />
+  <ul class="rows">
+    {
+      cv.supervision.breakdown.map((row) => (
+        <li>
+          <span class="k">{row.level}</span>
+          <span class="v" set:html={inline(row.notes)} />
+          <span class="when">{row.count}</span>
+        </li>
+      ))
+    }
+  </ul>
+  <Record>
+    <p>
+      <b>{CV_SOURCE}</b> — <b>supervision</b>: the <b>summary</b> and <b>topic_coverage</b> scalars above,
+      then <b>breakdown[]</b>, {cv.supervision.breakdown.length} rows with keys {
+        keysOf(cv.supervision.breakdown)
+      }. The counts in the right-hand column are the <b>count</b> field verbatim, open-ended ({
+        cv.supervision.breakdown.map((row) => row.count).join(', ')
+      }) exactly as the file writes them.
+    </p>
+  </Record>
+
+  <SectionHead source={`${CV_SOURCE} · awards[]`}>Awards and scholarships</SectionHead>
+  <ul class="rows">
+    {
+      cv.awards.map((award) => (
+        <li>
+          <span class="k">{award.title}</span>
+          <span class="v">
+            <span set:html={inline(award.detail)} />
+            {award.items && (
+              <ul>
+                {award.items.map((item) => (
+                  <li set:html={inline(item)} />
+                ))}
+              </ul>
+            )}
+          </span>
+          <span class="when">{award.dates}</span>
+        </li>
+      ))
+    }
+  </ul>
+  <Record>
+    <p>
+      <b>{CV_SOURCE}</b> — <b>awards[]</b>, {cv.awards.length} entries with keys {keysOf(cv.awards)}.
+      {withItems(cv.awards)} carry an <b>items</b> list.
+    </p>
+  </Record>
+
+  <SectionHead source={`${CV_SOURCE} · archive.leadership[]`}>
+    Leadership and representation
+  </SectionHead>
+  <ul class="rows">
+    {
+      cv.archive.leadership.map((role) => (
+        <li>
+          <span class="k">
+            {role.role}
+            {role.location && <span class="sub">{role.location}</span>}
+          </span>
+          <span class="v">
+            <span set:html={inline(role.detail)} />
+            {role.items && (
+              <ul>
+                {role.items.map((item) => (
+                  <li set:html={inline(item)} />
+                ))}
+              </ul>
+            )}
+          </span>
+          <span class="when">{role.dates}</span>
+        </li>
+      ))
+    }
+  </ul>
+  <Record>
+    <p>
+      <b>{CV_SOURCE}</b> — <b>archive.leadership[]</b>, {cv.archive.leadership.length} entries with keys
+      {keysOf(cv.archive.leadership)}. The file's <b>archive</b> block holds facts the printed CV does
+      not currently print; the comment above it says the website may surface them, and this is the site
+      doing that. The <b>data_protection</b> notice and <b>archive.data_protection_optional_sentence</b
+      > are the two things in the file this page deliberately leaves out: a consent written for a selection
+      procedure has no meaning here.
+    </p>
+  </Record>
+
+  <SectionHead source={`${CV_SOURCE} · languages[]`}>Languages</SectionHead>
+  <ul class="defs">
+    {
+      cv.languages.map((language) => (
+        <li>
+          <span class="a">{language.name}</span>
+          <span class="b label">{language.level}</span>
+        </li>
+      ))
+    }
+  </ul>
+  <Record>
+    <p>
+      <b>{CV_SOURCE}</b> — <b>languages[]</b>, {cv.languages.length} entries with keys {
+        keysOf(cv.languages)
+      }, in file order. The levels are the file's own words ({
+        [...new Set(cv.languages.map((language) => language.level))].join(', ')
+      }), not a CEFR scale.
+    </p>
+  </Record>
 </BaseLayout>

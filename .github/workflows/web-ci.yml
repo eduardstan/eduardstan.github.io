@@ -4,15 +4,23 @@ name: Web (Astro) CI
 # deploy or publish: the live site is still built from the Jekyll tree by
 # deploy.yml, and cutover is a separate, explicitly approved change.
 
+# The site reads the repository's own data files at build time, so an edit to
+# cv/cv.yaml or the bibliography can break the Astro build without touching
+# web/. Those paths trigger this workflow for that reason.
+
 on:
   push:
     branches: [master, main]
     paths:
       - "web/**"
+      - "cv/**"
+      - "_bibliography/**"
       - ".github/workflows/web-ci.yml"
   pull_request:
     paths:
       - "web/**"
+      - "cv/**"
+      - "_bibliography/**"
       - ".github/workflows/web-ci.yml"
   workflow_dispatch:
 

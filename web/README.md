@@ -98,6 +98,21 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   review", `keyword=workshop` is "Workshop"); DBLP's `@misc` artifacts are labelled
   "Software" explicitly because the CV does not print that type. The shared bibliography is
   the record; the site mirrors it.
+- **The CV page.** `/cv/` renders `cv/cv.yaml` — the same file `scripts/build-cv-data.mjs`
+  turns into the printed CV — through `src/lib/cv.ts`, which reads it with Vite's `?raw`
+  import (see the sharp-edge note in the repository's `AGENTS.md`: `import.meta.url` fails
+  at prerender) and `src/lib/inline.ts`, which renders that file's portable prose grammar
+  (`**bold**`, `_italic_`, `[text](url)`) with the regex from `build-cv-data.mjs`, so both
+  renderers agree on the two rules that matter — an intra-word underscore is literal and a
+  bare `*` passes through, keeping "CORE Rank: A\*" intact. `data_protection` and
+  `archive.data_protection_optional_sentence` are deliberately not rendered: a GDPR consent
+  written for a selection procedure means nothing on a public page. `service[]` and
+  `projects[]` belong to their own pages. Because the Astro build reads `cv/` and
+  `_bibliography/`, `.github/workflows/web-ci.yml` triggers on those paths too.
+- **The dense row.** `.rows` in `global.css` is the table primitive the CV-fed pages need:
+  `.defs`' label-left/meta-right pattern with a middle column and the dates in Go Mono. It
+  stacks below 760px the way `.entry` does, so nothing scrolls sideways on a phone. Reuse it
+  rather than adding a second row system.
 - **The one script.** 378 bytes inline on the publications page, which copies a BibTeX
   entry to the clipboard. The button ships with `hidden` set and is revealed only where
   `navigator.clipboard` exists, so nothing unusable is ever shown, and the entry is plain
@@ -105,18 +120,19 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   the inspect switch included — runs without script.
 - **Provenance is generated, never written.** Every count, source path, line range and
   "this is missing" note comes from `src/lib/record.ts`, which reads the repository's own
-  files (`_bibliography/papers.bib`, `_news/`, `_pages/`, `_config.yml`) at build time. The
+  files (`_bibliography/papers.bib`, `_news/`, `_pages/`, `_config.yml`) and, for `/cv/`,
+  from `src/lib/cv.ts` reading `cv/cv.yaml` — one registry, `SOURCES`, either way. The
   bibliography gap is a set difference between the news feed and the bibliography, so it
   shrinks on its own as entries are added. Do not hand-write a number the page displays —
-  the site's whole argument is that its claims can be checked. `src/lib/record.test.ts`
-  (`node --experimental-strip-types src/lib/record.test.ts`) asserts the readers still agree
-  with the data.
+  the site's whole argument is that its claims can be checked. `src/lib/record.test.ts` and
+  `src/lib/cv.test.ts` (`node --experimental-strip-types src/lib/<name>.test.ts`) assert the
+  readers still agree with the data.
 
 ## Not done yet
 
-Content migration, the CV pipeline and deployment. The home page, `/publications/` and
-`/news/` render the real data — `/news/` reads `_news/` through `src/lib/record.ts`, not
-the `news` collection, so it and the home page cannot disagree; the `/cv/`,
-`/professional_activities/` and `/repositories/` routes are structural placeholders under
-the Ledger page furniture, and the blog and projects routes are wired to their collections
-but still render the sample entries.
+Content migration and deployment. The home page, `/publications/`, `/news/` and `/cv/`
+render the real data — `/news/` reads `_news/` through `src/lib/record.ts`, not the `news`
+collection, so it and the home page cannot disagree; the `/professional_activities/` and
+`/repositories/` routes are structural placeholders under the Ledger page furniture, and
+the blog and projects routes are wired to their collections but still render the sample
+entries. `/cv/` does not yet offer the PDF: publishing it belongs to the cutover.
