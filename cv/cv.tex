@@ -254,7 +254,6 @@
 \defbibfilter{journals}{type=article}
 \defbibfilter{conferences}{type=inproceedings and not keyword=workshop}
 \defbibfilter{workshops}{type=inproceedings and keyword=workshop}
-\defbibfilter{preprints}{type=online and keyword=preprint or keyword=underreview}
 \defbibfilter{underreview}{type=online and keyword=underreview}
 
 % Filters for presentations
@@ -448,11 +447,6 @@
 
 \begin{refsection}[../_bibliography/papers.bib]
 \nocite{*}
-
-% Optional: selected first (tag a few entries with keyword=selected)
-\begin{refcontext}[labelprefix=SEL.]
-\printbibliography[heading=bibsubheading, title={Selected contributions}, keyword=selected, resetnumbers=true]
-\end{refcontext}
 
 \begin{refcontext}[labelprefix=J]
 \printbibliography[heading=bibsubheading, title={Journal articles (peer-reviewed)}, filter=journals, resetnumbers=true]
