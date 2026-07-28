@@ -42,6 +42,13 @@ Jekyll output risks colliding with that route.
   including under-review manuscripts and software artifacts; `web/README.md` owns that index's
   filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`
   BibTeX name forms; reading the second as the first silently renames authors.
+- `web/src/lib/cv.ts` reads `cv/cv.yaml` through Vite's `?raw` import, not `node:fs`. Do **not**
+  rewrite it as `readFileSync(new URL('../../../cv/cv.yaml', import.meta.url))`: that builds and
+  then fails at prerender with `ENOENT`, for the same relocation reason as the bullet above.
+  `?raw` inlines the file at build time, so there is no path to resolve; use `record.ts`'s
+  walk-up-for-`_config.yml` only where a whole directory has to be read.
+- `.github/workflows/web-ci.yml` therefore triggers on `cv/**` and `_bibliography/**` as well as
+  `web/**`: an edit to either can break the Astro build without touching `web/`.
 
 ## This repository is public
 

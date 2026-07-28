@@ -49,6 +49,9 @@ export const SOURCES = {
   activities: '_pages/professional_activities.md',
   news: '_news',
   config: '_config.yml',
+  // Read by `src/lib/cv.ts` through Vite's `?raw`, not by `read()` below: it is
+  // named here so there is one registry of where the site's facts come from.
+  cv: 'cv/cv.yaml',
 } as const;
 
 const read = (path: string) => readFileSync(join(ROOT, path), 'utf8');

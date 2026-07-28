@@ -6,9 +6,9 @@ directory so it can grow incrementally without touching the published site.
 **The live site is still the Jekyll/al-folio tree in the repository root.** It is built
 from `master` by `.github/workflows/deploy.yml` and published to the `gh-pages` branch.
 Nothing here is deployed. Jekyll ignores this directory via the `exclude` list in
-`_config.yml`, and `.github/workflows/web-ci.yml` only builds and type-checks — it has
-`permissions: contents: read` and no deploy step. Cutover is a separate, explicitly
-approved change.
+`_config.yml`, and `.github/workflows/web-ci.yml` only validates the rebuild — it has
+`permissions: contents: read` and no deploy step. Cutover is a separate, explicitly approved
+change.
 
 That `exclude` list also carries a `cv/` entry, which is a publication guard and not dead
 configuration — see "Two sites live in this repo" in the repository root's `AGENTS.md`.
@@ -27,6 +27,7 @@ npm run dev     # dev server on http://localhost:4321
 npm run build   # astro build, then pagefind indexes dist/
 npm run preview # serve the built dist/ locally
 npm run check   # astro check (TypeScript + Astro diagnostics)
+npm test        # run the build-time data-reader self-checks
 ```
 
 Site search is powered by [Pagefind](https://pagefind.app/), which indexes `dist/`
@@ -98,6 +99,21 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   review", `keyword=workshop` is "Workshop"); DBLP's `@misc` artifacts are labelled
   "Software" explicitly because the CV does not print that type. The shared bibliography is
   the record; the site mirrors it.
+- **The CV page.** `/cv/` renders `cv/cv.yaml` — the same file `scripts/build-cv-data.mjs`
+  turns into the printed CV — through `src/lib/cv.ts`, which reads it with Vite's `?raw`
+  import (see the sharp-edge note in the repository's `AGENTS.md`: `import.meta.url` fails
+  at prerender) and `src/lib/inline.ts`, which renders that file's portable prose grammar
+  (`**bold**`, `_italic_`, `[text](url)`) with the regex from `build-cv-data.mjs`, so both
+  renderers agree on the two rules that matter — an intra-word underscore is literal and a
+  bare `*` passes through, keeping "CORE Rank: A\*" intact. `data_protection` and
+  `archive.data_protection_optional_sentence` are deliberately not rendered: a GDPR consent
+  written for a selection procedure means nothing on a public page. `service[]` and
+  `projects[]` belong to their own pages. Because the Astro build reads `cv/` and
+  `_bibliography/`, `.github/workflows/web-ci.yml` triggers on those paths too.
+- **The dense row.** `.rows` in `global.css` is the table primitive the CV-fed pages need:
+  `.defs`' label-left/meta-right pattern with a middle column and the dates in Go Mono. It
+  stacks below 760px the way `.entry` does, so nothing scrolls sideways on a phone. Reuse it
+  rather than adding a second row system.
 - **The one script.** 378 bytes inline on the publications page, which copies a BibTeX
   entry to the clipboard. The button ships with `hidden` set and is revealed only where
   `navigator.clipboard` exists, so nothing unusable is ever shown, and the entry is plain
@@ -105,18 +121,22 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   the inspect switch included — runs without script.
 - **Provenance is generated, never written.** Every count, source path, line range and
   "this is missing" note comes from `src/lib/record.ts`, which reads the repository's own
-  files (`_bibliography/papers.bib`, `_news/`, `_pages/`, `_config.yml`) at build time. The
+  files (`_bibliography/papers.bib`, `_news/`, `_pages/`, `_config.yml`) and, for `/cv/`,
+  from `src/lib/cv.ts` reading `cv/cv.yaml` — one registry, `SOURCES`, either way. The
   bibliography gap is a set difference between the news feed and the bibliography, so it
   shrinks on its own as entries are added. Do not hand-write a number the page displays —
-  the site's whole argument is that its claims can be checked. `src/lib/record.test.ts`
-  (`node --experimental-strip-types src/lib/record.test.ts`) asserts the readers still agree
-  with the data.
+  the site's whole argument is that its claims can be checked. That includes what a page says
+  it leaves out: `/cv/` derives its omission list from the file's own keys minus the ones it
+  renders. `src/lib/record.test.ts` and `src/lib/cv.test.ts` (`npm test`, or
+  `node --experimental-strip-types src/lib/<name>.test.ts` for one of them) assert the readers
+  still agree with the data; `web-ci.yml` runs them before the build, which is what makes the
+  widened `cv/**` and `_bibliography/**` triggers useful.
 
 ## Not done yet
 
-Content migration, the CV pipeline and deployment. The home page, `/publications/` and
-`/news/` render the real data — `/news/` reads `_news/` through `src/lib/record.ts`, not
-the `news` collection, so it and the home page cannot disagree; the `/cv/`,
-`/professional_activities/` and `/repositories/` routes are structural placeholders under
-the Ledger page furniture, and the blog and projects routes are wired to their collections
-but still render the sample entries.
+Content migration and deployment. The home page, `/publications/`, `/news/` and `/cv/`
+render the real data — `/news/` reads `_news/` through `src/lib/record.ts`, not the `news`
+collection, so it and the home page cannot disagree; the `/professional_activities/` and
+`/repositories/` routes are structural placeholders under the Ledger page furniture, and
+the blog and projects routes are wired to their collections but still render the sample
+entries. `/cv/` does not yet offer the PDF: publishing it belongs to the cutover.
