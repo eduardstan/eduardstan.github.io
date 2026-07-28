@@ -6,9 +6,9 @@ directory so it can grow incrementally without touching the published site.
 **The live site is still the Jekyll/al-folio tree in the repository root.** It is built
 from `master` by `.github/workflows/deploy.yml` and published to the `gh-pages` branch.
 Nothing here is deployed. Jekyll ignores this directory via the `exclude` list in
-`_config.yml`, and `.github/workflows/web-ci.yml` only builds and type-checks — it has
-`permissions: contents: read` and no deploy step. Cutover is a separate, explicitly
-approved change.
+`_config.yml`, and `.github/workflows/web-ci.yml` only validates the rebuild — it has
+`permissions: contents: read` and no deploy step. Cutover is a separate, explicitly approved
+change.
 
 That `exclude` list also carries a `cv/` entry, which is a publication guard and not dead
 configuration — see "Two sites live in this repo" in the repository root's `AGENTS.md`.
@@ -27,6 +27,7 @@ npm run dev     # dev server on http://localhost:4321
 npm run build   # astro build, then pagefind indexes dist/
 npm run preview # serve the built dist/ locally
 npm run check   # astro check (TypeScript + Astro diagnostics)
+npm test        # run the build-time data-reader self-checks
 ```
 
 Site search is powered by [Pagefind](https://pagefind.app/), which indexes `dist/`
