@@ -159,6 +159,19 @@ function project({ title, detail, dates, items }) {
   return list ? `${head}\n${list}` : head;
 }
 
+/** Recompose the compact service detail printed by the existing CV. */
+function serviceDetail({ venue, section, metric, years }) {
+  const parts = [venue, section];
+  if (years?.length) {
+    const first = years[0].year;
+    const last = years.at(-1).year;
+    const consecutiveAscending = years.every(({ year }, index) => index === 0 || year === years[index - 1].year + 1);
+    parts.push(years.length > 1 && consecutiveAscending ? `${first}–${last}` : years.map(({ year }) => year).join(", "));
+  }
+  const detail = parts.filter(Boolean).join(", ");
+  return metric ? `${detail} **[${metric}]**` : detail;
+}
+
 /** A table body: one `a & b & c \\` line per row. */
 function tableRows(rows, fields) {
   return rows.map((r) => `${fields.map((f) => arg(r[f])).join(" & ")} \\\\`).join("\n");
@@ -247,7 +260,7 @@ function renderPublic(cv) {
     ),
     macro("cvTeachingUnifeRows", tableRows(t.unife.courses, ["course", "programme", "topics", "hours"])),
 
-    macro("cvService", cv.service.map((s) => project({ title: s.role, detail: s.detail, dates: s.dates, items: s.items })).join("\n\n")),
+    macro("cvService", cv.service.map((s) => project({ title: s.role, detail: serviceDetail(s), dates: s.dates, items: s.items })).join("\n\n")),
     macro("cvProjects", cv.projects.map((p) => project(p)).join("\n\n")),
     macro("cvAwards", cv.awards.map((a) => project(a)).join("\n\n")),
 
@@ -296,6 +309,6 @@ function main() {
   console.log(`wrote ${rel(OUT_PUBLIC)}`);
 }
 
-export { renderInline };
+export { renderInline, serviceDetail };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();
