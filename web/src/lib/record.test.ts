@@ -38,6 +38,14 @@ for (const entry of bib.entries) {
   assert.ok(entry.raw.startsWith('@') && entry.raw.endsWith('}'), `${entry.key}: raw not captured`);
 }
 
+for (const key of ['DBLP:data/11/MilellaPSS25', 'DBLP:data/11/MilellaPSS25a']) {
+  const software = bib.entries.find((entry) => entry.key === key);
+  assert.ok(software, `${key}: software entry not parsed`);
+  assert.equal(software.kind, 'Software', `${key}: incorrect kind`);
+  assert.equal(software.venue, 'DROPS Artifacts', `${key}: incorrect venue`);
+  assert.notEqual(software.venue, software.fields.note, `${key}: placeholder note used as venue`);
+}
+
 // Accents, particles and both BibTeX name forms — the cases a naive parser gets
 // wrong. `Stan, Ionel Eduard` read as `First Last` yields `S. I. Eduard`.
 const authors = bib.entries.flatMap((entry) => entry.authors);
