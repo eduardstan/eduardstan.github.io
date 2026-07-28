@@ -5,20 +5,90 @@
    not by the media query alone, so the toggle can override the OS preference. */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
+/* ------------------------------------------------------------------ type ---
+   Three roles, three faces, each doing something the others cannot.
+
+   Display — Archivo Black (Omnibus-Type, SIL OFL 1.1). A grotesque cut for
+   headlines: flat-sided bowls, square terminals, no optical softening. It sets
+   the masthead and the section rules.
+   Text — Inter (Rasmus Andersson, SIL OFL 1.1), with `tnum` on everywhere so
+   years, volumes and page ranges align down a column.
+   Apparatus — Go Mono (Bigelow & Holmes, BSD 3-Clause) for dates, ranks, column
+   heads and every source record. The mono is not decoration: it is the boundary
+   between a rendered claim and the data underneath it.
+
+   All six files are subset to Latin + Latin Extended-A/B and self-hosted from
+   /fonts. No CDN, no network request. See public/fonts/LICENSES.md. */
+@font-face {
+  font-family: 'Archivo Black';
+  src: url('/fonts/Archivo-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Go Mono';
+  src: url('/fonts/GoMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Go Mono';
+  src: url('/fonts/GoMono-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------------------------------------------------------------- tokens ---
+   Monochrome, plus one signal blue reserved entirely for "this is
+   machine-readable": types, ranks, source records, links. Body text measures
+   19.8:1 in light and 16.9:1 in dark; the lightest text on any background is
+   the muted grey at 7.0:1. Everything passes AA, most passes AAA. */
 @theme {
-  --color-page: oklch(99% 0 0);
-  --color-ink: oklch(25% 0.01 260);
-  --color-muted: oklch(50% 0.01 260);
-  --color-rule: oklch(90% 0.005 260);
-  --color-accent: oklch(50% 0.14 250);
+  --color-page: #ffffff;
+  --color-ink: #0a0a0a;
+  --color-muted: #565656;
+  --color-rule: #cbcbcb;
+  --color-hair: #d9d9d9;
+  --color-record: #f4f5fa;
+  --color-accent: #1231d6;
+
+  --font-display: 'Archivo Black', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Go Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 [data-theme='dark'] {
-  --color-page: oklch(19% 0.01 260);
-  --color-ink: oklch(92% 0.005 260);
-  --color-muted: oklch(70% 0.01 260);
-  --color-rule: oklch(32% 0.01 260);
-  --color-accent: oklch(78% 0.11 230);
+  --color-page: #0a0a0a;
+  --color-ink: #ededed;
+  --color-muted: #9c9c9c;
+  --color-rule: #333333;
+  --color-hair: #282828;
+  --color-record: #101218;
+  --color-accent: #8aa5ff;
 }
 
 html {
@@ -32,23 +102,956 @@ html {
 body {
   background-color: var(--color-page);
   color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  font-feature-settings: 'tnum' 1;
 }
 
-/* Shiki is configured with `defaultColor: false`, so every token carries both a
-   `--shiki-light` and a `--shiki-dark` custom property. Pick one per theme. */
-.astro-code,
-.astro-code span {
-  color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
+:where(a, button, summary, input, label, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
-[data-theme='dark'] .astro-code,
-[data-theme='dark'] .astro-code span {
-  color: var(--shiki-dark);
-  background-color: var(--shiki-dark-bg);
+.wrap {
+  max-width: 1560px;
+  margin-inline: auto;
+  padding-inline: clamp(14px, 2.6vw, 40px);
+  /* Keeps the footer rule at the bottom of short pages (404, search). */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-/* Minimal, neutral prose defaults. Visual design is a later task. */
+.wrap > main {
+  flex: 1;
+}
+
+/* Visually hidden, still in the accessibility tree. */
+.vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 12px;
+  top: 12px;
+  z-index: 9;
+  background: var(--color-ink);
+  color: var(--color-page);
+  padding: 0.6rem 1rem;
+}
+
+/* The recurring apparatus label: mono, small, spaced, uppercase. */
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------- topbar --- */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.6rem, 1.6vw, 1.4rem);
+  flex-wrap: wrap;
+  padding-block: 0.6rem;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.bar .who {
+  margin-right: auto;
+  color: var(--color-muted);
+}
+
+.bar nav {
+  display: flex;
+  gap: clamp(0.7rem, 1.6vw, 1.5rem);
+  flex-wrap: wrap;
+}
+
+.bar nav a {
+  padding-block: 0.2rem;
+  border-bottom: 1px solid transparent;
+}
+
+.bar nav a:hover,
+.bar nav a[aria-current='page'] {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.chip {
+  border: 1px solid var(--color-rule);
+  padding: 0.22rem 0.5rem;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ------------------------------------- SIGNATURE: the inspect switch -------
+   A native checkbox, hidden off-screen, with its label in the top bar. One
+   general-sibling rule opens every source record on the page. No JavaScript,
+   and nothing extra to download: the records are already in the HTML, at
+   `display: none`, until the switch is on. */
+.inspect-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  user-select: none;
+}
+
+.inspect-switch::before {
+  content: '';
+  width: 1.5rem;
+  height: 0.7rem;
+  border: 1px solid var(--color-muted);
+  flex: none;
+  background: linear-gradient(
+    to right,
+    var(--color-muted) 0,
+    var(--color-muted) 50%,
+    transparent 50%,
+    transparent 100%
+  );
+}
+
+#inspect:checked ~ .wrap .inspect-switch {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+#inspect:checked ~ .wrap .inspect-switch::before {
+  border-color: var(--color-accent);
+  background: linear-gradient(
+    to right,
+    transparent 0,
+    transparent 50%,
+    var(--color-accent) 50%,
+    var(--color-accent) 100%
+  );
+}
+
+#inspect:focus-visible ~ .wrap .inspect-switch {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.record {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+  background: var(--color-record);
+  border-left: 2px solid var(--color-accent);
+  padding: 0.5rem 0.7rem;
+  margin: 0.5rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.record b {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.record a {
+  color: var(--color-accent);
+}
+
+.record :where(p) {
+  margin: 0;
+}
+
+.record :where(p + p) {
+  margin-top: 0.45rem;
+}
+
+#inspect:checked ~ .wrap .record {
+  display: block;
+}
+
+/* The path badge beside a section head — same switch, inline form. */
+.record-of {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--color-accent);
+  letter-spacing: 0.06em;
+  margin-left: 0.5rem;
+  text-transform: none;
+  /* Paths have no break opportunities of their own, so they would run past the
+     column rule rather than wrap. */
+  overflow-wrap: anywhere;
+}
+
+#inspect:checked ~ .wrap .record-of {
+  display: inline;
+}
+
+/* -------------------------------------------------------------- masthead --- */
+.masthead {
+  padding-top: clamp(18px, 2.4vw, 34px);
+}
+
+.masthead h1 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.1rem, 8.65vw, 8.8rem);
+  line-height: 0.9;
+  letter-spacing: -0.038em;
+  margin: 0;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.dateline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.4rem;
+  padding-block: 0.7rem;
+  border-top: 1px solid var(--color-ink);
+  border-bottom: 4px solid var(--color-ink);
+  margin-top: clamp(10px, 1.4vw, 18px);
+}
+
+.dateline .em {
+  color: var(--color-accent);
+}
+
+/* ------------------------------------------------------------ broadsheet --- */
+.sheet {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 760px) {
+  .sheet {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1120px) {
+  .sheet {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.col {
+  min-width: 0;
+  padding-block: clamp(16px, 1.8vw, 26px);
+  border-top: 1px solid var(--color-rule);
+}
+
+@media (min-width: 760px) {
+  .col {
+    padding-inline: clamp(14px, 1.6vw, 26px);
+    border-left: 1px solid var(--color-rule);
+    border-top: 0;
+  }
+
+  .col:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (min-width: 760px) and (max-width: 1119px) {
+  /* Two columns: the feed drops full width underneath rather than squeezing. */
+  .col:nth-child(3) {
+    grid-column: 1 / -1;
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid var(--color-rule);
+    margin-top: 1rem;
+  }
+}
+
+.sec {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  letter-spacing: -0.015em;
+  line-height: 1;
+  margin: 0 0 0.2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-ink);
+}
+
+.col p {
+  margin: 0.85rem 0 0;
+}
+
+/* Column heads after the first get air above them. The record block between
+   them is display:none when inspect is off, but adjacency still holds. */
+:where(.defs, .stats, .strands, .record, .feed) + .sec {
+  margin-top: 1.6rem;
+}
+
+.colophon {
+  margin-top: clamp(18px, 2.4vw, 30px);
+  color: var(--color-muted);
+}
+
+.after-index {
+  margin-top: clamp(24px, 3vw, 40px);
+}
+
+.lead p {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+/* ------------------------------------------- the person, in the grid -------
+   Ledger's honest weakness is that it meets a prospective student with an
+   institution rather than a person. The portrait and the line beside it are the
+   answer, and they sit inside the lead column above the fold rather than in a
+   bolted-on hero. The photograph keeps its colour: it is the one warm thing on
+   a monochrome front page, which is the entire point of it being here. */
+.person {
+  display: grid;
+  grid-template-columns: clamp(96px, 12vw, 148px) minmax(0, 1fr);
+  gap: clamp(0.9rem, 1.6vw, 1.4rem);
+  align-items: start;
+  padding-bottom: clamp(14px, 1.6vw, 20px);
+  margin-bottom: clamp(14px, 1.6vw, 20px);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.person img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: center 22%;
+  border: 1px solid var(--color-rule);
+  display: block;
+}
+
+.person blockquote {
+  margin: 0;
+  font-size: clamp(1.0625rem, 1.55vw, 1.3rem);
+  line-height: 1.35;
+  letter-spacing: -0.012em;
+  text-wrap: pretty;
+}
+
+.person figcaption {
+  margin-top: 0.5rem;
+  color: var(--color-muted);
+}
+
+/* ----------------------------------------------------------------- stats --- */
+.stats {
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0;
+}
+
+.stats li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  border-bottom: 1px solid var(--color-hair);
+  padding-block: 0.45rem;
+}
+
+.stats .n {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.5rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  min-width: 2.6ch;
+}
+
+.stats .l {
+  color: var(--color-muted);
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+}
+
+/* --------------------------------------------------------------- strands ---
+   Three research strands, numbered but not ranked: same type, same size, same
+   rule above each. Nothing in the design promotes one of them. */
+.strands {
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  counter-reset: strand;
+}
+
+.strands li {
+  counter-increment: strand;
+  border-top: 1px solid var(--color-hair);
+  padding-block: 0.7rem;
+}
+
+.strands li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.strands h3 {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.strands h3::before {
+  content: '[' counter(strand) '] ';
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 0.8125rem;
+}
+
+.strands p {
+  margin: 0.25rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------ feed --- */
+.feed {
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0;
+}
+
+.feed li {
+  border-top: 1px solid var(--color-hair);
+  padding-block: 0.55rem;
+}
+
+.feed li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.more-feed {
+  margin-top: 0.8rem;
+}
+
+.more-feed a {
+  color: var(--color-accent);
+  border-bottom: 1px solid var(--color-accent);
+}
+
+.feed .when {
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+  display: block;
+}
+
+.feed p {
+  margin: 0.12rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* Feed items are whole sentences with links inside them, so the link rule is
+   an underline that skips descenders rather than a border across three lines. */
+.feed a {
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--color-rule);
+  text-underline-offset: 2px;
+}
+
+.feed a:hover {
+  color: var(--color-accent);
+  text-decoration-color: var(--color-accent);
+}
+
+/* ------------------------------------------------------------------ defs --- */
+.defs {
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0;
+}
+
+.defs li {
+  display: flex;
+  gap: 0.7rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--color-hair);
+  padding-block: 0.42rem;
+}
+
+.defs li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.defs .a {
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  flex: 1 1 auto;
+}
+
+.defs .b {
+  font-size: 0.625rem;
+  letter-spacing: 0.05em;
+  color: var(--color-muted);
+  margin-left: auto;
+  text-align: right;
+}
+
+.rank {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  border: 1px solid var(--color-rule);
+  padding: 0 0.25rem;
+  margin-left: 0.35rem;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------------- index ---
+   The publications index. Every row is a <details>: the summary is the row you
+   see, and opening it reveals the abstract and the record. Borrowed from
+   direction 02 — the row itself is the control, so there is nothing extra to
+   click and nothing to hunt for. */
+.pagehead {
+  padding-top: clamp(18px, 2.4vw, 34px);
+}
+
+.pagehead {
+  border-bottom: 4px solid var(--color-ink);
+  padding-bottom: clamp(10px, 1.4vw, 16px);
+  margin-bottom: clamp(16px, 2vw, 26px);
+}
+
+.pagehead h1 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(2.1rem, 8.65vw, 8.8rem);
+  line-height: 0.9;
+  letter-spacing: -0.038em;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Secondary pages are a single reading column under the same masthead rule. */
+.single {
+  max-width: 78ch;
+}
+
+.posttitle {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.4rem, 3vw, 2.1rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.blurb {
+  margin: 1rem 0 0;
+  max-width: 78ch;
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.blurb b {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* `~`, not `+`: the sort bar sits between the two below 900px. */
+.pagehead:has(~ .index) {
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+
+/* Ordering controls. The column headings carry the same links at >=900px, so
+   this row is what a narrow screen gets instead. */
+.sortbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1rem;
+  margin-top: clamp(14px, 1.8vw, 22px);
+  color: var(--color-muted);
+}
+
+.sortbar a {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.sortbar a:hover {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.sortbar a[aria-current='page'] {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+@media (min-width: 900px) {
+  .sortbar {
+    display: none;
+  }
+}
+
+.index {
+  margin-top: clamp(16px, 2vw, 28px);
+  border-top: 4px solid var(--color-ink);
+}
+
+.index-head {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .index-head {
+    display: grid;
+    grid-template-columns: 2.6rem 3rem 8.5rem minmax(0, 1fr) 6rem;
+    gap: 0.9rem;
+    border-bottom: 2px solid var(--color-ink);
+    padding-block: 0.4rem;
+    position: sticky;
+    top: 0;
+    background: var(--color-page);
+    z-index: 2;
+  }
+
+  .index-head span {
+    font-size: 0.625rem;
+    letter-spacing: 0.09em;
+    color: var(--color-muted);
+  }
+
+  .index-head span:last-child {
+    text-align: right;
+  }
+
+  .index-head a {
+    color: var(--color-muted);
+    border-bottom: 1px solid transparent;
+  }
+
+  .index-head a:hover {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+  }
+
+  .index-head a[aria-current='page'] {
+    color: var(--color-ink);
+  }
+}
+
+.entry {
+  border-bottom: 1px solid var(--color-hair);
+}
+
+.entry > summary {
+  list-style: none;
+  cursor: pointer;
+  padding-block: 0.75rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.15rem 0.9rem;
+  align-items: baseline;
+}
+
+.entry > summary::-webkit-details-marker {
+  display: none;
+}
+
+.entry > summary:hover .t {
+  color: var(--color-accent);
+}
+
+@media (min-width: 900px) {
+  .entry > summary {
+    grid-template-columns: 2.6rem 3rem 8.5rem minmax(0, 1fr) 6rem;
+  }
+}
+
+.entry .no,
+.entry .yr,
+.entry .ty {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.05em;
+  color: var(--color-muted);
+  text-transform: uppercase;
+}
+
+.entry .yr {
+  color: var(--color-ink);
+}
+
+.entry .ty {
+  color: var(--color-accent);
+}
+
+.entry .body {
+  min-width: 0;
+}
+
+.entry .t {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.011em;
+  overflow-wrap: anywhere;
+}
+
+.entry .au {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.entry .au b {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.entry .vn {
+  margin: 0.12rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.entry .more {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  border-bottom: 1px solid var(--color-accent);
+  justify-self: start;
+  white-space: nowrap;
+}
+
+.entry .more::after {
+  content: 'the record ↓';
+}
+
+.entry[open] .more::after {
+  content: 'close ↑';
+}
+
+@media (min-width: 900px) {
+  .entry .more {
+    justify-self: end;
+  }
+}
+
+@media (max-width: 899px) {
+  .entry > summary {
+    display: block;
+  }
+
+  .entry .no,
+  .entry .yr,
+  .entry .ty {
+    display: inline;
+  }
+
+  .entry .no::after,
+  .entry .yr::after {
+    content: ' · ';
+  }
+
+  .entry .body {
+    margin-top: 0.2rem;
+  }
+
+  .entry .more {
+    display: inline-block;
+    margin-top: 0.4rem;
+  }
+}
+
+.entry::details-content {
+  block-size: 0;
+  overflow: hidden;
+  opacity: 0.001;
+  transition:
+    block-size 430ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 300ms ease,
+    content-visibility 430ms allow-discrete;
+}
+
+.entry[open]::details-content {
+  block-size: auto;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry::details-content {
+    transition: none;
+  }
+}
+
+.reveal {
+  padding: 0 0 1.1rem;
+  max-width: 92ch;
+}
+
+@media (min-width: 900px) {
+  .reveal {
+    padding-left: calc(2.6rem + 3rem + 8.5rem + 2.7rem);
+  }
+}
+
+.reveal .abstract {
+  margin: 0;
+  max-width: 68ch;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.reveal dl {
+  margin: 0.7rem 0 0;
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.25rem 0.9rem;
+  font-size: 0.8125rem;
+}
+
+.reveal dt {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  padding-top: 0.15rem;
+}
+
+.reveal dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* The entry, verbatim, with a button that copies it. The <pre> is the record
+   and stays selectable; the button is revealed by script only where the
+   Clipboard API exists. */
+.bibtex {
+  margin-top: 0.9rem;
+}
+
+.bibtex-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.35rem;
+  color: var(--color-muted);
+}
+
+.bibtex pre {
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+  background: var(--color-record);
+  border-left: 2px solid var(--color-rule);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.copy {
+  color: var(--color-muted);
+}
+
+.reveal .open {
+  display: inline-block;
+  margin-top: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  border-bottom: 1px solid var(--color-accent);
+}
+
+/* ---------------------------------------------------------------- footer --- */
+.sheet-footer {
+  border-top: 4px solid var(--color-ink);
+  margin-top: clamp(24px, 3vw, 44px);
+  padding-block: clamp(18px, 2.4vw, 32px) clamp(28px, 4vw, 54px);
+}
+
+.footer-grid {
+  display: grid;
+  gap: clamp(16px, 2vw, 32px);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 760px) {
+  .footer-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.footer-grid h2 {
+  margin: 0 0 0.5rem;
+  color: var(--color-muted);
+  font-weight: 400;
+}
+
+.footer-grid a {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.footer-grid a:hover {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.footer-grid address {
+  font-style: normal;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  align-items: flex-start;
+}
+
+/* ------------------------------------------------------------------ prose --- */
 .prose :where(h2, h3, h4) {
   font-weight: 600;
   line-height: 1.3;
@@ -93,14 +1096,12 @@ body {
 
 .prose :where(pre) {
   overflow-x: auto;
-  border-radius: 0.5rem;
   padding: 1rem;
   font-size: 0.875rem;
 }
 
 .prose :where(:not(pre) > code) {
   background-color: color-mix(in oklab, var(--color-rule) 60%, transparent);
-  border-radius: 0.25rem;
   padding: 0.1em 0.35em;
   font-size: 0.9em;
 }
@@ -110,4 +1111,18 @@ body {
   overflow-x: auto;
   overflow-y: hidden;
   padding-block: 0.25rem;
+}
+
+/* Shiki is configured with `defaultColor: false`, so every token carries both a
+   `--shiki-light` and a `--shiki-dark` custom property. Pick one per theme. */
+.astro-code,
+.astro-code span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+[data-theme='dark'] .astro-code,
+[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
 }

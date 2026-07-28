@@ -1,0 +1,294 @@
+---
+/**
+ * The publications index, in four orders.
+ *
+ * Sorting is pre-rendered, not computed in the browser: each order is its own
+ * static page and the column headers are links between them. That keeps the
+ * page working with JavaScript off, keeps the inspect switch's zero-JS property
+ * intact, and gives every order a URL that can be linked and bookmarked. Four
+ * pages of the same bibliography is a rounding error next to the fonts.
+ *
+ * Searching is not reimplemented here. The site already has Pagefind at
+ * /search/, which indexes these rows — including the abstracts — so the index
+ * points at it rather than shipping a second search box.
+ */
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Record from '../../components/Record.astro';
+import { bibliography, bibliographyGaps, SOURCES, type Publication } from '../../lib/record';
+
+/**
+ * The order the CV prints them in — journals, conferences, workshops, under
+ * review — with the entry types the CV's Publications section does not print
+ * after them. Anything unrecognised sorts last rather than being dropped.
+ */
+const KIND_ORDER = [
+  'Journal',
+  'Conference',
+  'Workshop',
+  'Under review',
+  'Preprint',
+  'Chapter',
+  'Book',
+  'Report',
+  'Software',
+  'Thesis',
+];
+const byKind = (entry: Publication) => {
+  const rank = KIND_ORDER.indexOf(entry.kind);
+  return rank === -1 ? KIND_ORDER.length : rank;
+};
+const newestFirst = (a: Publication, b: Publication) =>
+  b.year - a.year || a.title.localeCompare(b.title);
+
+const SORTS = {
+  year: {
+    label: 'Newest first',
+    column: 'yr',
+    marker: '↓',
+    compare: newestFirst,
+  },
+  'year-asc': {
+    label: 'Oldest first',
+    column: 'yr',
+    marker: '↑',
+    compare: (a: Publication, b: Publication) => a.year - b.year || a.title.localeCompare(b.title),
+  },
+  type: {
+    label: 'By type',
+    column: 'ty',
+    marker: '↓',
+    compare: (a: Publication, b: Publication) => byKind(a) - byKind(b) || newestFirst(a, b),
+  },
+  title: {
+    label: 'By title',
+    column: 't',
+    marker: '↓',
+    compare: (a: Publication, b: Publication) => a.title.localeCompare(b.title),
+  },
+} as const;
+
+type SortKey = keyof typeof SORTS;
+
+export const getStaticPaths = (() => [
+  { params: { sort: undefined } },
+  { params: { sort: 'year-asc' } },
+  { params: { sort: 'type' } },
+  { params: { sort: 'title' } },
+]) satisfies GetStaticPaths;
+
+const active = ((Astro.params.sort as SortKey | undefined) ?? 'year') satisfies SortKey;
+const bib = bibliography();
+const gaps = bibliographyGaps();
+const entries = [...bib.entries].sort(SORTS[active].compare);
+
+/** The Year header toggles direction; the others switch to their own order. */
+const columns = [
+  { column: 'yr', label: 'Year', href: active === 'year' ? 'year-asc' : 'year' },
+  { column: 'ty', label: 'Type', href: 'type' },
+  { column: 't', label: 'Title / authors / venue', href: 'title' },
+] as const;
+const href = (sort: string) => (sort === 'year' ? '/publications/' : `/publications/${sort}/`);
+const marker = (column: string) => (SORTS[active].column === column ? ` ${SORTS[active].marker}` : '');
+
+const dateFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'short', timeZone: 'UTC' });
+const isHim = (author: string) => author === 'I. E. Stan';
+const pad = (index: number) => String(index + 1).padStart(2, '0');
+const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.years.last}, read from ${SOURCES.bibliography} at build time.`;
+---
+
+{
+  /* Only the default order is indexed, and the other three name it as their
+     canonical URL. They hold the same rows, and four copies of every paper in
+     the search results helps nobody. */
+}
+<BaseLayout
+  title={`Index of publications — ${SORTS[active].label}`}
+  description={description}
+  canonical={active === 'year' ? undefined : '/publications/'}
+  noindex={active !== 'year'}
+>
+  <section class="pagehead">
+    <h1>Index</h1>
+    <p class="blurb">
+      <b>{bib.entries.length} entries, {bib.years.first}–{bib.years.last}</b>, read from <b
+        >{SOURCES.bibliography}</b
+      > when this page was built, and nothing is left out — manuscripts under review and released
+      software are entries here like any other. Open a row for its abstract, its record and its
+      BibTeX. Order the index by year, type or title, <a href="/search/">search the site</a> to find
+      a paper by title, author or a word in its abstract, and turn <b>inspect sources</b> on, in the
+      bar above, to see where each part of this page comes from.
+      {
+        gaps.length > 0 && (
+          <>
+            {' '}
+            {gaps.length} paper{gaps.length === 1 ? '' : 's'} announced in the news feed{' '}
+            {gaps.length === 1 ? 'has' : 'have'} no entry here yet; they are listed under the index.
+          </>
+        )
+      }
+    </p>
+  </section>
+
+  {
+    /* Below 900px the column headings are not on screen, so the same links
+       appear as an ordinary row of controls. */
+  }
+  <nav class="sortbar label" aria-label="Order the index">
+    <span>Order</span>
+    {
+      (Object.keys(SORTS) as SortKey[]).map((key) => (
+        <a href={href(key)} aria-current={key === active ? 'page' : undefined}>
+          {SORTS[key].label}
+        </a>
+      ))
+    }
+  </nav>
+
+  <div class="index">
+    <div class="index-head label">
+      <span>No.</span>
+      {
+        columns.map((column) => (
+          <a href={href(column.href)} aria-current={column.href === active ? 'page' : undefined}>
+            {column.label}
+            {marker(column.column)}
+          </a>
+        ))
+      }
+      <span>Record</span>
+    </div>
+    {
+      entries.map((entry, index) => (
+        <details class="entry">
+          <summary>
+            <span class="no">{pad(index)}</span>
+            <span class="yr">{entry.year > 0 ? entry.year : '—'}</span>
+            <span class="ty">{entry.kind}</span>
+            <div class="body">
+              <h2 class="t">{entry.title}</h2>
+              <p class="au">
+                {entry.authors.map((author, position) => (
+                  <>
+                    {position > 0 && ', '}
+                    {isHim(author) ? <b>{author}</b> : author}
+                  </>
+                ))}
+              </p>
+              <p class="vn">{entry.venue}</p>
+            </div>
+            <span class="more" aria-hidden="true" />
+          </summary>
+          <div class="reveal">
+            {entry.abstract && <p class="abstract">{entry.abstract}</p>}
+            <dl>
+              {entry.detail && (
+                <>
+                  <dt>Record</dt>
+                  <dd>{entry.detail}</dd>
+                </>
+              )}
+              {entry.doi && (
+                <>
+                  <dt>DOI</dt>
+                  <dd>{entry.doi}</dd>
+                </>
+              )}
+              {!entry.abstract && (
+                <>
+                  <dt>Abstract</dt>
+                  <dd>No abstract in the BibTeX entry.</dd>
+                </>
+              )}
+            </dl>
+            <div class="bibtex">
+              <p class="bibtex-head">
+                <span class="label">BibTeX</span>
+                <button type="button" class="chip label copy" hidden aria-live="polite">
+                  Copy
+                </button>
+              </p>
+              <pre>{entry.raw}</pre>
+            </div>
+            {entry.url && (
+              <a class="open" href={entry.url}>
+                Open the paper →
+              </a>
+            )}
+          </div>
+        </details>
+      ))
+    }
+  </div>
+
+  <Record>
+    <p>
+      <b>{SOURCES.bibliography}</b> — {bib.entries.length} entries parsed at build, shown here {
+        SORTS[active].label.toLowerCase()
+      }. Every row is one entry: the number is its position in this order, the type is its BibTeX
+      entry type, and everything under an open row is that entry's own text. Nothing on this page is
+      transcribed by hand.
+    </p>
+    <p>
+      {bib.byKind.map((kind) => `${kind.count} ${kind.kind.toLowerCase()}`).join(', ')}.{' '}
+      {bib.entries.filter((entry) => entry.abstract).length} of {bib.entries.length} entries carry an
+      abstract; the rest show their record only. The four orders are four static pages —
+      /publications/, /publications/year-asc/, /publications/type/ and /publications/title/ — so
+      ordering the index needs no JavaScript.
+    </p>
+  </Record>
+
+  {
+    gaps.length > 0 && (
+      <section class="after-index">
+        <h2 class="sec">Announced, not yet recorded</h2>
+        <ul class="defs">
+          {gaps.map((gap) => (
+            <li>
+              <span class="a">{gap.title}</span>
+              <span class="b label">announced {dateFormat.format(gap.announced)}</span>
+            </li>
+          ))}
+        </ul>
+        <p class="blurb">
+          These papers are announced in the news feed but have no entry in{' '}
+          <b>{SOURCES.bibliography}</b>. This list is the difference between the two, computed when
+          the page was built: adding the entries removes them from here.
+        </p>
+        <Record>
+          {gaps.map((gap) => (
+            <p>
+              <b>{gap.source}</b> — announced {dateFormat.format(gap.announced)}; no entry whose
+              title matches "{gap.title}" in {SOURCES.bibliography}.
+            </p>
+          ))}
+        </Record>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<script>
+  // The only script on this page, and the only thing it does is put an entry on
+  // the clipboard. The button ships hidden and is revealed here, so a browser
+  // without the Clipboard API never shows a control that cannot work — the
+  // BibTeX is plain <pre> text and stays selectable either way.
+  if (navigator.clipboard) {
+    for (const button of document.querySelectorAll<HTMLButtonElement>('.copy')) {
+      button.hidden = false;
+    }
+    document.addEventListener('click', async (event) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>('.copy');
+      const entry = button?.closest('.bibtex')?.querySelector('pre');
+      if (!button || !entry) return;
+      try {
+        await navigator.clipboard.writeText(entry.textContent ?? '');
+        button.textContent = 'Copied';
+        setTimeout(() => (button.textContent = 'Copy'), 1500);
+      } catch {
+        // Denied or unavailable: the entry is still there to select by hand.
+        button.textContent = 'Select it';
+      }
+    });
+  }
+</script>

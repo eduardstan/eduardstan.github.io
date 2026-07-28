@@ -4,12 +4,14 @@ interface Props {
   description: string;
 }
 
+import PageHead from './PageHead.astro';
+
 const { heading, description } = Astro.props;
 ---
 
-<h1 class="text-2xl font-semibold">{heading}</h1>
-<p class="mt-4 text-muted">
+<PageHead title={heading} />
+<p class="single mt-4 text-muted">
   Structural placeholder. This route exists so the rebuild's navigation and
   routing can be verified; its content is filled in by a later task.
 </p>
-<div class="prose mt-6"><p>{description}</p></div>
+<div class="prose single mt-6"><p>{description}</p></div>
