@@ -42,10 +42,8 @@ person:
 # -----------------------------------------------------------------------------
 # Contact.
 #
-# PUBLIC contact only. The captain's mobile number and personal Gmail address
-# live in `cv/private.yaml`, which is gitignored and must never be committed.
-# When that file is present the build merges it and the contact line gains the
-# private fields; when it is absent (public CI build) they are omitted cleanly.
+# These contact facts are public. The mobile number is deliberately omitted
+# from the CV.
 # -----------------------------------------------------------------------------
 contact:
   email: ioneleduard.stan@unimib.it
