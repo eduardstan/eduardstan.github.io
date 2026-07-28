@@ -1,0 +1,113 @@
+@import 'tailwindcss';
+@import 'katex/dist/katex.min.css';
+
+/* Dark mode is driven by `data-theme="dark"` on <html> (see ThemeScript.astro),
+   not by the media query alone, so the toggle can override the OS preference. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  --color-page: oklch(99% 0 0);
+  --color-ink: oklch(25% 0.01 260);
+  --color-muted: oklch(50% 0.01 260);
+  --color-rule: oklch(90% 0.005 260);
+  --color-accent: oklch(50% 0.14 250);
+}
+
+[data-theme='dark'] {
+  --color-page: oklch(19% 0.01 260);
+  --color-ink: oklch(92% 0.005 260);
+  --color-muted: oklch(70% 0.01 260);
+  --color-rule: oklch(32% 0.01 260);
+  --color-accent: oklch(78% 0.11 230);
+}
+
+html {
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-page);
+  color: var(--color-ink);
+}
+
+/* Shiki is configured with `defaultColor: false`, so every token carries both a
+   `--shiki-light` and a `--shiki-dark` custom property. Pick one per theme. */
+.astro-code,
+.astro-code span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+[data-theme='dark'] .astro-code,
+[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+
+/* Minimal, neutral prose defaults. Visual design is a later task. */
+.prose :where(h2, h3, h4) {
+  font-weight: 600;
+  line-height: 1.3;
+  margin-block: 1.6em 0.6em;
+}
+
+.prose :where(h2) {
+  font-size: 1.35rem;
+}
+
+.prose :where(h3) {
+  font-size: 1.15rem;
+}
+
+.prose :where(p, ul, ol, blockquote, pre, table) {
+  margin-block: 1em;
+}
+
+.prose :where(ul, ol) {
+  padding-inline-start: 1.5em;
+}
+
+.prose :where(ul) {
+  list-style: disc;
+}
+
+.prose :where(ol) {
+  list-style: decimal;
+}
+
+.prose :where(a) {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose :where(blockquote) {
+  border-inline-start: 3px solid var(--color-rule);
+  padding-inline-start: 1em;
+  color: var(--color-muted);
+}
+
+.prose :where(pre) {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 0.875rem;
+}
+
+.prose :where(:not(pre) > code) {
+  background-color: color-mix(in oklab, var(--color-rule) 60%, transparent);
+  border-radius: 0.25rem;
+  padding: 0.1em 0.35em;
+  font-size: 0.9em;
+}
+
+/* KaTeX display math can be wider than the column. */
+.prose :where(.katex-display) {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.25rem;
+}

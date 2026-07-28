@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Pagefind indexes `dist/` after `astro build` (see the `build` script) and
+// writes its runtime to `/pagefind/`. Those files only exist in a built site,
+// so search works under `astro preview` but not under `astro dev`. The tags
+// below are `is:inline` for the same reason: Vite must not try to resolve them
+// at build time.
+---
+
+<BaseLayout title="Search" description="Search this site.">
+  <link slot="head" rel="stylesheet" href="/pagefind/pagefind-component-ui.css" />
+  <script slot="head" is:inline type="module" src="/pagefind/pagefind-component-ui.js"></script>
+  <h1 class="text-2xl font-semibold">Search</h1>
+  <div class="mt-6" data-pagefind-ignore>
+    <pagefind-searchbox></pagefind-searchbox>
+  </div>
+  <noscript>
+    <p class="mt-4 text-muted">Search requires JavaScript.</p>
+  </noscript>
+</BaseLayout>

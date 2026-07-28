@@ -1,0 +1,35 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { dateFormat } from '../../lib/content';
+
+const items = (await getCollection('news')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+
+const rendered = await Promise.all(
+  items.map(async (item) => ({ item, Content: (await render(item)).Content })),
+);
+---
+
+<BaseLayout title="News" description="Announcements and updates.">
+  <h1 class="text-2xl font-semibold">News</h1>
+  <p class="mt-4 text-muted">
+    Structural placeholder rendering the sample news collection. Real items are
+    migrated by a later task.
+  </p>
+  <ul class="mt-6 space-y-4">
+    {
+      rendered.map(({ item, Content }) => (
+        <li>
+          <p class="text-sm text-muted">
+            <time datetime={item.data.date.toISOString()}>{dateFormat.format(item.data.date)}</time>
+          </p>
+          <div class="prose">
+            <Content />
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
