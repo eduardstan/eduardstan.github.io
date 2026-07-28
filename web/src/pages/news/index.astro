@@ -14,7 +14,7 @@ const rendered = await Promise.all(
 
 <BaseLayout title="News" description="Announcements and updates.">
   <h1 class="text-2xl font-semibold">News</h1>
-  <p class="mt-4 text-[var(--color-muted)]">
+  <p class="mt-4 text-muted">
     Structural placeholder rendering the sample news collection. Real items are
     migrated by a later task.
   </p>
@@ -22,7 +22,7 @@ const rendered = await Promise.all(
     {
       rendered.map(({ item, Content }) => (
         <li>
-          <p class="text-sm text-[var(--color-muted)]">
+          <p class="text-sm text-muted">
             <time datetime={item.data.date.toISOString()}>{dateFormat.format(item.data.date)}</time>
           </p>
           <div class="prose">

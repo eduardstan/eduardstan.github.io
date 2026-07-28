@@ -7,7 +7,7 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
 
 <BaseLayout title="Projects" description="Projects by Eduard I. Stan.">
   <h1 class="text-2xl font-semibold">Projects</h1>
-  <p class="mt-4 text-[var(--color-muted)]">
+  <p class="mt-4 text-muted">
     Structural placeholder rendering the sample projects collection. Real
     projects are migrated by a later task.
   </p>
@@ -20,7 +20,7 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
           {project.data.github && (
             <a
               href={project.data.github}
-              class="text-sm text-[var(--color-accent)] underline underline-offset-2"
+              class="text-sm text-accent underline underline-offset-2"
             >
               GitHub
             </a>

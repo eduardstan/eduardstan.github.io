@@ -16,8 +16,11 @@ When changing either site, verify the other still builds.
 
 That same `exclude:` list carries a `cv/` entry. No such directory exists on this branch yet — the
 exclusion is deliberately in place _ahead_ of the task that creates it, because `cv/` will hold CV
-sources and generated output that must never be published. **Do not delete it as dead
-configuration**: removing it is what would publish that material once the directory lands.
+sources and generated output that must never appear on the published site. **Do not delete it as
+dead configuration**: removing it is what would publish that material once the directory lands. It
+is only a publication guard, though — it does not keep anything out of the git repository, so
+whatever under `cv/` must never be committed is a plain `.gitignore` concern, separate from this
+entry.
 
 ## Sharp edges
 
