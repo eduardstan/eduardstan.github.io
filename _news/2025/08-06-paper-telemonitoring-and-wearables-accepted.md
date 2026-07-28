@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-**Authenticated Robotic Teleoperation with Task Recognition** has been accepted for publication in the [IEEE Consumer Electronics Magazine](https://ctsoc.ieee.org/publications/ieee-consumer-electronics-magazine.html).
+**Authenticated Robotic Teleoperation with Task Recognition** has been accepted for publication in the [IEEE Consumer Electronics Magazine](https://ctsoc.ieee.org/publications/ieee-consumer-electronics-magazine).
