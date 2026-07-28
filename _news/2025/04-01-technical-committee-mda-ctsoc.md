@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-I am now a member of the **Machine learning, Deep learning and AI in CE (MDA) Technical Committee** of the [IEEE Consumer Technology Society (CTSoc)](https://ctsoc.ieee.org/technical/technical-committees/mda-tc.html).
+I am now a member of the **Machine learning, Deep learning and AI in CE (MDA) Technical Committee** of the [IEEE Consumer Technology Society (CTSoc)](https://ctsoc.ieee.org/technical/technical-committees/mda-tc).
