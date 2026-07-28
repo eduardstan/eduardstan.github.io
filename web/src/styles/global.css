@@ -867,9 +867,11 @@ body {
   }
 }
 
-.entry {
-  border-bottom: 1px solid var(--color-hair);
+/* The row's own rule lives on the wrapper, not on the <details>: the link is a
+   sibling of the <details> and has to sit above that rule, not below it. */
+.entry-row {
   position: relative;
+  border-bottom: 1px solid var(--color-hair);
 }
 
 .entry > summary {
@@ -948,7 +950,7 @@ body {
 }
 
 /* Reserve the last column for the open/close cue. The real link is a sibling
-   of the summary and is positioned over the same edge below. */
+   of the <details> and is positioned over the same edge below. */
 .entry .acts {
   display: flex;
   flex-wrap: wrap;
@@ -957,7 +959,7 @@ body {
   justify-self: start;
 }
 
-.entry .go,
+.entry-row .go,
 .entry .more {
   font-family: var(--font-mono);
   font-size: 0.625rem;
@@ -968,13 +970,13 @@ body {
   white-space: nowrap;
 }
 
-/* This sibling of the summary is the one control that does not toggle the row. */
-.entry .go:hover {
+/* The one control on the row that does not toggle it. */
+.entry-row .go:hover {
   color: var(--color-ink);
   border-bottom-color: var(--color-ink);
 }
 
-.entry > .go {
+.entry-row > .go {
   position: absolute;
   top: 0.75rem;
   right: 0;
@@ -1022,10 +1024,13 @@ body {
     margin-top: 0.4rem;
   }
 
-  .entry > .go {
+  /* Stacked under the row's own control, tucked back up under the summary's
+     bottom padding so it still reads as part of the row above the rule. */
+  .entry-row > .go {
     position: static;
-    display: inline-block;
-    margin: -0.45rem 0 0.75rem;
+    display: block;
+    width: fit-content;
+    margin: -0.35rem 0 0.75rem;
   }
 }
 
