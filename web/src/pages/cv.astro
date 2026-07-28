@@ -9,11 +9,7 @@
  * build time, so a change to the YAML changes the record with it.
  *
  * What the page leaves out is derived the same way, from the file's own keys
- * minus the ones rendered here, so the omission list cannot drift: the two
- * data-protection notices are a GDPR consent written for a selection procedure,
- * which means nothing on a public page; `service[]` and `projects[]` belong to
- * /professional_activities/ and /projects/; `person` and `contact` are the
- * printed CV's letterhead.
+ * minus the ones rendered here, so the omission list cannot drift.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
@@ -52,8 +48,12 @@ const rendered = [
   'languages',
   'archive',
 ];
-const omitted = Object.keys(cv).filter((key) => !rendered.includes(key));
-const archiveOmitted = Object.keys(cv.archive).filter((key) => key !== 'leadership');
+const omitted = [
+  ...Object.keys(cv).filter((key) => !rendered.includes(key)),
+  ...Object.keys(cv.archive)
+    .filter((key) => key !== 'leadership')
+    .map((key) => `archive.${key}`),
+];
 
 const description =
   `Curriculum vitae — ${cv.appointments.length} appointments, ${cv.education.length} degrees, ` +
@@ -279,11 +279,8 @@ const description =
       doing that.
     </p>
     <p>
-      What this page leaves out is derived too — the file's top-level keys minus the ones rendered
-      above: {omitted.join(', ')}, and inside <b>archive</b>, {archiveOmitted.join(', ')}. The two
-      data-protection notices are a consent written for a selection procedure, which has no meaning
-      here; <b>service</b> and <b>projects</b> have their own pages; <b>person</b> and <b>contact</b> are
-      the printed CV's letterhead, not repeated on a page that already has one.
+      These fields exist in <b>{CV_SOURCE}</b> and this page does not render them: {omitted.join(', ')}.
+      The list is derived from the source keys minus the fields rendered above.
     </p>
   </Record>
 
