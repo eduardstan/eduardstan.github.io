@@ -6,7 +6,7 @@
  * static page and the column headers are links between them. That keeps the
  * page working with JavaScript off, keeps the inspect switch's zero-JS property
  * intact, and gives every order a URL that can be linked and bookmarked. Four
- * pages of 29 rows is a rounding error next to the fonts.
+ * pages of the same bibliography is a rounding error next to the fonts.
  *
  * Searching is not reimplemented here. The site already has Pagefind at
  * /search/, which indexes these rows — including the abstracts — so the index
@@ -97,13 +97,17 @@ const pad = (index: number) => String(index + 1).padStart(2, '0');
 const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.years.last}, read from ${SOURCES.bibliography} at build time.`;
 ---
 
-<BaseLayout title={`Index of publications — ${SORTS[active].label}`} description={description}>
-  {
-    /* Only the default order is indexed. The other three hold the same rows,
-       and four copies of every paper in the search results helps nobody. */
-  }
-  {active !== 'year' && <link slot="head" rel="canonical" href="/publications/" />}
-
+{
+  /* Only the default order is indexed, and the other three name it as their
+     canonical URL. They hold the same rows, and four copies of every paper in
+     the search results helps nobody. */
+}
+<BaseLayout
+  title={`Index of publications — ${SORTS[active].label}`}
+  description={description}
+  canonical={active === 'year' ? undefined : '/publications/'}
+  noindex={active !== 'year'}
+>
   <section class="pagehead">
     <h1>Index</h1>
     <p class="blurb">
@@ -141,7 +145,7 @@ const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.y
     }
   </nav>
 
-  <div class="index" data-pagefind-ignore={active === 'year' ? undefined : true}>
+  <div class="index">
     <div class="index-head label">
       <span>No.</span>
       {

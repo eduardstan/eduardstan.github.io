@@ -3,7 +3,7 @@
  * count or a source line comes from these functions, so the cheapest guard that
  * catches a broken parse lives here.
  *
- *   cd web && npx tsx src/lib/record.test.ts
+ *   cd web && node --experimental-strip-types src/lib/record.test.ts
  *
  * It asserts against the repository's real data files, not fixtures, because the
  * failure this is protecting against is exactly "the parser stopped agreeing
@@ -75,9 +75,15 @@ assert.ok(
 assert.ok(!/[*_]/.test(bio.firstPerson), 'markdown markers left in the first-person line');
 const sections = activities().sections;
 assert.ok(sections.length >= 3, 'activities sections did not parse');
+const ranks = sections.flatMap((section) => section.entries.flatMap((entry) => entry.rank ?? []));
+assert.ok(ranks.length > 0, 'no ranks parsed from the activities page');
+// `A\*` is how the source writes the CORE rank A*; the backslash is markup.
+assert.ok(ranks.includes('A*'), 'markdown backslash escape left in a rank');
 assert.ok(
-  sections.some((section) => section.entries.some((entry) => entry.rank)),
-  'no ranks parsed from the activities page',
+  !sections.some((section) =>
+    section.entries.some((entry) => /[\\*_]/.test(entry.name + (entry.rankNote ?? ''))),
+  ),
+  'markdown markers left in an activity name or rank note',
 );
 
 console.log(

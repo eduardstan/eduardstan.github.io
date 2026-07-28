@@ -153,7 +153,7 @@ const KINDS: Record<string, string> = {
  */
 function kindOf(type: string, fields: Record<string, string>): string {
   const keywords = (fields.keywords ?? '').toLowerCase();
-  if (keywords.includes('underreview')) return 'Under review';
+  if (type === 'online' && keywords.includes('underreview')) return 'Under review';
   if (type === 'inproceedings' && keywords.includes('workshop')) return 'Workshop';
   return KINDS[type] ?? 'Other';
 }
@@ -226,14 +226,15 @@ function parseFields(body: string): Record<string, string> {
       let depth = 0;
       const start = cursor;
       for (; cursor < body.length; cursor++) {
-        if (body[cursor] === open) depth++;
-        else if (body[cursor] === close) {
+        // Braces nest, so an opener is checked first; `"` is its own closer, so
+        // once one is open the next one ends the value rather than nesting.
+        if (body[cursor] === close && depth > 0) {
           depth--;
           if (depth === 0) {
             cursor++;
             break;
           }
-        }
+        } else if (body[cursor] === open) depth++;
       }
       value = body.slice(start + 1, cursor - 1);
     } else {
@@ -370,14 +371,25 @@ const KIND_RULES: [RegExp, string][] = [
 /** `--` / `---` are the source files' own spelling of en and em dashes. */
 const dashes = (value: string) => value.replace(/---/g, '—').replace(/(?<!-)--(?!-)/g, '–');
 
+/**
+ * A markdown backslash escape is the file's way of writing a punctuation mark
+ * literally (`A\*` is the CORE rank A*), so the backslash belongs to the markup
+ * and not to the text. Applied last, after the emphasis and link patterns have
+ * run, so an escaped marker is never mistaken for a live one.
+ */
+const unescape = (value: string) => value.replace(/\\([\\`*_{}[\]()#+\-.!"'~<>|])/g, '$1');
+
 /** Markdown emphasis and links, inline only — news bodies are a single line. */
 function inlineHtml(markdown: string): string {
   const escaped = dashes(markdown)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+    // The link pattern below drops the URL into a quoted attribute, so a quote
+    // anywhere in the body has to stop being one first.
+    .replace(/"/g, '&quot;')
     .trim();
-  return (
+  return unescape(
     escaped
       .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
       .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
@@ -386,16 +398,17 @@ function inlineHtml(markdown: string): string {
       // Prettier rewrites `*em*` as `_em_`, and it runs over these source files.
       // Underscores only open emphasis at a word boundary, so identifiers and
       // paths (`neuro_symb_dt2024`, `_pages/about.md`) are left alone.
-      .replace(/(?<![\w_])_([^_]+)_(?![\w_])/g, '<i>$1</i>')
+      .replace(/(?<![\w_])_([^_]+)_(?![\w_])/g, '<i>$1</i>'),
   );
 }
 
 function stripMarkdown(markdown: string): string {
-  return dashes(markdown)
-    .replace(/\[([^\]]+)\]\([^)\s]+\)/g, '$1')
-    .replace(/\*\*?([^*]+)\*\*?/g, '$1')
-    .replace(/(?<![\w_])__?([^_]+)__?(?![\w_])/g, '$1')
-    .trim();
+  return unescape(
+    dashes(markdown)
+      .replace(/\[([^\]]+)\]\([^)\s]+\)/g, '$1')
+      .replace(/\*\*?([^*]+)\*\*?/g, '$1')
+      .replace(/(?<![\w_])__?([^_]+)__?(?![\w_])/g, '$1'),
+  ).trim();
 }
 
 export interface NewsFeed {
@@ -688,11 +701,11 @@ export function activities(): Activities {
     if (!entry) continue;
     const ranked = /^\*\*(.+?)\*\*\s*\(\[(.+?)\]\((.+?)\)\)\s*$/.exec(entry[1]);
     if (ranked) {
-      const [rank, ...note] = ranked[2].split(/\s+in\s+/);
+      const [rank, ...note] = stripMarkdown(ranked[2]).split(/\s+in\s+/);
       section.entries.push({
-        name: ranked[1],
+        name: stripMarkdown(ranked[1]),
         rank,
-        rankNote: note.join(' in ') || undefined,
+        rankNote: note.join(' in ').trim() || undefined,
         roles: [],
       });
     } else {

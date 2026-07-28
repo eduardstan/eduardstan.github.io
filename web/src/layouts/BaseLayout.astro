@@ -7,10 +7,23 @@ import ThemeScript from '../components/ThemeScript.astro';
 interface Props {
   title: string;
   description?: string;
+  /**
+   * Where this page's content really lives, when it is an alternate view of
+   * another page. One `<link rel="canonical">` is emitted either way: a second,
+   * conflicting one would make search engines ignore both.
+   */
+  canonical?: string;
+  /** Keeps the page out of the Pagefind index — `<main>` is the indexed body. */
+  noindex?: boolean;
 }
 
-const { title, description = 'Personal site of Eduard I. Stan.' } = Astro.props;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+const {
+  title,
+  description = 'Personal site of Eduard I. Stan.',
+  canonical: canonicalPath,
+  noindex = false,
+} = Astro.props;
+const canonical = new URL(canonicalPath ?? Astro.url.pathname, Astro.site);
 ---
 
 <html lang="en" data-theme="light">
@@ -46,7 +59,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <input type="checkbox" id="inspect" class="vh" data-pagefind-ignore />
     <div class="wrap">
       <Header />
-      <main id="main" data-pagefind-body>
+      <main id="main" data-pagefind-body={noindex ? undefined : true}>
         <slot />
       </main>
       <Footer />

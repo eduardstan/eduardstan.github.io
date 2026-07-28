@@ -682,7 +682,8 @@ body {
   font-weight: 600;
 }
 
-.pagehead:has(+ .index) {
+/* `~`, not `+`: the sort bar sits between the two below 900px. */
+.pagehead:has(~ .index) {
   border-bottom: 0;
   margin-bottom: 0;
 }

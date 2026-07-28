@@ -88,10 +88,13 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   reveal is a `#inspect:checked ~ .wrap` rule in `global.css`. The source records are already
   in the HTML at `display: none`, so switching it on costs no request.
 - **The publications index.** `/publications/` plus three sibling routes — `year-asc/`,
-  `type/`, `title/` — are the same 29 rows in four orders, pre-rendered. The column
-  headings are links between them, so ordering the index needs no JavaScript and every
-  order has a URL; only the default order is indexed by Pagefind, and the others carry a
-  canonical link to it. Searching is Pagefind at `/search/`, not a second search box.
+  `type/`, `title/` — are the whole bibliography in four orders, pre-rendered; the row
+  count is whatever `_bibliography/papers.bib` holds, never a number written here. The
+  column headings are links between them, so ordering the index needs no JavaScript and
+  every order has a URL; only the default order is indexed by Pagefind (the others pass
+  `noindex` to `BaseLayout`, which drops `data-pagefind-body`), and each names
+  `/publications/` as its canonical URL through the layout's `canonical` prop, so there
+  is exactly one canonical tag per page. Searching is Pagefind at `/search/`, not a second search box.
   Every row is a `<details>`: opening it reveals the abstract, the record and the entry's
   own BibTeX. **Nothing in the bibliography is filtered out** — manuscripts under review
   and released software artifacts are entries like any other, labelled by the same entry
