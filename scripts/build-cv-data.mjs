@@ -63,13 +63,26 @@ function escapeLatex(text) {
 }
 
 /**
- * Escape a URL for the first argument of \href. hyperref reads it almost
- * verbatim, so only the characters TeX itself consumes need handling.
+ * Escape a URL for the first argument of \href. Every \href produced here ends
+ * up inside a \newcommand body, so the URL is tokenised when the macro is
+ * defined and hyperref's catcode normalisation can no longer rescue it: `~`
+ * would become \nobreakspace (a silently wrong link target), `_` a subscript,
+ * `\` a line break. Only `%`, `#` and `&` survive as escapes; anything else TeX
+ * consumes raises rather than guessing.
  */
+const URL_UNSAFE = /[\\~_^${}]/;
+
 function escapeUrl(url) {
-  return String(url)
-    .replace(/\\/g, "\\\\")
-    .replace(/([%#&])/g, "\\$1");
+  const text = String(url);
+  const bad = URL_UNSAFE.exec(text);
+  if (bad) {
+    throw new Error(
+      `unsafe character "${bad[0]}" in URL: ${text}\n` +
+        "  \\href here is tokenised inside a \\newcommand body, so it cannot survive.\n" +
+        "  Percent-encode it (~ is %7E, _ is %5F, \\ is %5C) in cv/cv.yaml."
+    );
+  }
+  return text.replace(/([%#&])/g, "\\$1");
 }
 
 // -----------------------------------------------------------------------------

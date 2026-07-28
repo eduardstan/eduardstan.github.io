@@ -35,6 +35,18 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
 
+      # .gitignore alone does not stop `git add -f`, so assert the private
+      # contact files are untracked before anything else runs.
+      - name: Confirm no private contact file is tracked
+        run: |
+          set -euo pipefail
+          tracked=$(git ls-files -- cv/private.yaml cv/generated/cv-contact-private.tex)
+          if [ -n "$tracked" ]; then
+            echo "::error::tracked private contact file(s): $tracked - these must never enter the repository"
+            exit 1
+          fi
+          echo "No private contact file is tracked."
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

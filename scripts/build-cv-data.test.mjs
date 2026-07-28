@@ -14,7 +14,12 @@ test("an underscore inside a word stays literal and does not open a span", () =>
 test("bold, links and a bare asterisk are unchanged", () => {
   assert.equal(renderInline("**bold**"), "\\textbf{bold}");
   assert.equal(renderInline("CORE Rank: A*"), "CORE Rank: A*");
-  assert.equal(renderInline("[text](https://example.org/a_b?x=1&y=2)"), "\\href{https://example.org/a_b?x=1\\&y=2}{text}");
+  assert.equal(renderInline("[text](https://example.org/a-b?x=1&y=2)"), "\\href{https://example.org/a-b?x=1\\&y=2}{text}");
+});
+
+test("a URL carrying a character TeX consumes raises instead of mislinking", () => {
+  assert.throws(() => renderInline("[text](https://example.org/~user)"), /unsafe character "~"/);
+  assert.throws(() => renderInline("[text](https://example.org/a_b)"), /unsafe character "_"/);
 });
 
 test("an unclosed emphasis marker raises instead of emitting wrong emphasis", () => {
