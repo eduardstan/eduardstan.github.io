@@ -20,6 +20,11 @@
 #   [text](https://...) -> \href{...}{text}
 #   *                   passes through literally (so "CORE Rank: A*" is safe)
 #
+# No URL in this file - a link target above or a `url:` field below - may contain
+# \ ~ _ ^ $ { }; percent-encode them (~ is %7E, _ is %5F, \ is %5C). Every \href
+# lands inside a \newcommand body, where TeX consumes those characters before
+# hyperref can rescue them, so the build raises rather than emitting a wrong link.
+#
 # Characters that carry typographic meaning, written as real Unicode:
 #   -- em dash   (U+2014)  ->  ---     e.g. "settings-especially healthcare"
 #   - en dash    (U+2013)  ->  --      used for date and year ranges
