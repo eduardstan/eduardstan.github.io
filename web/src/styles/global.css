@@ -402,7 +402,7 @@ body {
 
 /* Column heads after the first get air above them. The record block between
    them is display:none when inspect is off, but adjacency still holds. */
-:where(.defs, .stats, .strands, .record, .feed) + .sec {
+:where(.defs, .stats, .strands, .record, .feed, .rows, .blurb) + .sec {
   margin-top: 1.6rem;
 }
 
@@ -630,6 +630,104 @@ body {
   margin-left: 0.35rem;
   color: var(--color-accent);
   white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ rows ---
+   The dense row: `.defs` with one more column.
+
+   The CV-fed pages are table-shaped rather than prose-shaped — role / detail /
+   dates, course / topics / hours, level / notes / count — so this is `.defs`'s
+   label-left, meta-right pattern with a middle column and the meta in mono, and
+   it keeps `.defs`' hairline between rows and none above the first. The dates
+   column is Go Mono for the same reason every other date on the site is: it is
+   apparatus, and it aligns down the column.
+
+   Below the breakpoint it stacks, the way `.entry` does, so a phone scrolls
+   down rather than sideways. `min-width: 0` and `overflow-wrap: anywhere` on the
+   cells because institution names and course titles are long unbroken strings
+   that would otherwise run past the rule. */
+.rows {
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0;
+}
+
+.rows > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.15rem 0.9rem;
+  border-top: 1px solid var(--color-hair);
+  padding-block: 0.55rem;
+}
+
+.rows > li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+@media (min-width: 760px) {
+  .rows > li {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.7fr) 9rem;
+    align-items: baseline;
+  }
+
+  .rows .when {
+    text-align: right;
+  }
+}
+
+.rows .k,
+.rows .v,
+.rows .when {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rows .k {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.rows .v {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+.rows .v b {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.rows .when {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* The second line of a cell: the programme a course belongs to, the city an
+   appointment is in. Apparatus, so it is set as apparatus. */
+.rows .sub {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-top: 0.15rem;
+}
+
+.rows .v ul {
+  list-style: square;
+  margin: 0.3rem 0 0;
+  padding-inline-start: 1.1em;
+}
+
+.rows .v li + li {
+  margin-top: 0.15rem;
 }
 
 /* ----------------------------------------------------------------- index ---
