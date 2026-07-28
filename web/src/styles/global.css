@@ -678,6 +678,37 @@ body {
   margin-bottom: 0;
 }
 
+/* Ordering controls. The column headings carry the same links at >=900px, so
+   this row is what a narrow screen gets instead. */
+.sortbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1rem;
+  margin-top: clamp(14px, 1.8vw, 22px);
+  color: var(--color-muted);
+}
+
+.sortbar a {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.sortbar a:hover {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.sortbar a[aria-current='page'] {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+@media (min-width: 900px) {
+  .sortbar {
+    display: none;
+  }
+}
+
 .index {
   margin-top: clamp(16px, 2vw, 28px);
   border-top: 4px solid var(--color-ink);
@@ -708,6 +739,20 @@ body {
 
   .index-head span:last-child {
     text-align: right;
+  }
+
+  .index-head a {
+    color: var(--color-muted);
+    border-bottom: 1px solid transparent;
+  }
+
+  .index-head a:hover {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+  }
+
+  .index-head a[aria-current='page'] {
+    color: var(--color-ink);
   }
 }
 
@@ -900,6 +945,38 @@ body {
 .reveal dd {
   margin: 0;
   overflow-wrap: anywhere;
+}
+
+/* The entry, verbatim, with a button that copies it. The <pre> is the record
+   and stays selectable; the button is revealed by script only where the
+   Clipboard API exists. */
+.bibtex {
+  margin-top: 0.9rem;
+}
+
+.bibtex-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.35rem;
+  color: var(--color-muted);
+}
+
+.bibtex pre {
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+  background: var(--color-record);
+  border-left: 2px solid var(--color-rule);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.copy {
+  color: var(--color-muted);
 }
 
 .reveal .open {

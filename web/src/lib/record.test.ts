@@ -21,23 +21,33 @@ const bib = bibliography();
 const grepped = readFileSync(root + SOURCES.bibliography, 'utf8').match(/^@/gm)!.length;
 assert.equal(bib.entries.length, grepped, 'entry count disagrees with `grep -c "^@"`');
 
-// Fields the index columns depend on.
+// Fields the index columns depend on. Nothing is filtered: every entry in the
+// file is shown, including manuscripts under review and released software, so
+// each one has to survive the parse intact.
 for (const entry of bib.entries) {
   assert.ok(entry.title, `${entry.key}: no title`);
   assert.ok(entry.year > 1990, `${entry.key}: implausible year ${entry.year}`);
   assert.ok(entry.authors.length > 0, `${entry.key}: no authors`);
+  assert.ok(entry.venue, `${entry.key}: no venue`);
+  assert.ok(entry.kind !== 'Other', `${entry.key}: unlabelled entry type @${entry.type}`);
   assert.ok(!/[{}\\]/.test(entry.title), `${entry.key}: unresolved LaTeX in title`);
   assert.ok(
     !entry.authors.some((a) => /[{}\\]/.test(a)),
     `${entry.key}: unresolved LaTeX in authors`,
   );
+  assert.ok(entry.raw.startsWith('@') && entry.raw.endsWith('}'), `${entry.key}: raw not captured`);
 }
 
-// Accents and particles: the two cases a naive parser gets wrong.
+// Accents, particles and both BibTeX name forms — the cases a naive parser gets
+// wrong. `Stan, Ionel Eduard` read as `First Last` yields `S. I. Eduard`.
 const authors = bib.entries.flatMap((entry) => entry.authors);
 assert.ok(authors.includes('E. Muñoz-Velasco'), 'LaTeX accent not resolved in author names');
 assert.ok(authors.includes('D. Della Monica'), 'surname particle was initialised away');
 assert.ok(authors.includes('I. E. Stan'), 'author name not normalised to initials');
+assert.ok(
+  !authors.some((author) => /\b(Eduard|Ionel)$/.test(author)),
+  '`Last, First` names were read as `First Last`',
+);
 
 // The feed, its defects, and the derived gap.
 const feed = news();

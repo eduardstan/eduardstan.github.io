@@ -14,9 +14,12 @@ const links = [
 ];
 
 // Astro's default `trailingSlash: 'ignore'` means the same page can be reached
-// with or without a slash, so normalise before comparing.
+// with or without a slash, so normalise before comparing. The comparison is a
+// prefix, not an equality: /publications/type/ is still the index, and a blog
+// post is still the blog.
 const normalise = (path: string) => (path.endsWith('/') ? path : `${path}/`);
 const current = normalise(Astro.url.pathname);
+const isCurrent = (href: string) => current.startsWith(normalise(href));
 const { name } = profile();
 ---
 
@@ -25,7 +28,7 @@ const { name } = profile();
   <nav aria-label="Main" class="label">
     {
       links.map((link) => (
-        <a href={link.href} aria-current={current === normalise(link.href) ? 'page' : undefined}>
+        <a href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>
           {link.label}
         </a>
       ))

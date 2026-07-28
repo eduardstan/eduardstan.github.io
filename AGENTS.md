@@ -40,6 +40,12 @@ committed is a plain `.gitignore` concern, separate from this entry.
   `import.meta.url`, because Astro relocates the bundle during `astro build`. The Ledger design
   requires every displayed count and source line to be derived there rather than written by hand —
   see "Notable configuration" in `web/README.md`.
+- The bibliography is shared by the CV and the site, and **nothing filters it**: the captain's rule
+  is that the site shows everything the CV's bibliography carries, under-review manuscripts and
+  software artifacts included. `cv/cv.tex` names the categories via biblatex `defbibfilter`, and
+  `web/src/lib/record.ts` labels entries from the same entry types and keywords, so the two stay in
+  step. It also holds both BibTeX name forms (`First Last` and `Last, First`) — reading the second
+  as the first silently renames authors.
 
 ## This repository is public
 

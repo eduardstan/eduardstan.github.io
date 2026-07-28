@@ -87,6 +87,22 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   rule per reveal, no JavaScript. It must stay a preceding sibling of `.wrap`, because every
   reveal is a `#inspect:checked ~ .wrap` rule in `global.css`. The source records are already
   in the HTML at `display: none`, so switching it on costs no request.
+- **The publications index.** `/publications/` plus three sibling routes — `year-asc/`,
+  `type/`, `title/` — are the same 29 rows in four orders, pre-rendered. The column
+  headings are links between them, so ordering the index needs no JavaScript and every
+  order has a URL; only the default order is indexed by Pagefind, and the others carry a
+  canonical link to it. Searching is Pagefind at `/search/`, not a second search box.
+  Every row is a `<details>`: opening it reveals the abstract, the record and the entry's
+  own BibTeX. **Nothing in the bibliography is filtered out** — manuscripts under review
+  and released software artifacts are entries like any other, labelled by the same entry
+  types and keywords `cv/cv.tex` filters on (`type=online and keyword=underreview` is
+  "Under review", `keyword=workshop` is "Workshop"). The CV bibliography is the record;
+  the site mirrors it.
+- **The one script.** 378 bytes inline on the publications page, which copies a BibTeX
+  entry to the clipboard. The button ships with `hidden` set and is revealed only where
+  `navigator.clipboard` exists, so nothing unusable is ever shown, and the entry is plain
+  `<pre>` text that stays selectable with JavaScript off. Everything else on the site —
+  the inspect switch included — runs without script.
 - **Provenance is generated, never written.** Every count, source path, line range and
   "this is missing" note comes from `src/lib/record.ts`, which reads the repository's own
   files (`_bibliography/papers.bib`, `_news/`, `_pages/`, `_config.yml`) at build time. The

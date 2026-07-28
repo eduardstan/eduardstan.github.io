@@ -117,6 +117,13 @@ export interface Publication {
   doi?: string;
   url?: string;
   abstract?: string;
+  /**
+   * The entry exactly as it appears in the .bib file, braces and all. This is
+   * what the copy button puts on the clipboard: a citation someone can paste
+   * straight into their own bibliography, and the least edited form of the
+   * record the site holds.
+   */
+  raw: string;
   fields: Record<string, string>;
 }
 
@@ -128,24 +135,63 @@ const KINDS: Record<string, string> = {
   mastersthesis: 'Thesis',
   book: 'Book',
   techreport: 'Report',
-  misc: 'Preprint',
+  online: 'Preprint',
+  // The `@misc` entries in this bibliography are released software packages
+  // filed under DROPS Artifacts. DBLP keys them `data/…`.
+  misc: 'Software',
 };
+
+/**
+ * What to call an entry, following the CV rather than inventing a taxonomy.
+ *
+ * `cv/cv.tex` sorts the same bibliography with biblatex filters — `type=article`
+ * is "Journal articles", `type=inproceedings and keyword=workshop` is "Workshop
+ * papers", `type=online and keyword=underreview` is "Under review" — so the
+ * entry type plus the keywords the CV already relies on decide the label here
+ * too. Nothing is filtered out: the CV's Publications section omits some entry
+ * types, but the bibliography is the record and every entry in it is shown.
+ */
+function kindOf(type: string, fields: Record<string, string>): string {
+  const keywords = (fields.keywords ?? '').toLowerCase();
+  if (keywords.includes('underreview')) return 'Under review';
+  if (type === 'inproceedings' && keywords.includes('workshop')) return 'Workshop';
+  return KINDS[type] ?? 'Other';
+}
 
 /** Surname particles that must not be abbreviated away ("D. Della Monica"). */
 const PARTICLES = new Set(['della', 'delle', 'del', 'de', 'di', 'da', 'dos', 'van', 'von', 'la']);
 
 /**
- * `Ionel Eduard Stan` → `I. E. Stan`, `{I.E.} Stan` → `I. E. Stan`. Names
- * carrying a particle are left as written, because initialising the particle
- * would rename the author.
+ * `Ionel Eduard Stan` → `I. E. Stan`, `{I.E.} Stan` → `I. E. Stan`,
+ * `Dario Della Monica` → `D. Della Monica`.
+ *
+ * BibTeX has two name forms and this bibliography uses both: `First von Last`,
+ * and `von Last, First` where the comma marks the end of the surname. Reading
+ * the second as the first turns `Stan, Ionel Eduard` into `S. I. Eduard`, so
+ * the comma is checked before anything else.
+ *
+ * A particle starts the surname and everything after it belongs to the surname:
+ * `Della` is not a given name, and initialising it would rename the author.
  */
 function formatAuthor(raw: string): string {
   const name = deLatex(raw);
-  const words = name.split(/\s+/).filter(Boolean);
-  if (words.length < 2) return name;
-  const given = words.slice(0, -1);
-  const surname = words[words.length - 1];
-  if (given.some((word) => PARTICLES.has(word.toLowerCase()))) return name;
+  const comma = name.indexOf(',');
+  let given: string[];
+  let surname: string | undefined;
+  if (comma === -1) {
+    const words = name.split(/\s+/).filter(Boolean);
+    const particle = words.findIndex((word) => PARTICLES.has(word.toLowerCase()));
+    const split = particle === -1 ? words.length - 1 : particle;
+    given = words.slice(0, split);
+    surname = words.slice(split).join(' ');
+  } else {
+    given = name
+      .slice(comma + 1)
+      .split(/\s+/)
+      .filter(Boolean);
+    surname = name.slice(0, comma).trim();
+  }
+  if (!surname || given.length === 0) return name.replace(/,\s*$/, '');
   const initials = given.flatMap((word) =>
     // "I.E." is one word carrying two initials.
     word.includes('.')
@@ -202,14 +248,27 @@ function parseFields(body: string): Record<string, string> {
   return fields;
 }
 
-function toPublication(type: string, key: string, fields: Record<string, string>): Publication {
-  const venue = fields.journal ?? fields.booktitle ?? fields.school ?? '';
+function toPublication(
+  type: string,
+  key: string,
+  fields: Record<string, string>,
+  raw: string,
+): Publication {
+  // Where the work appeared. Manuscripts under review carry it in `note`
+  // ("Journal of Artificial Intelligence Research (Manuscript under review)")
+  // and released artifacts in `publisher`, so both are fallbacks rather than
+  // special cases — an entry with neither simply has no venue line.
+  const venue = deLatex(
+    fields.journal ?? fields.booktitle ?? fields.school ?? fields.note ?? fields.publisher ?? '',
+  );
+  const publisher = fields.publisher && deLatex(fields.publisher);
   const detail = [
     fields.series && deLatex(fields.series),
     fields.volume && `volume ${deLatex(fields.volume)}`,
     fields.number && `number ${deLatex(fields.number)}`,
     fields.pages && `pages ${deLatex(fields.pages)}`,
-    fields.publisher && deLatex(fields.publisher),
+    // Already the venue for entries that have nothing else; do not print twice.
+    publisher !== venue && publisher,
   ]
     .filter(Boolean)
     .join(', ');
@@ -217,18 +276,19 @@ function toPublication(type: string, key: string, fields: Record<string, string>
   return {
     key,
     type,
-    kind: KINDS[type] ?? type,
+    kind: kindOf(type, fields),
     title: deLatex(fields.title ?? ''),
     authors: (fields.author ?? '')
       .split(/\s+and\s+/)
       .filter(Boolean)
       .map(formatAuthor),
     year: Number.parseInt(fields.year ?? '0', 10),
-    venue: deLatex(venue),
+    venue,
     detail,
     doi,
     url: fields.html ?? fields.url ?? (doi ? `https://doi.org/${doi}` : undefined),
     abstract: fields.abstract ? deLatex(fields.abstract) : undefined,
+    raw,
     fields,
   };
 }
@@ -262,7 +322,8 @@ export function bibliography(): Bibliography {
       }
     }
     const fields = parseFields(raw.slice(start, cursor));
-    entries.push(toPublication(match[1].toLowerCase(), match[2].trim(), fields));
+    const source = raw.slice(match.index, cursor + 1);
+    entries.push(toPublication(match[1].toLowerCase(), match[2].trim(), fields, source));
   }
   entries.sort((a, b) => b.year - a.year || a.title.localeCompare(b.title));
 
