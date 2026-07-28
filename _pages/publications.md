@@ -15,9 +15,8 @@ nav_order: 2
 
 <div class="publications">
 
-<!-- The site lists published work only: papers.bib is shared with the CV, which keeps its own "Under review" section, so hide the under-review manuscripts and the @misc dataset artifacts here rather than removing them from the bibliography. -->
-<!-- The query reads as (type != misc) AND (keywords !~ underreview): in bibtex-ruby's Element#matches? the leading `!` binds to the @type token alone and is ANDed with the bracket condition. Verified against the pinned gem; do not "fix" it. -->
+<!-- The site mirrors the CV bibliography: papers.bib is shared with the CV, and everything the CV prints appears here, including the under-review manuscripts. The only exclusion is @misc, which the CV's own biblatex filters do not print either. -->
 
-{% bibliography --query !@misc[keywords!~underreview] %}
+{% bibliography --query !@misc %}
 
 </div>
