@@ -1,10 +1,146 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Placeholder from '../components/Placeholder.astro';
+import Record from '../components/Record.astro';
+import { bibliography, bibliographyGaps, SOURCES } from '../lib/record';
 
-const description = 'Publication list, rendered from the BibTeX bibliography by a later task.';
+const bib = bibliography();
+const gaps = bibliographyGaps();
+const dateFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'short', timeZone: 'UTC' });
+
+/** The author line marks him without re-ordering or re-spelling anyone. */
+const isHim = (author: string) => author === 'I. E. Stan';
+const pad = (index: number) => String(index + 1).padStart(2, '0');
+
+const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.years.last}, read from ${SOURCES.bibliography} at build time.`;
 ---
 
-<BaseLayout title="Publications" description={description}>
-  <Placeholder heading="Publications" description={description} />
+<BaseLayout title="Index of publications" description={description}>
+  <section class="pagehead">
+    <h1>Index</h1>
+    <p class="blurb">
+      <b>{bib.entries.length} entries, {bib.years.first}–{bib.years.last}</b>, read from <b
+        >{SOURCES.bibliography}</b
+      > when this page was built. Open a row for its abstract and its record. Turn <b
+        >inspect sources</b
+      > on, in the bar above, to see where each part of this page comes from.
+      {
+        gaps.length > 0 && (
+          <>
+            {' '}
+            {gaps.length} paper{gaps.length === 1 ? '' : 's'} announced in the news feed{' '}
+            {gaps.length === 1 ? 'has' : 'have'} no entry here yet; they are listed under the index.
+          </>
+        )
+      }
+    </p>
+  </section>
+
+  <div class="index">
+    <div class="index-head label" aria-hidden="true">
+      <span>No.</span><span>Year</span><span>Type</span><span>Title / authors / venue</span><span
+        >Record</span
+      >
+    </div>
+    {
+      bib.entries.map((entry, index) => (
+        <details class="entry">
+          <summary>
+            <span class="no">{pad(index)}</span>
+            <span class="yr">{entry.year}</span>
+            <span class="ty">{entry.kind}</span>
+            <div class="body">
+              <h2 class="t">{entry.title}</h2>
+              <p class="au">
+                {entry.authors.map((author, position) => (
+                  <>
+                    {position > 0 && ', '}
+                    {isHim(author) ? <b>{author}</b> : author}
+                  </>
+                ))}
+              </p>
+              <p class="vn">{entry.venue}</p>
+            </div>
+            <span class="more" aria-hidden="true" />
+          </summary>
+          <div class="reveal">
+            {entry.abstract && <p class="abstract">{entry.abstract}</p>}
+            <dl>
+              <dt>BibTeX key</dt>
+              <dd>
+                @{entry.type}
+                {'{'}
+                {entry.key}
+                {'}'}
+              </dd>
+              {entry.detail && (
+                <>
+                  <dt>Record</dt>
+                  <dd>{entry.detail}</dd>
+                </>
+              )}
+              {entry.doi && (
+                <>
+                  <dt>DOI</dt>
+                  <dd>{entry.doi}</dd>
+                </>
+              )}
+              {!entry.abstract && (
+                <>
+                  <dt>Abstract</dt>
+                  <dd>No abstract in the BibTeX entry.</dd>
+                </>
+              )}
+            </dl>
+            {entry.url && (
+              <a class="open" href={entry.url}>
+                Open the paper →
+              </a>
+            )}
+          </div>
+        </details>
+      ))
+    }
+  </div>
+
+  <Record>
+    <p>
+      <b>{SOURCES.bibliography}</b> — {bib.entries.length} entries parsed at build. Every row is one
+      entry: the number is its position in this list, the type is its BibTeX entry type, and the
+      lines under "the record" are its own fields. Nothing on this page is transcribed by hand.
+    </p>
+    <p>
+      {bib.byKind.map((kind) => `${kind.count} ${kind.kind.toLowerCase()}`).join(', ')}.{' '}
+      {bib.entries.filter((entry) => entry.abstract).length} of {bib.entries.length} entries carry an
+      abstract; the rest show their record only.
+    </p>
+  </Record>
+
+  {
+    gaps.length > 0 && (
+      <section class="after-index">
+        <h2 class="sec">Announced, not yet recorded</h2>
+        <ul class="defs">
+          {gaps.map((gap) => (
+            <li>
+              <span class="a">{gap.title}</span>
+              <span class="b label">announced {dateFormat.format(gap.announced)}</span>
+            </li>
+          ))}
+        </ul>
+        <p class="blurb">
+          These papers are announced in the news feed but have no entry in{' '}
+          <b>{SOURCES.bibliography}</b>. This list is the difference between the two, computed when
+          the page was built: adding the entries removes them from here.
+        </p>
+        <Record>
+          {gaps.map((gap) => (
+            <p>
+              <b>{gap.source}</b> — announced {dateFormat.format(gap.announced)}; no entry whose
+              title matches "{gap.title}" in {SOURCES.bibliography}.
+            </p>
+          ))}
+        </Record>
+      </section>
+    )
+  }
 </BaseLayout>

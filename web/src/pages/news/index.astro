@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import PageHead from '../../components/PageHead.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { dateFormat } from '../../lib/content';
 
@@ -13,12 +14,12 @@ const rendered = await Promise.all(
 ---
 
 <BaseLayout title="News" description="Announcements and updates.">
-  <h1 class="text-2xl font-semibold">News</h1>
-  <p class="mt-4 text-muted">
+  <PageHead title="News" />
+  <p class="single mt-4 text-muted">
     Structural placeholder rendering the sample news collection. Real items are
     migrated by a later task.
   </p>
-  <ul class="mt-6 space-y-4">
+  <ul class="single mt-6 space-y-4">
     {
       rendered.map(({ item, Content }) => (
         <li>

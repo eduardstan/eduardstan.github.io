@@ -1,14 +1,50 @@
 ---
+import Record from './Record.astro';
+import { profile, SOURCES } from '../lib/record';
+
+const { name, email, links, missing, address, addressSource } = profile();
 const year = new Date().getFullYear();
 ---
 
-<footer
-  class="mt-16 border-t border-rule text-sm text-muted"
-  data-pagefind-ignore
->
-  <div class="mx-auto flex max-w-3xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-6">
-    <span>&copy; {year} Eduard I. Stan</span>
-    <a href="/rss.xml" class="hover:text-accent">RSS</a>
-    <a href="/sitemap-index.xml" class="hover:text-accent">Sitemap</a>
+<footer class="sheet-footer" data-pagefind-ignore>
+  <div class="footer-grid">
+    <div>
+      <h2 class="label">Contact</h2>
+      {email && <a href={`mailto:${email}`}>{email}</a>}
+      <Record>
+        <p><b>{SOURCES.config}</b> — <code>email</code>, <code>first_name</code>, <code
+            >middle_name</code
+          >, <code>last_name</code>.</p>
+      </Record>
+    </div>
+    <div>
+      <h2 class="label">Elsewhere</h2>
+      <div class="stack">
+        {links.map((link) => <a href={link.href}>{link.label}</a>)}
+        <a href="/rss.xml">RSS</a>
+        <a href="/sitemap-index.xml">Sitemap</a>
+      </div>
+      <Record>
+        <p>
+          <b>{SOURCES.config}</b> — one link per account field that carries a value.
+          {
+            missing.length > 0 && (
+              <>
+                {' '}
+                Empty in the config, so not shown: {missing.map((key) => <code>{key}</code>)}.
+              </>
+            )
+          }
+        </p>
+      </Record>
+    </div>
+    <div>
+      <h2 class="label">Post</h2>
+      <address>{address.map((line) => <>{line}<br /></>)}</address>
+      <Record>
+        <p><b>{addressSource}</b> — <code>profile.more_info</code>.</p>
+      </Record>
+    </div>
   </div>
+  <p class="label colophon">&copy; {year} {name}</p>
 </footer>

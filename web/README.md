@@ -46,6 +46,9 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
 | `src/layouts/BaseLayout.astro` | Shared document shell, with a named `head` slot                 |
 | `src/components/`              | Header, footer, theme script and toggle                         |
 | `src/lib/content.ts`           | Shared post query (draft rule + sort order) and date formatter  |
+| `src/lib/record.ts`            | Build-time readers for the repository's own data files          |
+| `src/lib/strands.ts`           | The three research strands — the one piece of authored copy     |
+| `public/fonts/`                | Self-hosted subset faces, with `LICENSES.md`                    |
 | `src/pages/`                   | Routes, including `rss.xml.ts`                                  |
 | `src/styles/global.css`        | Tailwind entry point, theme tokens and minimal prose styles     |
 
@@ -75,10 +78,28 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   It deliberately declares no plugins, because that root check runs without this
   directory's dependencies installed.
 
+- **Design — Ledger.** A broadsheet: masthead, dateline, three columns, hairline rules,
+  monochrome plus one signal blue reserved for machine-readable things. Three faces, three
+  roles: Archivo Black (display), Inter (text), Go Mono (apparatus, and the visual marker
+  that something is data rather than prose). All subset and self-hosted from `public/fonts/`;
+  no CDN and no network font request.
+- **The inspect switch.** One native checkbox in `BaseLayout.astro`, one general-sibling CSS
+  rule per reveal, no JavaScript. It must stay a preceding sibling of `.wrap`, because every
+  reveal is a `#inspect:checked ~ .wrap` rule in `global.css`. The source records are already
+  in the HTML at `display: none`, so switching it on costs no request.
+- **Provenance is generated, never written.** Every count, source path, line range and
+  "this is missing" note comes from `src/lib/record.ts`, which reads the repository's own
+  files (`_bibliography/papers.bib`, `_news/`, `_pages/`, `_config.yml`) at build time. The
+  bibliography gap is a set difference between the news feed and the bibliography, so it
+  shrinks on its own as entries are added. Do not hand-write a number the page displays —
+  the site's whole argument is that its claims can be checked. `src/lib/record.test.ts`
+  (`node --experimental-strip-types src/lib/record.test.ts`) asserts the readers still agree
+  with the data.
+
 ## Not done yet
 
-Visual design, content migration, the bibliography renderer, the CV pipeline and
-deployment. The home page and the `/cv/`, `/publications/`, `/professional_activities/`
-and `/repositories/` routes are structural placeholders that only prove routing; the
-blog, news and projects routes are wired to their collections but still render the
-sample entries.
+Content migration, the CV pipeline and deployment. The home page and
+`/publications/` render the real data; the `/cv/`, `/professional_activities/` and
+`/repositories/` routes are structural placeholders under the Ledger page furniture,
+and the blog, news and projects routes are wired to their collections but still
+render the sample entries.

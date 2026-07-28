@@ -1,0 +1,14 @@
+---
+/** The masthead treatment for a secondary page: the page name, set like the
+ * name on the front page, over the same 4px rule. */
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<section class="pagehead">
+  <h1>{title}</h1>
+  <slot />
+</section>

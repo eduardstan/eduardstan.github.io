@@ -22,14 +22,34 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title="Eduard I. Stan" href="/rss.xml" />
+    {
+      /* The masthead face and the body face are needed for first paint; the
+         other four load as the page uses them. */
+    }
+    <link rel="preload" href="/fonts/Archivo-Black.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <ThemeScript />
     <slot name="head" />
   </head>
-  <body class="flex min-h-screen flex-col">
-    <Header />
-    <main class="mx-auto w-full max-w-3xl flex-1 px-4 py-10" data-pagefind-body>
-      <slot />
-    </main>
-    <Footer />
+  <body>
+    {
+      /* Outside `.wrap` so it stays the first thing a keyboard reaches, ahead of
+         the inspect switch below. */
+    }
+    <a class="skip label" href="#main">Skip to content</a>
+    {
+      /* The inspect switch. A native checkbox, so it is keyboard-operable,
+         announces its own state and needs no JavaScript. It must stay a sibling
+         of `.wrap`: every reveal in global.css is a `#inspect:checked ~ .wrap`
+         rule. Its label sits in the header. */
+    }
+    <input type="checkbox" id="inspect" class="vh" data-pagefind-ignore />
+    <div class="wrap">
+      <Header />
+      <main id="main" data-pagefind-body>
+        <slot />
+      </main>
+      <Footer />
+    </div>
   </body>
 </html>

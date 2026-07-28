@@ -34,6 +34,12 @@ committed is a plain `.gitignore` concern, separate from this entry.
   inside the worktree.
 - Astro 7's default Markdown processor (Sätteri) is **not** remark/rehype compatible, so `web/`
   opts back into the unified processor — see "Notable configuration" in `web/README.md`.
+- `web/` reads the repository root's data files (`_bibliography/`, `_news/`, `_pages/`,
+  `_config.yml`) at build time through `web/src/lib/record.ts`, so the two sites share one set of
+  sources. That module finds the root by walking up for `_config.yml` rather than from
+  `import.meta.url`, because Astro relocates the bundle during `astro build`. The Ledger design
+  requires every displayed count and source line to be derived there rather than written by hand —
+  see "Notable configuration" in `web/README.md`.
 
 ## This repository is public
 

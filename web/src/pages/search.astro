@@ -1,4 +1,5 @@
 ---
+import PageHead from '../components/PageHead.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 // Pagefind indexes `dist/` after `astro build` (see the `build` script) and
@@ -11,11 +12,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <BaseLayout title="Search" description="Search this site.">
   <link slot="head" rel="stylesheet" href="/pagefind/pagefind-component-ui.css" />
   <script slot="head" is:inline type="module" src="/pagefind/pagefind-component-ui.js"></script>
-  <h1 class="text-2xl font-semibold">Search</h1>
-  <div class="mt-6" data-pagefind-ignore>
+  <PageHead title="Search" />
+  <div class="single mt-6" data-pagefind-ignore>
     <pagefind-searchbox></pagefind-searchbox>
   </div>
   <noscript>
-    <p class="mt-4 text-muted">Search requires JavaScript.</p>
+    <p class="single mt-4 text-muted">Search requires JavaScript.</p>
   </noscript>
 </BaseLayout>

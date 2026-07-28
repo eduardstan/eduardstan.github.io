@@ -1,13 +1,14 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import { profile } from '../lib/record';
 
 const links = [
-  { href: '/blog/', label: 'blog' },
-  { href: '/publications/', label: 'publications' },
-  { href: '/projects/', label: 'projects' },
+  { href: '/publications/', label: 'index' },
   { href: '/news/', label: 'news' },
-  { href: '/professional_activities/', label: 'activities' },
-  { href: '/repositories/', label: 'repositories' },
+  { href: '/professional_activities/', label: 'service' },
+  { href: '/projects/', label: 'projects' },
+  { href: '/repositories/', label: 'code' },
+  { href: '/blog/', label: 'blog' },
   { href: '/cv/', label: 'cv' },
   { href: '/search/', label: 'search' },
 ];
@@ -16,24 +17,25 @@ const links = [
 // with or without a slash, so normalise before comparing.
 const normalise = (path: string) => (path.endsWith('/') ? path : `${path}/`);
 const current = normalise(Astro.url.pathname);
+const { name } = profile();
 ---
 
-<header class="border-b border-rule" data-pagefind-ignore>
-  <div class="mx-auto flex max-w-3xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-4">
-    <a href="/" class="font-semibold">Eduard I. Stan</a>
-    <nav aria-label="Main" class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-      {
-        links.map((link) => (
-          <a
-            href={link.href}
-            aria-current={current === normalise(link.href) ? 'page' : undefined}
-            class="text-muted hover:text-accent aria-[current=page]:text-ink aria-[current=page]:underline"
-          >
-            {link.label}
-          </a>
-        ))
-      }
-    </nav>
-    <div class="ms-auto"><ThemeToggle /></div>
-  </div>
+<header class="bar" data-pagefind-ignore>
+  <a class="label who" href="/">{name} / Milano-Bicocca</a>
+  <nav aria-label="Main" class="label">
+    {
+      links.map((link) => (
+        <a href={link.href} aria-current={current === normalise(link.href) ? 'page' : undefined}>
+          {link.label}
+        </a>
+      ))
+    }
+  </nav>
+  {
+    /* The label for the inspect checkbox in BaseLayout. Its visible text is its
+       whole accessible name, and the checkbox announces its own on/off state, so
+       the switch graphic beside it is decoration only. */
+  }
+  <label class="label chip inspect-switch" for="inspect">Inspect sources</label>
+  <ThemeToggle />
 </header>
