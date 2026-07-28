@@ -59,8 +59,20 @@ for (const gap of bibliographyGaps()) {
   assert.ok(gap.title.length > 10, `implausible gap title: ${gap.title}`);
 }
 
-// About and activities.
-assert.ok(about().paragraphs.length >= 3, 'about section did not parse');
+// About and activities. Prettier runs over the source markdown and spells
+// emphasis `_like this_`, so both markers have to render — and neither may fire
+// on an underscore inside a word.
+const bio = about();
+assert.ok(bio.paragraphs.length >= 3, 'about section did not parse');
+assert.ok(
+  !bio.paragraphs.some((paragraph) => /[*_]{1,2}\w/.test(paragraph)),
+  'unrendered markdown emphasis left in the about paragraphs',
+);
+assert.ok(
+  bio.paragraphs.some((paragraph) => paragraph.includes('<i>')),
+  'no emphasis rendered from the about page',
+);
+assert.ok(!/[*_]/.test(bio.firstPerson), 'markdown markers left in the first-person line');
 const sections = activities().sections;
 assert.ok(sections.length >= 3, 'activities sections did not parse');
 assert.ok(

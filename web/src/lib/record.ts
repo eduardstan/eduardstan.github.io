@@ -377,16 +377,24 @@ function inlineHtml(markdown: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .trim();
-  return escaped
-    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
-    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
-    .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<i>$1</i>');
+  return (
+    escaped
+      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
+      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+      .replace(/__([^_]+)__/g, '<b>$1</b>')
+      .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<i>$1</i>')
+      // Prettier rewrites `*em*` as `_em_`, and it runs over these source files.
+      // Underscores only open emphasis at a word boundary, so identifiers and
+      // paths (`neuro_symb_dt2024`, `_pages/about.md`) are left alone.
+      .replace(/(?<![\w_])_([^_]+)_(?![\w_])/g, '<i>$1</i>')
+  );
 }
 
 function stripMarkdown(markdown: string): string {
   return dashes(markdown)
     .replace(/\[([^\]]+)\]\([^)\s]+\)/g, '$1')
     .replace(/\*\*?([^*]+)\*\*?/g, '$1')
+    .replace(/(?<![\w_])__?([^_]+)__?(?![\w_])/g, '$1')
     .trim();
 }
 

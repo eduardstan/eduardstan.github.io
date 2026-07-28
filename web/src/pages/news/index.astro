@@ -1,36 +1,66 @@
 ---
-import { getCollection, render } from 'astro:content';
+/**
+ * The whole feed. The home page shows only the newest few and links here, so
+ * this route is the one that must be complete — every item the repository
+ * publishes, plus what it could not.
+ *
+ * It reads `_news/` through the same reader the home page uses rather than the
+ * `news` collection, so the two cannot disagree about what "everything" is.
+ * Migrating those files into the collection is the content task's job; when it
+ * lands, this page swaps `news()` for `getCollection('news')` and the markup
+ * stays as it is.
+ */
 import PageHead from '../../components/PageHead.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { dateFormat } from '../../lib/content';
+import Record from '../../components/Record.astro';
+import { news, SOURCES } from '../../lib/record';
 
-const items = (await getCollection('news')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-);
-
-const rendered = await Promise.all(
-  items.map(async (item) => ({ item, Content: (await render(item)).Content })),
-);
+const feed = news();
+const excluded = feed.defects.filter((defect) => defect.excluded);
+const dateFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'short', timeZone: 'UTC' });
 ---
 
-<BaseLayout title="News" description="Announcements and updates.">
+<BaseLayout title="News" description={`All ${feed.items.length} announcements and updates.`}>
   <PageHead title="News" />
-  <p class="single mt-4 text-muted">
-    Structural placeholder rendering the sample news collection. Real items are
-    migrated by a later task.
-  </p>
-  <ul class="single mt-6 space-y-4">
+  <p class="blurb">
+    All <b>{feed.items.length} items</b>, newest first, read from <b>{SOURCES.news}/*/*.md</b> when
+    this page was built.
     {
-      rendered.map(({ item, Content }) => (
+      excluded.length > 0 && (
+        <>
+          {excluded.length} file{excluded.length === 1 ? '' : 's'} could not be published; turn{' '}
+          <b>inspect sources</b> on to see which and why.
+        </>
+      )
+    }
+  </p>
+  <ul class="feed single mt-6">
+    {
+      feed.items.map((item) => (
         <li>
-          <p class="text-sm text-muted">
-            <time datetime={item.data.date.toISOString()}>{dateFormat.format(item.data.date)}</time>
-          </p>
-          <div class="prose">
-            <Content />
-          </div>
+          <span class="when label">
+            <time datetime={item.date.toISOString().slice(0, 10)}>
+              {dateFormat.format(item.date)}
+            </time>
+            {' · '}
+            {item.kind}
+          </span>
+          <p set:html={item.html} />
         </li>
       ))
     }
   </ul>
+  <Record>
+    <p>
+      <b>{SOURCES.news}/*/*.md</b> — {feed.fileCount} files read, {feed.items.length} published, all
+      of them shown here.
+    </p>
+    {
+      feed.defects.map((defect) => (
+        <p>
+          <b>{defect.source}</b> — {defect.problem}
+        </p>
+      ))
+    }
+  </Record>
 </BaseLayout>
