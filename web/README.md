@@ -10,12 +10,8 @@ Nothing here is deployed. Jekyll ignores this directory via the `exclude` list i
 `permissions: contents: read` and no deploy step. Cutover is a separate, explicitly
 approved change.
 
-That `exclude` list also carries a `cv/` entry. No such directory exists on this branch
-yet; the exclusion is in place _ahead_ of the task that creates it, because `cv/` will
-hold CV sources and generated output that must never appear on the published site. Do
-not delete it as dead configuration. It only stops publication, though — it does not
-keep anything out of the git repository, so whatever under `cv/` must never be committed
-is a plain `.gitignore` concern, separate from this exclude entry.
+That `exclude` list also carries a `cv/` entry, which is a publication guard and not dead
+configuration — see "Two sites live in this repo" in the repository root's `AGENTS.md`.
 
 ## Requirements
 
@@ -44,8 +40,11 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
 | `src/content.config.ts`        | Typed schemas for the `blog`, `news` and `projects` collections |
 | `src/content/`                 | Sample entries only — real content is migrated in a later task  |
 | `src/layouts/BaseLayout.astro` | Shared document shell, with a named `head` slot                 |
-| `src/components/`              | Header, footer, theme script and toggle                         |
+| `src/components/`              | Header, footer, page and section heads, source record, theme    |
 | `src/lib/content.ts`           | Shared post query (draft rule + sort order) and date formatter  |
+| `src/lib/record.ts`            | Build-time readers for the repository's own data files          |
+| `src/lib/strands.ts`           | The three research strands — the one piece of authored copy     |
+| `public/fonts/`                | Self-hosted subset faces, with `LICENSES.md`                    |
 | `src/pages/`                   | Routes, including `rss.xml.ts`                                  |
 | `src/styles/global.css`        | Tailwind entry point, theme tokens and minimal prose styles     |
 
@@ -75,10 +74,48 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   It deliberately declares no plugins, because that root check runs without this
   directory's dependencies installed.
 
+- **Design — Ledger.** A broadsheet: masthead, dateline, three columns, hairline rules,
+  monochrome plus one signal blue reserved for machine-readable things. Three faces, three
+  roles: Archivo Black (display), Inter (text), Go Mono (apparatus, and the visual marker
+  that something is data rather than prose). All subset and self-hosted from `public/fonts/`;
+  no CDN and no network font request.
+- **The inspect switch.** One native checkbox in `BaseLayout.astro`, one general-sibling CSS
+  rule per reveal, no JavaScript. It must stay a preceding sibling of `.wrap`, because every
+  reveal is a `#inspect:checked ~ .wrap` rule in `global.css`. The source records are already
+  in the HTML at `display: none`, so switching it on costs no request.
+- **The publications index.** `/publications/` plus three sibling routes — `year-asc/`,
+  `type/`, `title/` — are the whole bibliography in four orders, pre-rendered; the row
+  count is whatever `_bibliography/papers.bib` holds, never a number written here. The
+  column headings are links between them, so ordering the index needs no JavaScript and
+  every order has a URL; only the default order is indexed by Pagefind (the others pass
+  `noindex` to `BaseLayout`, which drops `data-pagefind-body`), and each names
+  `/publications/` as its canonical URL through the layout's `canonical` prop, so there
+  is exactly one canonical tag per page. Searching is Pagefind at `/search/`, not a second search box.
+  Every row is a `<details>`: opening it reveals the abstract, the record and the entry's
+  own BibTeX. **Nothing in the bibliography is filtered out** — manuscripts under review
+  and released software artifacts are entries like any other, labelled by the same entry
+  types and keywords `cv/cv.tex` filters on (`type=online and keyword=underreview` is
+  "Under review", `keyword=workshop` is "Workshop"). The CV bibliography is the record;
+  the site mirrors it.
+- **The one script.** 378 bytes inline on the publications page, which copies a BibTeX
+  entry to the clipboard. The button ships with `hidden` set and is revealed only where
+  `navigator.clipboard` exists, so nothing unusable is ever shown, and the entry is plain
+  `<pre>` text that stays selectable with JavaScript off. Everything else on the site —
+  the inspect switch included — runs without script.
+- **Provenance is generated, never written.** Every count, source path, line range and
+  "this is missing" note comes from `src/lib/record.ts`, which reads the repository's own
+  files (`_bibliography/papers.bib`, `_news/`, `_pages/`, `_config.yml`) at build time. The
+  bibliography gap is a set difference between the news feed and the bibliography, so it
+  shrinks on its own as entries are added. Do not hand-write a number the page displays —
+  the site's whole argument is that its claims can be checked. `src/lib/record.test.ts`
+  (`node --experimental-strip-types src/lib/record.test.ts`) asserts the readers still agree
+  with the data.
+
 ## Not done yet
 
-Visual design, content migration, the bibliography renderer, the CV pipeline and
-deployment. The home page and the `/cv/`, `/publications/`, `/professional_activities/`
-and `/repositories/` routes are structural placeholders that only prove routing; the
-blog, news and projects routes are wired to their collections but still render the
-sample entries.
+Content migration, the CV pipeline and deployment. The home page, `/publications/` and
+`/news/` render the real data — `/news/` reads `_news/` through `src/lib/record.ts`, not
+the `news` collection, so it and the home page cannot disagree; the `/cv/`,
+`/professional_activities/` and `/repositories/` routes are structural placeholders under
+the Ledger page furniture, and the blog and projects routes are wired to their collections
+but still render the sample entries.

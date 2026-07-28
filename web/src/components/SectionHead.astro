@@ -1,0 +1,14 @@
+---
+/** A column head, with the file it is built from shown when inspect is on. */
+interface Props {
+  id?: string;
+  /** Repository-relative path, from `SOURCES` in `src/lib/record.ts`. */
+  source: string;
+}
+
+const { id, source } = Astro.props;
+---
+
+<h2 class="sec" id={id}>
+  <slot /><span class="record-of" data-pagefind-ignore>{source}</span>
+</h2>

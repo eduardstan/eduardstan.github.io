@@ -1,18 +1,237 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Record from '../components/Record.astro';
+import SectionHead from '../components/SectionHead.astro';
+import {
+  about,
+  activities,
+  bibliography,
+  bibliographyGaps,
+  news,
+  profile,
+  SOURCES,
+} from '../lib/record';
+import { strands } from '../lib/strands';
+
+const { name, affiliation } = profile();
+const bio = about();
+const bib = bibliography();
+const feed = news();
+const gaps = bibliographyGaps();
+const service = activities();
+const research = strands();
+
+const editorials = service.sections.find((section) => /editorial/i.test(section.title));
+const committees = service.sections.find((section) => /committee/i.test(section.title));
+
+const counts = [
+  { n: bib.entries.length, label: 'entries in this bibliography' },
+  ...bib.byKind.map((kind) => ({ n: kind.count, label: `${kind.kind.toLowerCase()} entries` })),
+  { n: editorials?.entries.length ?? 0, label: 'editorial boards' },
+  { n: committees?.entries.length ?? 0, label: 'conference committees' },
+];
+
+const dateFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'short', timeZone: 'UTC' });
+
+/**
+ * How many news items the front page carries. Six is what balances the third
+ * column against the lead at 1440 without the page turning into a scroll; the
+ * whole feed lives at /news/. One edit here retunes it.
+ */
+const LATELY = 6;
+const shown = feed.items.slice(0, LATELY);
+const withheld = feed.items.length - shown.length;
+const excluded = feed.defects.filter((defect) => defect.excluded);
+const inconsistent = feed.defects.filter((defect) => !defect.excluded);
 ---
 
-<BaseLayout title="Eduard I. Stan">
-  <h1 class="text-2xl font-semibold">Eduard I. Stan</h1>
-  <div class="prose mt-4">
-    <p>
-      Structural placeholder for the home page of the Astro rebuild. Content and
-      visual design land in later tasks.
-    </p>
-    <p>
-      Start with the <a href="/blog/">blog</a>, the{' '}
-      <a href="/publications/">publications</a> list, or{' '}
-      <a href="/search/">search</a>.
-    </p>
+<BaseLayout
+  title={name}
+  description={`${affiliation[0]}, ${affiliation.at(-1)}. Interpretable AI, temporal and logic methods, agentic AI.`}
+>
+  <section class="masthead">
+    <h1>{name}</h1>
+    {
+      /* The dateline states the size of the record, so both figures are counted
+         at build rather than typed. */
+    }
+    <div class="dateline label">
+      {affiliation.map((line) => <span>{line}</span>)}
+      <span class="em">
+        {bib.entries.length} publications · {editorials?.entries.length ?? 0} editorial boards
+      </span>
+    </div>
+  </section>
+
+  <div class="sheet">
+    <div class="col lead">
+      {
+        /* The person, above the fold and inside the grid: a photograph and one
+           sentence in his own voice, both taken from the repository rather than
+           written for the occasion. */
+      }
+      <figure class="person">
+        <img
+          src="/img/portrait.jpg"
+          width="500"
+          height="500"
+          alt={`${name}, photographed against a plain background`}
+        />
+        <div>
+          <blockquote>{bio.firstPerson}</blockquote>
+          <figcaption class="label">{name} · {affiliation[0]}</figcaption>
+          <Record>
+            <p>Quoted verbatim from <b>{bio.firstPersonSource}</b>.</p>
+          </Record>
+        </div>
+      </figure>
+
+      <SectionHead source={SOURCES.about}>The work</SectionHead>
+      {bio.paragraphs.map((paragraph) => <p set:html={paragraph} />)}
+      <Record>
+        <p>
+          <b>{SOURCES.about}</b>, section <code>## about</code>, {bio.lineRange} — {
+            bio.paragraphs.length
+          } paragraphs, rendered verbatim.
+        </p>
+      </Record>
+
+      <SectionHead source="web/src/lib/strands.ts">Three strands</SectionHead>
+      <ol class="strands">
+        {
+          research.map((strand) => (
+            <li>
+              <h3>{strand.title}</h3>
+              <p>{strand.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <Record>
+        <p>
+          Unlike everything else on this page, the strands are not read out of a repository file —
+          nothing in the repository states a strand structure. The copy lives in <b
+            >web/src/lib/strands.ts</b
+          >, and each strand names the files its claim rests on.
+        </p>
+        {
+          research.map((strand) => (
+            <p>
+              <b>{strand.title}</b> — {strand.evidence.join(', ')}
+              {strand.absent.length > 0 && (
+                <>
+                  {' · '}not present on this branch: {strand.absent.join(', ')}, so this strand has
+                  no evidence in the repository as it stands
+                </>
+              )}
+            </p>
+          ))
+        }
+      </Record>
+    </div>
+
+    <div class="col">
+      <SectionHead source={SOURCES.bibliography}>The count</SectionHead>
+      <ul class="stats">
+        {
+          counts.map((count) => (
+            <li>
+              <span class="n">{count.n}</span>
+              <span class="l label">{count.label}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <Record>
+        <p>
+          <b>{SOURCES.bibliography}</b> — {bib.entries.length} entries, {bib.years.first}–{
+            bib.years.last
+          }, counted at build by parsing the file. Editorial boards and committees are counted from <b
+            >{SOURCES.activities}</b
+          >.
+        </p>
+        {
+          gaps.length > 0 && (
+            <p>
+              {gaps.length} paper{gaps.length === 1 ? '' : 's'} announced in <b>{SOURCES.news}</b>{' '}
+              {gaps.length === 1 ? 'has' : 'have'} no entry in the bibliography:{' '}
+              {gaps.map((gap) => `“${gap.title}” (${dateFormat.format(gap.announced)})`).join('; ')}.
+              That sentence is a set difference between two files in this repository: it shrinks as
+              entries are added, and disappears when the two agree.
+            </p>
+          )
+        }
+      </Record>
+
+      {
+        service.sections.map((section, index) => (
+          <>
+            <SectionHead source={SOURCES.activities} id={index === 0 ? 'service' : undefined}>
+              {section.title}
+            </SectionHead>
+            <ul class="defs">
+              {section.entries.map((entry) => (
+                <li>
+                  <span class="a">
+                    {entry.name}
+                    {entry.rank && (
+                      <abbr class="rank" title={entry.rankNote ?? entry.rank}>
+                        {entry.rank}
+                      </abbr>
+                    )}
+                  </span>
+                  {entry.roles.length > 0 && <span class="b label">{entry.roles.join(' · ')}</span>}
+                </li>
+              ))}
+            </ul>
+          </>
+        ))
+      }
+      <Record>
+        <p>
+          <b>{SOURCES.activities}</b> — {service.sections.length} sections, {
+            service.sections.reduce((total, section) => total + section.entries.length, 0)
+          } entries. The ranks and quartiles are the ones linked in that file.
+        </p>
+      </Record>
+    </div>
+
+    <div class="col">
+      <SectionHead source={`${SOURCES.news}/*/*.md`}>Lately</SectionHead>
+      <ul class="feed">
+        {
+          shown.map((item) => (
+            <li>
+              <span class="when label">
+                <time datetime={item.date.toISOString().slice(0, 10)}>
+                  {dateFormat.format(item.date)}
+                </time>
+                {' · '}
+                {item.kind}
+              </span>
+              <p set:html={item.html} />
+            </li>
+          ))
+        }
+      </ul>
+      <p class="more-feed">
+        <a class="label" href="/news/">All {feed.items.length} items →</a>
+      </p>
+      <Record>
+        <p>
+          <b>{SOURCES.news}/*/*.md</b> — {feed.fileCount} files read, {feed.items.length}{' '}
+          published. This column is capped at {LATELY}, so {shown.length} of {feed.items.length} are
+          shown here and {withheld} {withheld === 1 ? 'is' : 'are'} not; the full feed is at{' '}
+          <a href="/news/">/news/</a>.
+        </p>
+        {
+          [...excluded, ...inconsistent].map((defect) => (
+            <p>
+              <b>{defect.source}</b> — {defect.problem}
+            </p>
+          ))
+        }
+      </Record>
+    </div>
   </div>
 </BaseLayout>

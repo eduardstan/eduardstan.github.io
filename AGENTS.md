@@ -34,6 +34,18 @@ committed is a plain `.gitignore` concern, separate from this entry.
   inside the worktree.
 - Astro 7's default Markdown processor (Sätteri) is **not** remark/rehype compatible, so `web/`
   opts back into the unified processor — see "Notable configuration" in `web/README.md`.
+- `web/` reads the repository root's data files (`_bibliography/`, `_news/`, `_pages/`,
+  `_config.yml`) at build time through `web/src/lib/record.ts`, so the two sites share one set of
+  sources. That module finds the root by walking up for `_config.yml` rather than from
+  `import.meta.url`, because Astro relocates the bundle during `astro build`. The Ledger design
+  requires every displayed count and source line to be derived there rather than written by hand —
+  see "Notable configuration" in `web/README.md`.
+- The bibliography is shared by the CV and the site, and **nothing filters it**: the captain's rule
+  is that the site shows everything the CV's bibliography carries, under-review manuscripts and
+  software artifacts included. `cv/cv.tex` names the categories via biblatex `defbibfilter`, and
+  `web/src/lib/record.ts` labels entries from the same entry types and keywords, so the two stay in
+  step. It also holds both BibTeX name forms (`First Last` and `Last, First`) — reading the second
+  as the first silently renames authors.
 
 ## This repository is public
 

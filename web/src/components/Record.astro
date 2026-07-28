@@ -1,0 +1,15 @@
+---
+/**
+ * A source record: what the inspect switch reveals under a rendered claim.
+ *
+ * Hidden with `display: none` until `#inspect` is checked, so it costs one CSS
+ * rule and no JavaScript. Excluded from the search index — it is apparatus about
+ * the page, not content of it.
+ *
+ * Everything passed in here must come from a reader in `src/lib/record.ts`.
+ * A hand-written source line on a site whose whole argument is inspectability
+ * is the one failure that would matter.
+ */
+---
+
+<div class="record" data-pagefind-ignore><slot /></div>
