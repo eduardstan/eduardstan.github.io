@@ -1,0 +1,115 @@
+name: Build CV
+
+# Builds the PDF CV from cv/cv.yaml + cv/cv.tex and uploads it as an artifact.
+#
+# This workflow deliberately does NOT deploy or publish the PDF: the live site is
+# still the old Jekyll one and a separate cutover task owns publishing.
+#
+# cv/private.yaml is gitignored and never present on a runner, so CI always
+# builds the public CV with institutional contact only.
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - "cv/**"
+      - "_bibliography/papers.bib"
+      - "scripts/build-cv-data.mjs"
+      - "scripts/build-cv-data.test.mjs"
+      - ".github/workflows/cv.yml"
+  pull_request:
+    paths:
+      - "cv/**"
+      - "_bibliography/papers.bib"
+      - "scripts/build-cv-data.mjs"
+      - "scripts/build-cv-data.test.mjs"
+      - ".github/workflows/cv.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+
+      # .gitignore alone does not stop `git add -f`, so assert the private
+      # contact files are untracked before anything else runs.
+      - name: Confirm no private contact file is tracked
+        run: |
+          set -euo pipefail
+          tracked=$(git ls-files -- cv/private.yaml cv/generated/cv-contact-private.tex)
+          if [ -n "$tracked" ]; then
+            echo "::error::tracked private contact file(s): $tracked - these must never enter the repository"
+            exit 1
+          fi
+          echo "No private contact file is tracked."
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The generated-file check below cannot catch a renderInline regression:
+      # it only compares the committed cv-data.tex against what the current
+      # code produces, so a consistent regression regenerates it identically.
+      - name: Run the generator's unit tests
+        run: node --test scripts/build-cv-data.test.mjs
+
+      # Guards against hand edits to the generated file: cv.yaml is the single
+      # source of truth, so a committed cv-data.tex that no longer matches it
+      # must fail rather than silently diverge.
+      - name: Check generated cv-data.tex is up to date
+        run: node scripts/build-cv-data.mjs --check
+
+      # xelatex is required: the CV uses academicons, which needs TU encoding.
+      # texlive_version is pinned to 2024: the "latest"/2025 images ship
+      # academicons v1.9.6-2, which switched to a fontspec name lookup for
+      # the icon font ("academicons") that doesn't match the family name
+      # fontconfig actually registers ("Academicons"), so the icon glyphs
+      # resolve to zero-height boxes and \resizebox's auto-ratio computation
+      # divides by zero. 2024 ships academicons v1.9.1, which loads the font
+      # via a plain NFSS .fd file and is unaffected.
+      - name: Build the PDF
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: cv.tex
+          working_directory: cv
+          latexmk_use_xelatex: true
+          texlive_version: "2024"
+
+      # Belt and braces: private.yaml can never reach a runner, but assert it
+      # anyway. Matched by shape, not by value, so the real number and address
+      # stay out of this public repository.
+      - name: Confirm no private contact details leaked into the PDF
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y poppler-utils
+          if [ ! -f cv/cv.pdf ]; then
+            echo "::error::cv/cv.pdf is missing, so the leak check cannot run"
+            exit 1
+          fi
+          # Capture first: a failing pdftotext must fail the step rather than
+          # leave grep's exit status standing in for the whole check. The sed
+          # pass folds the non-breaking space and non-breaking hyphen a typeset
+          # number may carry onto their ASCII equivalents.
+          text=$(pdftotext cv/cv.pdf - | sed -e 's/\xc2\xa0/ /g' -e 's/\xe2\x80\x91/-/g')
+          # The country code after + or 00 is never itself 0, which is what keeps
+          # the ORCID on the contact line from reading as a phone number.
+          if grep -qiE '@(gmail|googlemail|outlook|hotmail|yahoo|proton(mail)?)\.|(^|[^0-9])(\+|00)[1-9][0-9]{0,2}[ .()-]{0,2}[0-9]{2,4}[ .()-]{0,2}[0-9]{3,}' <<<"$text"; then
+            echo "::error::The built PDF looks like it contains a personal phone number or personal email address"
+            exit 1
+          fi
+          echo "PDF carries institutional contact only."
+
+      - name: Upload the PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: cv-pdf
+          path: cv/cv.pdf
+          if-no-files-found: error
