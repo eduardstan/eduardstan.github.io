@@ -68,12 +68,20 @@ jobs:
         run: node scripts/build-cv-data.mjs --check
 
       # xelatex is required: the CV uses academicons, which needs TU encoding.
+      # texlive_version is pinned to 2024: the "latest"/2025 images ship
+      # academicons v1.9.6-2, which switched to a fontspec name lookup for
+      # the icon font ("academicons") that doesn't match the family name
+      # fontconfig actually registers ("Academicons"), so the icon glyphs
+      # resolve to zero-height boxes and \resizebox's auto-ratio computation
+      # divides by zero. 2024 ships academicons v1.9.1, which loads the font
+      # via a plain NFSS .fd file and is unaffected.
       - name: Build the PDF
         uses: xu-cheng/latex-action@v3
         with:
           root_file: cv.tex
           working_directory: cv
           latexmk_use_xelatex: true
+          texlive_version: "2024"
 
       # Belt and braces: private.yaml can never reach a runner, but assert it
       # anyway. Matched by shape, not by value, so the real number and address
