@@ -8,10 +8,9 @@
  * `source:` string and every "this is missing" note below is derived from the
  * files named in `SOURCES`, and changes when they change.
  *
- * Content migration into Astro collections is a separate task. Until it happens,
- * these readers are the seam: the shapes returned here are what the components
- * consume, so the reader can be swapped for `getCollection()` without the
- * components or the provenance blocks changing.
+ * The blog and project collections still contain migration samples, but the
+ * repository facts read here remain authoritative. The shapes returned by these
+ * readers are the seam consumed by components and provenance blocks.
  */
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
@@ -68,8 +67,8 @@ export const readSource = read;
 
 /**
  * Every file under a repository-relative directory, one level of subdirectory
- * deep, as repository-relative paths. That is the shape both `_posts/` and the
- * old `_news/` use: a year directory holding dated markdown files.
+ * deep, as repository-relative paths. `_posts/` uses both root files and year
+ * directories, so both levels are included.
  */
 export function listSources(directory: string, extension = '.md'): string[] {
   const base = join(ROOT, directory);

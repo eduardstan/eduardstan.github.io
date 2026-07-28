@@ -1,15 +1,9 @@
 /**
  * The announcement feed, derived from the facts themselves.
  *
- * `_news/` contains twenty-two markdown files, each one a hand-written sentence
- * about a fact recorded somewhere else. That is two records of one thing, and
- * they drifted — one file ended up carrying a verbatim copy of another's body
- * and date, so the site printed the same sentence twice and the paper that file
- * was named for was never announced at all.
- *
- * The dates were moved onto the facts, and `web/` no longer reads `_news/`.
- * Those files remain temporarily for the live Jekyll site until cutover. Every
- * item below is generated from a fact this repository already holds:
+ * `web/` does not read `_news/`; those files remain temporarily for the live
+ * Jekyll site until cutover. Every item below is generated from a fact this
+ * repository already holds:
  *
  *   `cv/cv.yaml`               appointments, service roles and editions, awards
  *   `_bibliography/papers.bib` publications, preprints, released software
@@ -19,8 +13,7 @@
  * A fact is announced on the date it carries. Most carry one already: a talk has
  * an ISO `date`, a post has a front-matter `date`, an award has a month, a paper
  * has at least a `year`. An `announced` key is written onto a fact only when the
- * announcement genuinely happened on a date the fact does not otherwise state —
- * four papers and one appointment, harvested from `_news/`.
+ * announcement genuinely happened on a date the fact does not otherwise state.
  *
  * Nothing here invents a date. A fact whose finest available date is a year is
  * placed at the start of that year and **shown as a year**, so the feed never

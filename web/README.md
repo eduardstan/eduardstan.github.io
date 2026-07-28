@@ -36,19 +36,19 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
 
 ## Layout
 
-| Path                           | Purpose                                                         |
-| ------------------------------ | --------------------------------------------------------------- |
-| `src/content.config.ts`        | Typed schemas for the `blog` and `projects` collections         |
-| `src/content/`                 | Sample blog and project entries for later content migration     |
-| `src/layouts/BaseLayout.astro` | Shared document shell, with a named `head` slot                 |
-| `src/components/`              | Header, footer, page and section heads, source record, theme    |
+| Path                           | Purpose                                                        |
+| ------------------------------ | -------------------------------------------------------------- |
+| `src/content.config.ts`        | Typed schemas for the `blog` and `projects` collections        |
+| `src/content/`                 | Sample blog and project entries for later content migration    |
+| `src/layouts/BaseLayout.astro` | Shared document shell, with a named `head` slot                |
+| `src/components/`              | Header, footer, page and section heads, source record, theme   |
 | `src/lib/announcements.ts`     | Announcement feed generated from the facts it announces        |
-| `src/lib/content.ts`           | Shared post query (draft rule + sort order) and date formatter  |
-| `src/lib/record.ts`            | Build-time readers for the repository's own data files          |
-| `src/lib/strands.ts`           | The three research strands — the one piece of authored copy     |
-| `public/fonts/`                | Self-hosted subset faces, with `LICENSES.md`                    |
-| `src/pages/`                   | Routes, including `rss.xml.ts`                                  |
-| `src/styles/global.css`        | Tailwind entry point, theme tokens and minimal prose styles     |
+| `src/lib/content.ts`           | Shared post query (draft rule + sort order) and date formatter |
+| `src/lib/record.ts`            | Build-time readers for the repository's own data files         |
+| `src/lib/strands.ts`           | The three research strands — the one piece of authored copy    |
+| `public/fonts/`                | Self-hosted subset faces, with `LICENSES.md`                   |
+| `src/pages/`                   | Routes, including `rss.xml.ts`                                 |
+| `src/styles/global.css`        | Tailwind entry point, theme tokens and minimal prose styles    |
 
 ## Notable configuration
 

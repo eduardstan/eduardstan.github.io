@@ -121,7 +121,7 @@ appointments:
     url: https://islab.disco.unimib.it/
     dates: Jul 2024–Present
     # The day the post was announced. `dates` above is month-precision, so this
-    # is a fact the CV does not otherwise carry. The generator ignores it.
+    # is a fact the CV does not otherwise carry. `build-cv-data.mjs` ignores it.
     announced: 2024-07-16T10:00:00+02:00
     items:
       - Teaching (Instructor of record), thesis supervision, and mentoring activities.
@@ -235,7 +235,7 @@ teaching:
 # Each entry requires `role` and `venue`; `section`, `metric`, ISO 8601
 # `announced`, and `years` are optional. `announced` dates service without
 # editions; `years` stores each edition as a `year` plus optional `announced`.
-# The generator folds consecutive editions back into the compact CV range.
+# `build-cv-data.mjs` folds consecutive editions back into the compact CV range.
 # -----------------------------------------------------------------------------
 service:
   - role: Associate Editor
