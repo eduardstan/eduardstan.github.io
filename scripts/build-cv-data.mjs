@@ -291,10 +291,10 @@ const afterEarlier = (own, earlier) => [own, ...earlier.map((predicate) => `not 
  * calls: the key printed beside the section header, and the sections themselves.
  *
  * EVERY declaration is validated, then the printed ones are emitted. A section
- * carrying `printed: false` is a name for the website and nothing more, exactly
- * as `leadership:` is a section the site renders and the PDF does not - but it
- * is still read by the website, so a criteria-less or nameless one is an error
- * here rather than a silent relabelling of the whole bibliography there.
+ * carrying `printed: false` is omitted from the PDF; for publications it remains
+ * a name on the website, exactly as `leadership:` is a section the site renders
+ * and the PDF does not. A criteria-less or nameless declaration is an error
+ * rather than a whole-bibliography match in either consumer.
  */
 function bibSections(key, declaration) {
   const name = macroName(key);

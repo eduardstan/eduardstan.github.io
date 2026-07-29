@@ -232,10 +232,11 @@ Both `journal` and BibLaTeX's `journaltitle` are read, so a Better BibTeX BibLaT
 
 ### How they are grouped: `publications:` and `talks:` in `cv.yaml`
 
-**A section is a title plus a filter, and you declare it.** No entry type is named in `cv.tex` or
-in the website's source, so every BibTeX type is expressible — an adopter whose career is books,
-datasets or patents declares a section and it works, with no LaTeX edit. The same declaration is
-read by both, so the PDF and the site cannot disagree about how the work is grouped.
+**A section is a title plus a filter, and you declare it.** No publication entry type is named in
+`cv.tex` or in the website's source, so every BibTeX type is expressible — an adopter whose career
+is books, datasets or patents declares a section and it works, with no LaTeX edit. The
+`publications:` declaration is read by both, so the PDF and the publication index cannot disagree
+about how the work is grouped.
 
 ```yaml
 publications:
@@ -260,15 +261,16 @@ publications:
       printed: false # named on the site; no section in the PDF
 ```
 
-Order is print order. Each entry lands in the **first** section it matches, in the PDF exactly as
-on the site: each printed section's biblatex filter is compiled as its own criteria *minus* every
-section declared above it, including any carrying `printed: false`, so an entry two sections
-accept is printed once and labelled the same way. Two more keys: `prefix:` overrides the numbering
-letter (it defaults to `short`'s first letter, and two sections claiming the same one is an error,
-not a silent collision), and `printed: false` names a group for the website without printing a
-section for it in the PDF — the answer to "on the site, not in the CV", as `leadership:` is for
-ordinary sections. Every section is checked, printed or not: one with no criteria at all would
-match the whole bibliography on the site, so it is refused rather than accepted quietly.
+Declaration order is match order and, among printed sections, print order. Each publication lands
+in the **first** section it matches, in the PDF exactly as on the site: each printed section's
+biblatex filter is compiled as its own criteria *minus* every section declared above it, including
+any carrying `printed: false`, so an entry two sections accept is printed once and labelled the
+same way. Two more keys: `prefix:` overrides the numbering letter (it defaults to `short`'s first
+letter, and two printed sections claiming the same one is an error, not a silent collision), and
+`printed: false` omits a section from the PDF; a publication section remains named on the website
+— the answer to "on the site, not in the CV", as `leadership:` is for ordinary sections. Every
+section is checked, printed or not: one with no criteria at all would match the whole bibliography,
+so it is refused rather than accepted quietly.
 
 **Types and keywords are matched exactly as Biber matches them**, because Biber is the other
 consumer: entry types are written in **lower case** (biber lower-cases every one before testing a
@@ -285,7 +287,10 @@ read the entry's own `underreview` keyword, not the name of the section it lands
 declaring one costs nothing until the first entry arrives. An entry matching no section is still
 shown on the site, labelled `Other`; that is the visible sign that you have no group for it yet.
 
-`talks:` takes the same shape over `talks.bib`.
+`talks:` takes the same shape over `talks.bib` and controls the PDF's talk headings, filters,
+numbering prefixes and key. The `/talks/` page deliberately does not relabel talks from this
+declaration: its badges and descriptions remain each entry's own `keywords` and `note`, so
+`printed: false` on a talk section only omits that section from the PDF.
 
 `talks.bib` entries look like this — the entry type and every field name matters:
 

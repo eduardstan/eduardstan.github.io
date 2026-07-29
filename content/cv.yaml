@@ -9,9 +9,10 @@
 #   * the printed CV - `node scripts/build-cv-data.mjs` -> `cv/generated/cv-data.tex`
 #   * the website    - `web/src/lib/cv.ts` and `web/src/lib/record.ts`
 #
-# Layout, spacing, fonts, table column widths and section order are NOT here:
-# they belong to `cv/cv.tex`, which owns the design and decides which of the
-# sections below the PDF prints.
+# Layout, spacing, fonts, table column widths and the order of ordinary CV parts
+# are NOT here: they belong to `cv/cv.tex`, which owns the design and decides
+# which top-level entry lists the PDF prints. The order and inclusion of
+# bibliography subsections are declared under `publications:` and `talks:`.
 #
 # `content/README.md` is the documentation. Everything below is described there.
 #
@@ -494,26 +495,27 @@ leadership:
 # -----------------------------------------------------------------------------
 # How the two bibliographies are grouped.
 #
-# A section is a title plus a filter over `publications.bib` / `talks.bib`. Both
-# consumers read this one declaration, so the printed CV and the website cannot
-# disagree about how the work is grouped, and neither of them names a BibTeX
-# entry type anywhere in its own source.
+# A section is a title plus a filter over `publications.bib` / `talks.bib`. The
+# generator reads both declarations for the printed CV. The website also reads
+# `publications:` for its Type column and "by type" order; `/talks/` deliberately
+# keeps each entry's own `keywords` and `note` instead of relabelling it.
 #
 #   title             the heading the printed CV gives the group
-#   short             its short name: the website's Type column, and the key
-#                     printed beside the section header ("J=Journal, ...")
+#   short             its short name in the key beside the section header
+#                     ("J=Journal, ..."); publications also use it as the
+#                     website's Type label
 #   types             BibTeX entry types, ANY of which matches (omit for any)
 #   keywords          keywords, ALL of which must be present
 #   exclude_keywords  keywords, NONE of which may be present
 #   prefix            the entry-numbering letter; defaults to short's first
-#   printed           `false` names the group on the website without printing a
-#                     section for it in the PDF - the answer to "on the site,
-#                     not in the CV", as `leadership:` is for ordinary sections
+#   printed           `false` omits the section from the PDF; a publication
+#                     group remains named on the website
 #
-# Order is print order. A section whose filter matches nothing prints nothing -
-# no heading, no gap - so declaring one costs nothing until an entry arrives.
-# Every BibTeX entry type is expressible here; an entry matching no section is
-# still shown on the website, labelled "Other".
+# Declaration order is match order and, among printed sections, print order. A
+# printed section whose filter matches nothing prints nothing - no heading, no
+# gap - so declaring one costs nothing until an entry arrives. Every BibTeX
+# entry type is expressible here; a publication matching no section is still
+# shown on the website, labelled "Other".
 # -----------------------------------------------------------------------------
 publications:
   sections:

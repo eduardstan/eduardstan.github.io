@@ -62,7 +62,7 @@ export const SOURCES = {
   posts: 'content/posts',
   // Read twice, on purpose: `src/lib/cv.ts` inlines it through Vite's `?raw`
   // for the pages, and `cvRecord()` below reads it with `read()` for the
-  // declaration the bibliography's sections are matched against — which also
+  // publication declaration the bibliography is matched against — which also
   // runs under plain `node`, where `?raw` does not exist.
   cv: 'content/cv.yaml',
 } as const;

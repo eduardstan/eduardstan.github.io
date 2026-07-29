@@ -33,25 +33,13 @@ extras (`metric`, `rank_url`, `years`, `funding`, `count`, `rows`) are the rest.
 `cv/cv.tex` prints the ones it has a `\cvpart` line for. Adding a section to the YAML must
 never require editing the generator.
 
-**Publication and talk grouping is declared too.** `publications:` and `talks:` are the two
-top-level keys holding `sections:` rather than entries — a section is a `title` plus a filter
-(`types` any, `keywords` all, `exclude_keywords` none), and that is the whole grammar. The
-generator translates each into its `\defbibfilter` and `\printbibliography` plus `\cv<Key>Key` /
-`\cv<Key>Sections`; `web/src/lib/record.ts` matches entries against the same list for the Type
-column and the "by type" order. **No BibTeX entry type is named in `cv/cv.tex` or in the website's
-source, and none may be reintroduced there** — that hard-coding is what this replaced. `printed:
-false` names a group for the site without a PDF section (how `@misc` is "Software" today); adding
-one to the printed CV is a captain decision, because it moves the baseline.
-
-**Two matchers, one declaration — keep them provably equal.** biblatex/Biber selects the printed
-sections and `matchesBibSection` labels the site's, so every semantic must hold on both sides:
-entry types are lower case and compared as written, `keywords` is comma-separated and
-case-sensitive (Biber's rules, not a convenience), and each printed `\defbibfilter` is compiled as
-its own predicate **minus every predicate declared above it** — including `printed: false` ones,
-which claim the entry on the site — so first-match-wins holds in the PDF too. `record.test.ts`
-evaluates the generated filter expressions against every entry in `content/publications.bib` and
-fails if an entry lands in different sections on the two sides; a pair of matchers that merely
-look alike is not evidence.
+**Publication and talk grouping is declared too.** `content/README.md` owns the `sections:`
+interface. The generator translates both declarations for the PDF; the publication declaration
+also drives the site's Type column and "by type" order, while `/talks/` continues to display each
+talk's own `keywords` and `note` without relabelling it. **No grouping opinion or BibTeX entry type
+may be reintroduced in `cv/cv.tex` or the website's publication source.** `record.test.ts`
+evaluates the generated publication filters against every bibliography entry and proves
+first-match-wins agrees with the site, including around `printed: false` sections.
 
 Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commit.
 
@@ -79,9 +67,10 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
   filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`
   BibTeX name forms; reading the second as the first silently renames authors. `VENUE_FIELDS`
   reads `journaltitle` as well as `journal`: that is what a Better BibTeX BibLaTeX export writes.
-- DBLP's `@misc` artifacts carry an unfilled `note = {Accessed on YYYY-MM-DD.}`. Both sides drop
-  it now: `VENUE_FIELDS` tries `publisher` before `note`, and `cv.tex`'s `\DeclareSourcemap` nulls
-  a `note` matching that exact placeholder, so a declared `types: [misc]` section renders.
+- DBLP's `@misc` artifacts carry an unfilled `note = {Accessed on YYYY-MM-DD.}`. Both sides keep it
+  out of the rendered venue: `VENUE_FIELDS` tries `publisher` before `note`, and `cv.tex`'s
+  `\DeclareSourcemap` nulls a `note` matching that exact placeholder, so a declared
+  `types: [misc]` section renders.
 - `web/src/lib/cv.ts` reads `content/cv.yaml` through Vite's `?raw` import, not `node:fs`. Do
   **not** rewrite it as `readFileSync(new URL('../../../content/cv.yaml', import.meta.url))`:
   that builds and then fails at prerender with `ENOENT`, for the same relocation reason as the

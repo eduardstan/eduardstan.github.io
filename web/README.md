@@ -107,9 +107,9 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   and released software artifacts are entries like any other. **The Type column and the "by
   type" order are read from `publications:` in `content/cv.yaml`**, the same declaration
   `scripts/build-cv-data.mjs` translates into the printed CV's biblatex filters and headings:
-  a section is a title plus a filter over entry types and keywords, this file names no entry
-  type, and an entry matching no declared section is still shown, labelled "Other". A section
-  may carry `printed: false` to be named here without printing in the PDF — how DBLP's
+  a section is a title plus a filter over entry types and keywords, `record.ts` contains no
+  parallel type taxonomy, and an entry matching no declared section is still shown, labelled
+  "Other". A section may carry `printed: false` to be named here without printing in the PDF — how DBLP's
   `@misc` artifacts are labelled "Software" while the CV has no section for them.
   `VENUE_FIELDS` reads
   `journaltitle` as well as `journal`, because that is what a Better BibTeX **BibLaTeX**

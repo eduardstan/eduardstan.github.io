@@ -99,17 +99,16 @@ export const noteOf = (section: Section | undefined): string[] =>
  * One group of bibliography entries: a title plus a filter. Not a query
  * language.
  *
- * `publications:` and `talks:` in `content/cv.yaml` declare these, and both
- * consumers read the same declaration — `scripts/build-cv-data.mjs` turns each
- * into the biblatex filter and `\printbibliography` the PDF needs, and the site
- * matches entries against it here. Neither file names a BibTeX entry type in
- * its own source, so every type is expressible and none is unrenderable because
- * nobody wrote a filter for it.
+ * `publications:` and `talks:` in `content/cv.yaml` declare these.
+ * `scripts/build-cv-data.mjs` turns both into the biblatex filters and
+ * `\printbibliography` calls the PDF needs. The publication index also matches
+ * entries against the `publications:` list here; the talks page deliberately
+ * keeps each entry's own `keywords` and `note` instead of relabelling it.
  */
 export interface BibSection {
   /** The heading the printed CV gives the group. */
   title: string;
-  /** Its short name — the site's Type column, and the CV's section-header key. */
+  /** Its short name in the CV key; publications also use it in the site's Type column. */
   short: string;
   /** BibTeX entry types, any of which matches. Omitted means any type. */
   types?: string[];
@@ -119,7 +118,7 @@ export interface BibSection {
   exclude_keywords?: string[];
   /** The entry-numbering letter in the PDF. Defaults to `short`'s first letter. */
   prefix?: string;
-  /** `false` names the group here without printing a section for it in the PDF. */
+  /** `false` omits the PDF section; a publication group remains named on the site. */
   printed?: boolean;
 }
 
