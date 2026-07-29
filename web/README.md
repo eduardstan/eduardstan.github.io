@@ -111,7 +111,7 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   into a formatter — extend the field list and the tests instead.
 - **Links prefer the DOI.** `linkOf()` orders `doi` → `html` → `url` → `pdf`: the DOI
   outlives a publisher's URL scheme, and DBLP's `url` is usually that same doi.org address.
-  `html` and `pdf` follow al-folio's own rule for them (`_layouts/bib.liquid`) — an address
+  `html` and `pdf` retain the former al-folio `_layouts/bib.liquid` rule — an address
   containing `://` is used as it stands, anything else names a file under `/assets/`. An
   entry with none of the four renders no link rather than a dead one. The link is a sibling
   of the `<summary>`, visually placed beside it: interactive content is not nested inside
@@ -129,9 +129,8 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   grouping and cannot disagree. Each row hangs a rank badge off `metric`, linked to the
   `rank_url` beside it. The home page's "editorial boards" figure is `isEditorial()`, a
   `/\beditor\b/i` match on the role field, so a new editorship counts itself.
-  Nothing reads `_pages/professional_activities.md` any more: it was a hand-written third
-  transcription that had drifted from the CV, and `record.test.ts` fails if a reader for it
-  comes back.
+  The removed `_pages/professional_activities.md` was a hand-written third transcription that
+  had drifted from the CV, and `record.test.ts` fails if a reader for it comes back.
   `/projects/` renders `projects[]` **including the `funding` figures** — that file's own
   comment says the amounts are kept out of the printed CV so the website can use them, and
   no total is summed from them, because a programme total and a grant to one group are not
