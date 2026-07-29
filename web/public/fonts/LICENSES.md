@@ -4,11 +4,11 @@ Every face served from this directory is subset with `pyftsubset --flavor=woff2`
 upstream release and self-hosted. The licences below permit modification and
 redistribution, and require these notices to travel with the files.
 
-| File                                                                  | Family        | Upstream                                                                      | Licence      |
-| --------------------------------------------------------------------- | ------------- | ----------------------------------------------------------------------------- | ------------ |
-| `Archivo-Black.woff2`                                                 | Archivo Black | <https://github.com/Omnibus-Type/Archivo>                                     | SIL OFL 1.1  |
-| `PTSerif-Regular.woff2`, `PTSerif-Italic.woff2`, `PTSerif-Bold.woff2` | Ledger Serif  | [PT Serif by ParaType](https://github.com/google/fonts/tree/main/ofl/ptserif) | SIL OFL 1.1  |
-| `GoMono-Regular.woff2`, `GoMono-Bold.woff2`                           | Go Mono       | <https://go.googlesource.com/image/+/master/font/gofont/ttfs/>                | BSD 3-Clause |
+| File                                                                              | Family        | Upstream                                                                      | Licence      |
+| --------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------------------------------- | ------------ |
+| `Archivo-Black.woff2`                                                             | Archivo Black | <https://github.com/Omnibus-Type/Archivo>                                     | SIL OFL 1.1  |
+| `LedgerSerif-Regular.woff2`, `LedgerSerif-Italic.woff2`, `LedgerSerif-Bold.woff2` | Ledger Serif  | [PT Serif by ParaType](https://github.com/google/fonts/tree/main/ofl/ptserif) | SIL OFL 1.1  |
+| `GoMono-Regular.woff2`, `GoMono-Bold.woff2`                                       | Go Mono       | <https://go.googlesource.com/image/+/master/font/gofont/ttfs/>                | BSD 3-Clause |
 
 The Ledger Serif files are renamed subsets of PT Serif, satisfying the OFL Reserved Font
 Name condition while preserving clear attribution to the original family and authors.

@@ -31,21 +31,21 @@
   /* Renamed subset of PT Serif: its OFL Reserved Font Name may not identify a
      modified font as the primary family presented to users. */
   font-family: 'Ledger Serif';
-  src: url('/fonts/PTSerif-Regular.woff2') format('woff2');
+  src: url('/fonts/LedgerSerif-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Ledger Serif';
-  src: url('/fonts/PTSerif-Italic.woff2') format('woff2');
+  src: url('/fonts/LedgerSerif-Italic.woff2') format('woff2');
   font-weight: 400;
   font-style: italic;
   font-display: swap;
 }
 @font-face {
   font-family: 'Ledger Serif';
-  src: url('/fonts/PTSerif-Bold.woff2') format('woff2');
+  src: url('/fonts/LedgerSerif-Bold.woff2') format('woff2');
   /* PT Serif has no semibold; map every deliberate 600 to the real Bold face
      instead of allowing the browser to synthesize one. */
   font-weight: 600 700;
