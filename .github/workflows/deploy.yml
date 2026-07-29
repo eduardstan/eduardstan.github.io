@@ -45,13 +45,22 @@ jobs:
           # Astro 7 requires Node >= 22.12.0.
           node-version: "22"
           cache: npm
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
 
-      # The printed CV, typeset from the same cv/cv.yaml the /cv/ page renders.
-      # It is never committed — no binary enters git history — so it is built
-      # here and dropped into web/public/ before astro build picks it up. The
-      # texlive pin and the xelatex requirement are explained in cv.yml, which
-      # builds the same document on its own for review.
+      - name: Install CV data dependencies 💾
+        run: npm ci
+
+      - name: Check generated CV data 🔎
+        run: node scripts/build-cv-data.mjs --check
+
+      # The printed CV is typeset from the committed generated form of the same
+      # cv/cv.yaml the /cv/ page renders. It is never committed — no binary
+      # enters git history — so it is built here and dropped into web/public/
+      # before astro build picks it up. The texlive pin and the xelatex
+      # requirement are explained in cv.yml, which builds the same document on
+      # its own for review.
       - name: Build the CV PDF 📄
         uses: xu-cheng/latex-action@v3
         with:
@@ -65,7 +74,7 @@ jobs:
           mkdir -p web/public/assets
           cp cv/cv.pdf web/public/assets/cv.pdf
 
-      - name: Install 💾
+      - name: Install web dependencies 💾
         run: npm ci
         working-directory: web
 

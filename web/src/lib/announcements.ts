@@ -283,11 +283,12 @@ function fromTalks(into: Announcement[], undated: Undated[]): void {
 }
 
 function fromPosts(into: Announcement[], undated: Undated[]): void {
-  for (const path of listSources(SOURCES.posts)) {
+  for (const path of listSources(SOURCES.posts, ['.md', '.mdx'])) {
     const raw = readSource(path);
     const frontmatter = /^---\n([\s\S]*?)\n---/.exec(raw)?.[1] ?? '';
-    const field = (key: string) =>
-      new RegExp(`^${key}:\\s*(.+?)\\s*$`, 'm').exec(frontmatter)?.[1]?.replace(/^["']|["']$/g, '');
+    const data = parse(frontmatter) as Record<string, unknown> | null;
+    if (data?.draft === true) continue;
+    const field = (key: string) => (typeof data?.[key] === 'string' ? data[key] : undefined);
     const stamp = field('date');
     const title = field('title');
     if (!stamp || !precisionOf(stamp) || !title) {
@@ -298,22 +299,13 @@ function fromPosts(into: Announcement[], undated: Undated[]): void {
       });
       continue;
     }
-    // al-folio publishes posts at /blog/<year>/<slug>/, where the slug is the
-    // filename with its date prefix removed.
-    const slug = path
-      .split('/')
-      .pop()!
-      .replace(/^\d{4}-\d{2}-\d{2}-/, '')
-      .replace(/\.md$/, '');
+    const id = path.slice(`${SOURCES.posts}/`.length).replace(/\.(?:md|mdx)$/, '');
     const description = field('description');
     into.push(
       item(
         stamp,
         'Writing',
-        `New post: [${md(title)}${description ? ` — ${md(description)}` : ''}](/blog/${stamp.slice(
-          0,
-          4,
-        )}/${slug}/)`,
+        `New post: [${md(title)}${description ? ` — ${md(description)}` : ''}](/blog/${id}/)`,
         path,
       ),
     );
@@ -355,7 +347,7 @@ export function announcements(): Feed {
   cache = {
     items,
     undated,
-    sources: [SOURCES.cv, SOURCES.bibliography, SOURCES.talks, `${SOURCES.posts}/*/*.md`],
+    sources: [SOURCES.cv, SOURCES.bibliography, SOURCES.talks, `${SOURCES.posts}/**/*.{md,mdx}`],
   };
   return cache;
 }
