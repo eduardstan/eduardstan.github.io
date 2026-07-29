@@ -12,15 +12,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import {
-  about,
-  activities,
-  bibliography,
-  bibliographyGaps,
-  news,
-  parseEntries,
-  SOURCES,
-} from './record.ts';
+import { about, activities, bibliography, SOURCES } from './record.ts';
+import { announcements, formatStamp } from './announcements.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const bib = bibliography();
@@ -129,35 +122,15 @@ assert.ok(
   'no entry resolved a link at all',
 );
 
-// Adding an `abstract` to an entry has to be the only action needed for it to
-// show, so nothing may gate on a list or a flag. The bibliography carries none
-// today, so the two states are put to the parser directly.
-const [withAbstract, withoutAbstract] = parseEntries(`
-@article{withabstract,
-  title = {A title},
-  author = {Stan, Ionel Eduard},
-  journal = {A journal},
-  year = {2026},
-  abstract = {The claim, stated once.},
+// Abstracts follow the entries that carry the field; there is no separate
+// allow-list that can drift away from the bibliography.
+for (const entry of bib.entries) {
+  assert.equal(
+    Boolean(entry.abstract),
+    Boolean(entry.fields.abstract),
+    `${entry.key}: abstract presence disagrees with its fields`,
+  );
 }
-@article{withoutabstract,
-  title = {B title},
-  author = {Stan, Ionel Eduard},
-  journal = {A journal},
-  year = {2026},
-}
-`);
-assert.equal(withAbstract.key, 'withabstract', 'synthetic entries did not parse in order');
-assert.equal(
-  withAbstract.abstract,
-  'The claim, stated once.',
-  'an `abstract` field did not reach the entry',
-);
-assert.equal(
-  withoutAbstract.abstract,
-  undefined,
-  'an abstract appeared on an entry that carries no `abstract` field',
-);
 
 // Accents, particles and both BibTeX name forms — the cases a naive parser gets
 // wrong. `Stan, Ionel Eduard` read as `First Last` yields `S. I. Eduard`.
@@ -170,15 +143,72 @@ assert.ok(
   '`Last, First` names were read as `First Last`',
 );
 
-// The feed, its defects, and the derived gap.
-const feed = news();
-assert.ok(feed.items.length > 0, 'no news items parsed');
-const excluded = feed.defects.filter((defect) => defect.excluded).length;
-assert.equal(feed.items.length + excluded, feed.fileCount, 'items + excluded files ≠ files read');
-assert.ok(excluded > 0, 'the known duplicated news file was not detected');
-for (const gap of bibliographyGaps()) {
-  assert.ok(gap.title.length > 10, `implausible gap title: ${gap.title}`);
+// The generated feed. Every publication and talk is announceable, so the feed
+// is at least as long as the bibliography; nothing may reach the page undated,
+// unlabelled, or still carrying markdown markers.
+const feed = announcements();
+assert.ok(feed.items.length >= bib.entries.length, 'the feed is shorter than the bibliography');
+for (const item of feed.items) {
+  assert.ok(item.text.length > 10, `implausible announcement text: ${item.text}`);
+  assert.ok(item.kind, `${item.stamp}: no kind`);
+  // A literal `*` is real data — the bibliography contains `OVERLAY@AI*IA 2019`
+  // — so what must not survive is an unrendered emphasis pair or a leftover
+  // escape from the templates that splice those facts in.
+  assert.ok(!item.html.includes('**'), `unrendered bold: ${item.html}`);
+  assert.ok(!item.text.includes('**'), `unrendered bold: ${item.text}`);
+  assert.ok(!item.text.includes('\\'), `leftover markdown escape: ${item.text}`);
+  assert.ok(!Number.isNaN(item.at.valueOf()), `${item.stamp}: unparseable date`);
+  // The rendered date may never state more than the source does.
+  assert.equal(
+    item.precision === 'year',
+    /^\d{4}$/.test(formatStamp(item)),
+    `${item.stamp}: rendered as "${formatStamp(item)}" at ${item.precision} precision`,
+  );
 }
+
+const linkedPublication = bib.entries.find((entry) => entry.link?.field === 'doi')!;
+const linkedAnnouncement = feed.items.find(
+  (item) => item.source === `${SOURCES.bibliography} (${linkedPublication.key})`,
+)!;
+assert.ok(
+  linkedAnnouncement.html.includes(`href="${linkedPublication.link!.href}"`),
+  `${linkedPublication.key}: resolved publication link did not reach its announcement`,
+);
+
+// Newest first, and the two same-day service announcements keep the order their
+// harvested times give them: IJCAI 2025 at 16:00 above EAAI at 10:00.
+for (let i = 1; i < feed.items.length; i++) {
+  assert.ok(feed.items[i - 1].at >= feed.items[i].at, 'the feed is not newest-first');
+}
+// Three things happened on 2025-01-13: two service invitations whose harvested
+// times put IJCAI above EAAI, and a blog post, which states only a day and so
+// sorts below both.
+const sameDay = feed.items.filter((item) => item.stamp.startsWith('2025-01-13'));
+assert.equal(sameDay.length, 3, `expected 3 announcements on 2025-01-13, got ${sameDay.length}`);
+assert.match(sameDay[0].text, /International Joint Conference/, 'IJCAI 2025 lost its place');
+assert.match(sameDay[1].text, /Engineering Applications/, 'EAAI lost its place');
+
+// Sorting follows the instant, but display follows the calendar date written in
+// the source stamp even when its offset puts that instant on the previous UTC day.
+const offsetStamp = '2025-01-01T00:30:00+02:00';
+const offsetAnnouncement = {
+  ...sameDay[0],
+  stamp: offsetStamp,
+  at: new Date(offsetStamp),
+  precision: 'minute' as const,
+};
+assert.equal(offsetAnnouncement.at.toISOString().slice(0, 10), '2024-12-31');
+assert.equal(formatStamp(offsetAnnouncement), '1 Jan 2025');
+
+// Facts are escaped on the way into the markdown templates and unescaped on the
+// way out, so a venue containing markup characters arrives intact.
+const starred = feed.items.find((item) => item.text.includes('AI*IA'));
+assert.ok(starred, 'the `OVERLAY@AI*IA` venue did not survive the markdown round trip');
+assert.ok(starred.html.includes('AI*IA'), 'the literal asterisk was rendered as emphasis');
+
+// Every talk in cv/pres.bib carries its own ISO date, so all of them announce.
+const talks = feed.items.filter((item) => item.kind === 'Talk');
+assert.equal(talks.length, 11, `expected 11 talks in the feed, got ${talks.length}`);
 
 // About and activities. Prettier runs over the source markdown and spells
 // emphasis `_like this_`, so both markers have to render — and neither may fire
@@ -208,7 +238,6 @@ assert.ok(
 );
 
 console.log(
-  `ok — ${bib.entries.length} entries, ${feed.items.length} news items, ` +
-    `${feed.defects.length} defects, ${bibliographyGaps().length} gaps, ` +
-    `${sections.length} activity sections`,
+  `ok — ${bib.entries.length} entries, ${feed.items.length} announcements, ` +
+    `${feed.undated.length} undated facts, ${sections.length} activity sections`,
 );

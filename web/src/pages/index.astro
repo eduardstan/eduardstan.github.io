@@ -2,22 +2,14 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Record from '../components/Record.astro';
 import SectionHead from '../components/SectionHead.astro';
-import {
-  about,
-  activities,
-  bibliography,
-  bibliographyGaps,
-  news,
-  profile,
-  SOURCES,
-} from '../lib/record';
+import { about, activities, bibliography, profile, SOURCES } from '../lib/record';
+import { announcements, formatStamp } from '../lib/announcements';
 import { strands } from '../lib/strands';
 
 const { name, affiliation } = profile();
 const bio = about();
 const bib = bibliography();
-const feed = news();
-const gaps = bibliographyGaps();
+const feed = announcements();
 const service = activities();
 const research = strands();
 
@@ -31,18 +23,14 @@ const counts = [
   { n: committees?.entries.length ?? 0, label: 'conference committees' },
 ];
 
-const dateFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'short', timeZone: 'UTC' });
-
 /**
- * How many news items the front page carries. Six is what balances the third
+ * How many announcements the front page carries. Six is what balances the third
  * column against the lead at 1440 without the page turning into a scroll; the
  * whole feed lives at /news/. One edit here retunes it.
  */
 const LATELY = 6;
 const shown = feed.items.slice(0, LATELY);
 const withheld = feed.items.length - shown.length;
-const excluded = feed.defects.filter((defect) => defect.excluded);
-const inconsistent = feed.defects.filter((defect) => !defect.excluded);
 ---
 
 <BaseLayout
@@ -150,17 +138,6 @@ const inconsistent = feed.defects.filter((defect) => !defect.excluded);
             >{SOURCES.activities}</b
           >.
         </p>
-        {
-          gaps.length > 0 && (
-            <p>
-              {gaps.length} paper{gaps.length === 1 ? '' : 's'} announced in <b>{SOURCES.news}</b>{' '}
-              {gaps.length === 1 ? 'has' : 'have'} no entry in the bibliography:{' '}
-              {gaps.map((gap) => `“${gap.title}” (${dateFormat.format(gap.announced)})`).join('; ')}.
-              That sentence is a set difference between two files in this repository: it shrinks as
-              entries are added, and disappears when the two agree.
-            </p>
-          )
-        }
       </Record>
 
       {
@@ -197,15 +174,13 @@ const inconsistent = feed.defects.filter((defect) => !defect.excluded);
     </div>
 
     <div class="col">
-      <SectionHead source={`${SOURCES.news}/*/*.md`}>Lately</SectionHead>
+      <SectionHead source={SOURCES.cv}>Lately</SectionHead>
       <ul class="feed">
         {
           shown.map((item) => (
             <li>
               <span class="when label">
-                <time datetime={item.date.toISOString().slice(0, 10)}>
-                  {dateFormat.format(item.date)}
-                </time>
+                <time datetime={item.stamp}>{formatStamp(item)}</time>
                 {' · '}
                 {item.kind}
               </span>
@@ -219,18 +194,21 @@ const inconsistent = feed.defects.filter((defect) => !defect.excluded);
       </p>
       <Record>
         <p>
-          <b>{SOURCES.news}/*/*.md</b> — {feed.fileCount} files read, {feed.items.length}{' '}
-          published. This column is capped at {LATELY}, so {shown.length} of {feed.items.length} are
-          shown here and {withheld} {withheld === 1 ? 'is' : 'are'} not; the full feed is at{' '}
+          {feed.items.length} announcements, generated from the facts themselves — {
+            feed.sources.map((file, index) => (
+              <>
+                {index > 0 && ', '}
+                <b>{file}</b>
+              </>
+            ))
+          }. Nothing is written twice: a fact is announced on the date it carries, and the feed shows
+          that date at the precision the source states it and no finer.
+        </p>
+        <p>
+          This column is capped at {LATELY}, so {shown.length} of {feed.items.length} are shown here
+          and {withheld} {withheld === 1 ? 'is' : 'are'} not; the full feed is at{' '}
           <a href="/news/">/news/</a>.
         </p>
-        {
-          [...excluded, ...inconsistent].map((defect) => (
-            <p>
-              <b>{defect.source}</b> — {defect.problem}
-            </p>
-          ))
-        }
       </Record>
     </div>
   </div>

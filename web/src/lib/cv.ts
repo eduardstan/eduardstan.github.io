@@ -27,6 +27,28 @@ interface Block {
 export interface Appointment extends Block {
   role: string;
   organisation: string;
+  url?: string;
+  /**
+   * ISO 8601 date the fact was announced, when the block's own `dates` range
+   * does not already carry it at that precision. Optional everywhere it appears.
+   */
+  announced?: string;
+}
+
+/** One edition of a recurring service role (a conference year). */
+export interface ServiceYear {
+  year: number;
+  announced?: string;
+}
+
+export interface ServiceEntry {
+  role: string;
+  venue: string;
+  section?: string;
+  metric?: string;
+  url?: string;
+  announced?: string;
+  years?: ServiceYear[];
 }
 
 export interface Degree extends Block {
@@ -76,6 +98,7 @@ export interface CV {
     breakdown: SupervisionRow[];
   };
   awards: Award[];
+  service: ServiceEntry[];
   languages: { name: string; level: string }[];
   archive: { leadership: Leadership[] };
 }
