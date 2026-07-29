@@ -16,7 +16,8 @@ Two consumers read it: the website (`web/`) and the printed CV (`cv/cv.tex`, via
 `node scripts/build-cv-data.mjs`). Neither has a second copy of anything.
 
 **The fastest way in:** copy the example below into `cv.yaml`, put an empty `publications.bib` and
-`talks.bib` beside it, and run the two builds. You get a one-page CV and a working site. Then grow it.
+`talks.bib` beside it, and run the two builds. You get a one-page CV and a working site. Then grow it
+— starting with your own BibTeX export, which needs no conversion at all.
 
 ## The smallest file that works
 
@@ -37,6 +38,45 @@ appointments:
     org: University of Somewhere
     dates: 2025 – Present
 ```
+
+## Bring the publications you already have
+
+**Drop your BibTeX file in as `publications.bib`. That is the whole import.** It is the largest
+block of an academic CV and it costs nothing: an untouched DBLP export for a stranger — 26 entries,
+not one edit — renders complete on the site (authors, venue, pages, DOI link, copy-BibTeX block)
+_and_ prints in the PDF, grouped and numbered. Zotero, Mendeley and Google Scholar write the same
+format. `talks.bib` works the same way. Two things to know before you read the result:
+
+**Declare your sections, or every entry is labelled `Other`.** Nothing about grouping is built in —
+which type belongs under which heading is your opinion and you write it down
+([how they are grouped](#how-they-are-grouped-publications-and-talks-in-cvyaml)). Paste this beside
+the example above and refine it once you can see your own list:
+
+```yaml
+publications:
+  sections:
+    - { title: Journal articles (peer-reviewed), short: Journal, types: [article] }
+    - { title: Conference papers (peer-reviewed), short: Conference, types: [inproceedings] }
+    - { title: Books & chapters, short: Books, types: [incollection, inbook, book] }
+
+talks:
+  sections:
+    - { title: Talks, short: Talk, types: [unpublished] }
+```
+
+(`inbook` is in there because Crossref emits it for conference papers published in LNCS. Without it
+those land in `Other`. Declaring a section for a file you have not filled in yet costs nothing: a
+`.bib` with no entries prints no bibliography at all.)
+
+**DBLP escapes the underscores in `doi`, and the PDF prints the backslash.** It writes
+`doi = {10.1007/978-3-319-07857-1\_33}`; the site strips the escape, the PDF prints it literally and
+its DOI link carries `%5C_`. Until that is fixed for everyone, unescape them yourself:
+
+```sh
+sed -i '/doi *=/ s/\\_/_/g' content/publications.bib
+```
+
+It is a known blemish that the captain's own published CV carries — not something you did wrong.
 
 ## `profile:`
 
@@ -359,8 +399,7 @@ Everything about *you* is in this directory. Two pieces of prose on the site are
   rewrite it or delete the block from `web/src/pages/index.astro`** — until you do, the front
   page describes someone else's research.
 - **The `Talks & Presentations` and `Publications` headings in `cv/cv.tex`** print even when
-  the matching `.bib` is empty; biblatex cannot report a count before it prints. Delete those
-  two blocks if you have neither.
+  the matching `.bib` is empty. Delete those two blocks if you have neither.
 
 ## Prove a clean handoff
 
