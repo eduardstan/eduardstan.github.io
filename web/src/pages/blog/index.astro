@@ -4,7 +4,7 @@
  * everything else is read from the repository's own data files, but a post is
  * prose that exists nowhere else, so it is the one thing a collection is for.
  *
- * `src/lib/announcements.ts` reads these same files for the news feed, so a post
+ * `src/lib/announcements.ts` reads these same files for the register, so a post
  * is announced on the date its own front matter carries.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -24,8 +24,8 @@ const description = `${posts.length} posts by ${profile().name}.`;
 <BaseLayout title="Blog" description={description}>
   <PageHead title="Blog">
     <p class="blurb">
-      <b>{posts.length} posts</b>, newest first. Each is announced in the <a href="/news/"
-        >news feed</a
+      <b>{posts.length} posts</b>, newest first. Each is announced in the <a href="/lately/"
+        >register</a
       > on the date its own front matter carries, and syndicated at <a href="/rss.xml">/rss.xml</a>.
     </p>
   </PageHead>

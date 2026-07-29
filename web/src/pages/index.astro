@@ -44,7 +44,7 @@ const counts = [
 /**
  * How many announcements the front page carries. Six is what balances the third
  * column against the lead at 1440 without the page turning into a scroll; the
- * whole feed lives at /news/. One edit here retunes it.
+ * whole feed lives at /lately/. One edit here retunes it.
  */
 const LATELY = 6;
 const shown = feed.items.slice(0, LATELY);
@@ -307,7 +307,7 @@ const withheld = feed.items.length - shown.length;
         }
       </ul>
       <p class="more-feed">
-        <a class="label" href="/news/">All {feed.items.length} items →</a>
+        <a class="label" href="/lately/">All {feed.items.length} items →</a>
       </p>
       <Record>
         <p>
@@ -324,7 +324,7 @@ const withheld = feed.items.length - shown.length;
         <p>
           This column is capped at {LATELY}, so {shown.length} of {feed.items.length} are shown here
           and {withheld} {withheld === 1 ? 'is' : 'are'} not; the full feed is at{' '}
-          <a href="/news/">/news/</a>.
+          <a href="/lately/">/lately/</a>.
         </p>
       </Record>
     </div>

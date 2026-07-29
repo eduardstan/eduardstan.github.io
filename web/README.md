@@ -177,7 +177,7 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   pages, and the page derives the list of sections it omits from the file's own top-level
   sections minus the ones it renders.
 - **Announcements belong to their facts.** `src/lib/announcements.ts` generates the home-page
-  and `/news/` feeds from the four files under `content/`. It names no CV section: it walks
+  and `/lately/` feeds from the four files under `content/`. It names no CV section: it walks
   every top-level list, and the section key becomes the kind on the apparatus line
   (`appointments` → `Appointment`, an invented `fieldwork:` → `Fieldwork`), except that
   `isEditorial()` gives an editorship the word "Editorial".
@@ -186,17 +186,27 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   precision recorded by the source and no finer, while facts with no defensible date stay in
   the feed's `undated` provenance instead of receiving a guess. **A manuscript under review
   does not announce without one**: its `year` is the year it is aimed at, not a date anything
-  happened on, and letting it fall back to 1 January put five of them above every real item on
-  the front page. The Jekyll site's `_news/` directory is gone; its 22 permalinks redirect to
-  `/news/` through `src/lib/legacy-urls.ts`.
+  happened on, and letting it fall back to 1 January put every such manuscript above real
+  items on the front page. The Jekyll site's `_news/` directory is gone; its 22 permalinks,
+  and the `/news/` index itself, redirect to `/lately/` through `src/lib/legacy-urls.ts`.
 - **One canonical sentence per kind.** `TEMPLATES` at the top of `announcements.ts` is the
   whole wording of the feed, one line per kind, and it is the first thing a reuser will want
   to edit. The grammar is **what it was, then where**; the kind is not repeated in the prose
   because the mono line beside the date already carries it, and the venue is the short name
   (`IJCAI 2026`, from the acronym the CV puts in brackets). Each template returns the
   segments of one sentence and they are joined after the empty ones are dropped, so a fact
-  missing a slot never prints a dangling comma. Zero CSS was added for any of it: the bodies
-  are `<b>`, `<i>` and `<a>` inside `.feed p`, all already styled.
+  missing a slot never prints a dangling comma. Announcement bodies and rows need no dedicated
+  CSS: they remain `<b>`, `<i>` and `<a>` inside the already styled `.feed`.
+- **The register is the feed, filtered by CSS.** `/lately/` is the whole stream — the home
+  page's "Lately" column shows the newest six of the same `announcements()` call and links
+  here, so the two cannot disagree about what "everything" is. It is broken by year with a
+  `.sec` year marker, every row carries the record it was generated from under the inspect
+  switch (the BibTeX key, or the `cv.yaml` list and entry title), and the facts that carry no
+  defensible date are counted and listed in the same place. Filtering by kind is one hidden
+  radio per kind plus one generated general-sibling rule per kind — the inspect switch's trick,
+  so it is keyboard-operable, needs no JavaScript and downloads nothing. The kinds are read off
+  the stream, never listed by hand, and the rules are written on the page from them. `/rss.xml`
+  serves the same stream, one item per announcement, each linking its `/lately/#anchor`.
 - **The dense row.** `.rows` in `global.css` is the table primitive the CV-fed pages need:
   `.defs`' label-left/meta-right pattern with a middle column and the dates in Go Mono. It
   stacks below 760px the way `.entry` does, so nothing scrolls sideways on a phone. Reuse it
