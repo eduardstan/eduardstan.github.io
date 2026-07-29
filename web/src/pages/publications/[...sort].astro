@@ -15,7 +15,7 @@
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Record from '../../components/Record.astro';
-import { bibliography, bibliographyGaps, SOURCES, type Publication } from '../../lib/record';
+import { bibliography, SOURCES, type Publication } from '../../lib/record';
 
 /**
  * The order the CV prints them in — journals, conferences, workshops, under
@@ -79,7 +79,6 @@ export const getStaticPaths = (() => [
 
 const active = ((Astro.params.sort as SortKey | undefined) ?? 'year') satisfies SortKey;
 const bib = bibliography();
-const gaps = bibliographyGaps();
 const entries = [...bib.entries].sort(SORTS[active].compare);
 
 /** The Year header toggles direction; the others switch to their own order. */
@@ -91,7 +90,6 @@ const columns = [
 const href = (sort: string) => (sort === 'year' ? '/publications/' : `/publications/${sort}/`);
 const marker = (column: string) => (SORTS[active].column === column ? ` ${SORTS[active].marker}` : '');
 
-const dateFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'short', timeZone: 'UTC' });
 const isHim = (author: string) => author === 'I. E. Stan';
 const pad = (index: number) => String(index + 1).padStart(2, '0');
 const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.years.last}, read from ${SOURCES.bibliography} at build time.`;
@@ -118,15 +116,6 @@ const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.y
       BibTeX. Order the index by year, type or title, <a href="/search/">search the site</a> to find
       a paper by title, author or a word in its abstract, and turn <b>inspect sources</b> on, in the
       bar above, to see where each part of this page comes from.
-      {
-        gaps.length > 0 && (
-          <>
-            {' '}
-            {gaps.length} paper{gaps.length === 1 ? '' : 's'} announced in the news feed{' '}
-            {gaps.length === 1 ? 'has' : 'have'} no entry here yet; they are listed under the index.
-          </>
-        )
-      }
     </p>
   </section>
 
@@ -292,34 +281,6 @@ const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.y
     </p>
   </Record>
 
-  {
-    gaps.length > 0 && (
-      <section class="after-index">
-        <h2 class="sec">Announced, not yet recorded</h2>
-        <ul class="defs">
-          {gaps.map((gap) => (
-            <li>
-              <span class="a">{gap.title}</span>
-              <span class="b label">announced {dateFormat.format(gap.announced)}</span>
-            </li>
-          ))}
-        </ul>
-        <p class="blurb">
-          These papers are announced in the news feed but have no entry in{' '}
-          <b>{SOURCES.bibliography}</b>. This list is the difference between the two, computed when
-          the page was built: adding the entries removes them from here.
-        </p>
-        <Record>
-          {gaps.map((gap) => (
-            <p>
-              <b>{gap.source}</b> — announced {dateFormat.format(gap.announced)}; no entry whose
-              title matches "{gap.title}" in {SOURCES.bibliography}.
-            </p>
-          ))}
-        </Record>
-      </section>
-    )
-  }
 </BaseLayout>
 
 <script>

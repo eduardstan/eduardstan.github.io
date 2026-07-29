@@ -32,12 +32,12 @@ Jekyll output risks colliding with that route.
   inside the worktree.
 - Astro 7's default Markdown processor (Sätteri) is **not** remark/rehype compatible, so `web/`
   opts back into the unified processor — see "Notable configuration" in `web/README.md`.
-- `web/` reads the repository root's data files (`_bibliography/`, `_news/`, `_pages/`,
-  `_config.yml`) at build time through `web/src/lib/record.ts`, so the two sites share one set of
-  sources. That module finds the root by walking up for `_config.yml` rather than from
-  `import.meta.url`, because Astro relocates the bundle during `astro build`. The Ledger design
-  requires every displayed count and source line to be derived there rather than written by hand —
-  see "Notable configuration" in `web/README.md`.
+- `web/` reads the repository root's data files (`_bibliography/`, `_posts/`, `_pages/`, `cv/`
+  and `_config.yml`) at build time through `web/src/lib/record.ts` and `web/src/lib/cv.ts`, so the
+  two sites share one set of sources. `record.ts` finds the root by walking up for `_config.yml`
+  rather than from `import.meta.url`, because Astro relocates the bundle during `astro build`.
+  The Ledger design requires every displayed count and source line to be derived there rather than
+  written by hand — see "Notable configuration" in `web/README.md`.
 - The CV and both sites share `_bibliography/papers.bib`. The Astro rebuild displays every entry,
   including under-review manuscripts and software artifacts; `web/README.md` owns that index's
   filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`
@@ -46,9 +46,39 @@ Jekyll output risks colliding with that route.
   rewrite it as `readFileSync(new URL('../../../cv/cv.yaml', import.meta.url))`: that builds and
   then fails at prerender with `ENOENT`, for the same relocation reason as the bullet above.
   `?raw` inlines the file at build time, so there is no path to resolve; use `record.ts`'s
-  walk-up-for-`_config.yml` only where a whole directory has to be read.
-- `.github/workflows/web-ci.yml` therefore triggers on `cv/**` and `_bibliography/**` as well as
-  `web/**`: an edit to either can break the Astro build without touching `web/`.
+  walk-up-for-`_config.yml` only where a whole directory has to be read — or, as
+  `announcements.ts` does, where the module also has to run under plain `node` in a self-check,
+  which `?raw` cannot.
+- `.github/workflows/web-ci.yml` therefore triggers on `cv/**`, `_bibliography/**` and `_posts/**`
+  as well as `web/**`: an edit to any of them can break the Astro build without touching `web/`.
+- `_news/` still exists but **nothing in `web/` reads it**. It is kept only so the live Jekyll
+  site's news section keeps working until the cutover, which deletes it — the same parity-first
+  holding pattern `_pages/cv.md` was in. Every date it carried now lives on the fact itself, so do
+  not add a file there and do not treat it as a source; see "Announcements" below.
+- Text spliced into a generated announcement must go through that module's `md()` escaper: the
+  bibliography really contains `OVERLAY@AI*IA 2019` and DOIs ending `…-7_26`, which would otherwise
+  be read as markdown emphasis. `cv/pres.bib` is LaTeX like `papers.bib` is, so its fields need
+  `deLatex()` first.
+
+## Announcements
+
+In `web/`, every announcement is derived from the fact it announces; there is no separate news
+content. A fact is announced on the date it already carries — a talk's ISO `date`, a post's
+front-matter `date`, an award's month, a paper's `year`. An `announced:` key is written **only**
+where the announcement demonstrably happened on a date the fact does not otherwise state
+(harvested from `_news/`); it is optional and additive everywhere, and
+`scripts/build-cv-data.mjs` ignores it, so adding one leaves `cv/generated/cv-data.tex`
+byte-identical — check with `--check`.
+
+Dates are shown at the precision their source states and no finer: an item whose source records
+only a year renders as a year. Never widen a date to a day the record does not support. A fact
+with no defensible date is listed in the feed's `undated` array and shown in the provenance block,
+not given an invented one.
+
+**The root Jekyll site has no generator for this** and still renders `_news/` through
+`_includes/news.liquid`. So the two sites' news differ by construction — Jekyll shows the 22
+hand-written files, `web/` shows the generated feed — and that is deliberate until the cutover.
+Deleting `_news/` before then takes the live news page down.
 
 ## This repository is public
 

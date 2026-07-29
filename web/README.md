@@ -36,18 +36,19 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
 
 ## Layout
 
-| Path                           | Purpose                                                         |
-| ------------------------------ | --------------------------------------------------------------- |
-| `src/content.config.ts`        | Typed schemas for the `blog`, `news` and `projects` collections |
-| `src/content/`                 | Sample entries only — real content is migrated in a later task  |
-| `src/layouts/BaseLayout.astro` | Shared document shell, with a named `head` slot                 |
-| `src/components/`              | Header, footer, page and section heads, source record, theme    |
-| `src/lib/content.ts`           | Shared post query (draft rule + sort order) and date formatter  |
-| `src/lib/record.ts`            | Build-time readers for the repository's own data files          |
-| `src/lib/strands.ts`           | The three research strands — the one piece of authored copy     |
-| `public/fonts/`                | Self-hosted subset faces, with `LICENSES.md`                    |
-| `src/pages/`                   | Routes, including `rss.xml.ts`                                  |
-| `src/styles/global.css`        | Tailwind entry point, theme tokens and minimal prose styles     |
+| Path                           | Purpose                                                        |
+| ------------------------------ | -------------------------------------------------------------- |
+| `src/content.config.ts`        | Typed schemas for the `blog` and `projects` collections        |
+| `src/content/`                 | Sample blog and project entries for later content migration    |
+| `src/layouts/BaseLayout.astro` | Shared document shell, with a named `head` slot                |
+| `src/components/`              | Header, footer, page and section heads, source record, theme   |
+| `src/lib/announcements.ts`     | Announcement feed generated from the facts it announces        |
+| `src/lib/content.ts`           | Shared post query (draft rule + sort order) and date formatter |
+| `src/lib/record.ts`            | Build-time readers for the repository's own data files         |
+| `src/lib/strands.ts`           | The three research strands — the one piece of authored copy    |
+| `public/fonts/`                | Self-hosted subset faces, with `LICENSES.md`                   |
+| `src/pages/`                   | Routes, including `rss.xml.ts`                                 |
+| `src/styles/global.css`        | Tailwind entry point, theme tokens and minimal prose styles    |
 
 ## Notable configuration
 
@@ -129,8 +130,15 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   bare `*` passes through, keeping "CORE Rank: A\*" intact. `data_protection` and
   `archive.data_protection_optional_sentence` are deliberately not rendered: a GDPR consent
   written for a selection procedure means nothing on a public page. `service[]` and
-  `projects[]` belong to their own pages. Because the Astro build reads `cv/` and
-  `_bibliography/`, `.github/workflows/web-ci.yml` triggers on those paths too.
+  `projects[]` belong to their own pages. Because the Astro build reads `cv/`,
+  `_bibliography/` and `_posts/`, `.github/workflows/web-ci.yml` triggers on those paths too.
+- **Announcements belong to their facts.** `src/lib/announcements.ts` generates the home-page
+  and `/news/` feeds from `cv/cv.yaml`, `_bibliography/papers.bib`, `cv/pres.bib` and `_posts/`.
+  A fact is announced on its own date; `announced:` is added only when the historical
+  announcement happened on a date the fact does not otherwise state. Dates render at the
+  precision recorded by the source and no finer, while facts with no defensible date stay in
+  the feed's `undated` provenance instead of receiving a guess. `_news/` remains only for the
+  live Jekyll news page and is deleted at cutover; nothing in `web/` reads it.
 - **The dense row.** `.rows` in `global.css` is the table primitive the CV-fed pages need:
   `.defs`' label-left/meta-right pattern with a middle column and the dates in Go Mono. It
   stacks below 760px the way `.entry` does, so nothing scrolls sideways on a phone. Reuse it
@@ -141,23 +149,22 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   `<pre>` text that stays selectable with JavaScript off. Everything else on the site —
   the inspect switch included — runs without script.
 - **Provenance is generated, never written.** Every count, source path, line range and
-  "this is missing" note comes from `src/lib/record.ts`, which reads the repository's own
-  files (`_bibliography/papers.bib`, `_news/`, `_pages/`, `_config.yml`) and, for `/cv/`,
-  from `src/lib/cv.ts` reading `cv/cv.yaml` — one registry, `SOURCES`, either way. The
-  bibliography gap is a set difference between the news feed and the bibliography, so it
-  shrinks on its own as entries are added. Do not hand-write a number the page displays —
-  the site's whole argument is that its claims can be checked. That includes what a page says
-  it leaves out: `/cv/` derives its omission list from the file's own keys minus the ones it
-  renders. `src/lib/record.test.ts` and `src/lib/cv.test.ts` (`npm test`, or
+  "this is missing" note comes from the build-time readers. `src/lib/record.ts` reads the
+  repository's bibliography, posts, talks, page sources and configuration, while
+  `src/lib/cv.ts` reads `cv/cv.yaml`; `SOURCES` is their shared registry. Do not hand-write a
+  number the page displays — the site's whole argument is that its claims can be checked.
+  That includes what a page says it leaves out: `/cv/` derives its omission list from the
+  file's own keys minus the ones it renders. `src/lib/record.test.ts` and
+  `src/lib/cv.test.ts` (`npm test`, or
   `node --experimental-strip-types src/lib/<name>.test.ts` for one of them) assert the readers
   still agree with the data; `web-ci.yml` runs them before the build, which is what makes the
-  widened `cv/**` and `_bibliography/**` triggers useful.
+  widened `cv/**`, `_bibliography/**` and `_posts/**` triggers useful.
 
 ## Not done yet
 
 Content migration and deployment. The home page, `/publications/`, `/news/` and `/cv/`
-render the real data — `/news/` reads `_news/` through `src/lib/record.ts`, not the `news`
-collection, so it and the home page cannot disagree; the `/professional_activities/` and
-`/repositories/` routes are structural placeholders under the Ledger page furniture, and
-the blog and projects routes are wired to their collections but still render the sample
-entries. `/cv/` does not yet offer the PDF: publishing it belongs to the cutover.
+render the real data — the home page and `/news/` share the generated announcement feed, so
+they cannot disagree; the `/professional_activities/` and `/repositories/` routes are
+structural placeholders under the Ledger page furniture, and the blog and projects routes
+are wired to their collections but still render the sample entries. `/cv/` does not yet
+offer the PDF: publishing it belongs to the cutover.

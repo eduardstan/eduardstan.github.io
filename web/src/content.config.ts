@@ -20,22 +20,6 @@ const blog = defineCollection({
   }),
 });
 
-const news = defineCollection({
-  loader: glob({ base: './src/content/news', pattern: '**/*.{md,mdx}' }),
-  schema: z.object({
-    title: z.string().optional(),
-    date: z.coerce.date(),
-    /**
-     * Accepted and preserved so real news frontmatter validates; nothing reads
-     * it yet. Splitting long items onto their own page belongs to the
-     * content-migration task.
-     */
-    inline: z.boolean().default(false),
-    /** Accepted and preserved; rendered by the content-migration task. */
-    related_posts: z.array(z.string()).default([]),
-  }),
-});
-
 const projects = defineCollection({
   loader: glob({ base: './src/content/projects', pattern: '**/*.{md,mdx}' }),
   schema: z.object({
@@ -51,4 +35,4 @@ const projects = defineCollection({
   }),
 });
 
-export const collections = { blog, news, projects };
+export const collections = { blog, projects };
