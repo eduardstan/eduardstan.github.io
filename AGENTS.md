@@ -58,6 +58,11 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
   filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`
   BibTeX name forms; reading the second as the first silently renames authors. `VENUE_FIELDS`
   reads `journaltitle` as well as `journal`: that is what a Better BibTeX BibLaTeX export writes.
+- **Latent, not fixed:** DBLP's `@misc` artifacts carry an unfilled `note = {Accessed on
+YYYY-MM-DD.}`. The website already works around it — `VENUE_FIELDS` tries `publisher` before
+  `note` for exactly this reason — but `cv/cv.tex` has no equivalent, so the placeholder would
+  print verbatim if `@misc` were ever added to its `other` filter. It is not today. Fixing the
+  printed side is a separate task.
 - `web/src/lib/cv.ts` reads `content/cv.yaml` through Vite's `?raw` import, not `node:fs`. Do
   **not** rewrite it as `readFileSync(new URL('../../../content/cv.yaml', import.meta.url))`:
   that builds and then fails at prerender with `ENOENT`, for the same relocation reason as the
