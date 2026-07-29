@@ -399,8 +399,7 @@ Everything about *you* is in this directory. Two pieces of prose on the site are
   rewrite it or delete the block from `web/src/pages/index.astro`** — until you do, the front
   page describes someone else's research.
 - **The `Talks & Presentations` and `Publications` headings in `cv/cv.tex`** print even when
-  the matching `.bib` is empty; biblatex cannot report a count before it prints. Delete those
-  two blocks if you have neither.
+  the matching `.bib` is empty. Delete those two blocks if you have neither.
 
 ## Prove a clean handoff
 

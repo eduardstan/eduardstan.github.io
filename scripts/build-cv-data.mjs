@@ -20,7 +20,8 @@
 //
 // A top-level key holding `sections:` instead of entries is a bibliography
 // grouping (`publications:`, `talks:`): each becomes \defbibfilter definitions
-// plus \cv<Key>Key and \cv<Key>Sections. It knows no BibTeX entry type either.
+// plus \cv<Key>Key, \cv<Key>Sections and \cv<Key>Count. It knows no BibTeX entry
+// type either.
 // =============================================================================
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
@@ -526,6 +527,20 @@ function main() {
   console.log(`wrote ${rel(OUT_PUBLIC)}`);
 }
 
-export { renderInline, where, editions, affiliationBlock, profilesLine, macroName, tableHeader, entry, bibFilter, bibPrefix, bibSections, bibEntryCount, render };
+export {
+  renderInline,
+  where,
+  editions,
+  affiliationBlock,
+  profilesLine,
+  macroName,
+  tableHeader,
+  entry,
+  bibFilter,
+  bibPrefix,
+  bibSections,
+  bibEntryCount,
+  render,
+};
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();
