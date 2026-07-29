@@ -284,6 +284,19 @@ you give it an `announced:` — the day you submitted it. It stays on `/publicat
 The sentence each kind of fact is announced in is one table, `TEMPLATES`, at the top of
 `web/src/lib/announcements.ts`. It is the first thing to edit if you want different wording.
 
+## Two things `content/` does not yet own
+
+Everything about *you* is in this directory. Two pieces of prose on the site are not:
+
+- **`web/src/lib/strands.ts`** — the three research strands on the front page. No file in
+  this repository states a strand structure, so this is authored copy rather than a derived
+  record, and it is kept alone in one module so that stays obvious. **If you adopt this site,
+  rewrite it or delete the block from `web/src/pages/index.astro`** — until you do, the front
+  page describes someone else's research.
+- **The `Talks & Presentations` and `Publications` headings in `cv/cv.tex`** print even when
+  the matching `.bib` is empty; biblatex cannot report a count before it prints. Delete those
+  two blocks if you have neither.
+
 ## The two builds
 
 ```bash

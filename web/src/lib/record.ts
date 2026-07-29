@@ -696,6 +696,9 @@ export interface About {
   firstPersonSource: string;
 }
 
+/** One full stop, not two: a paragraph that is one sentence already has one. */
+const sentence = (value: string) => (/[.!?]$/.test(value) ? value : `${value}.`);
+
 export function about(): About {
   const long = profileBlock().bio?.long ?? '';
   const paragraphs = long
@@ -706,8 +709,10 @@ export function about(): About {
     source: `${SOURCES.cv} · profile.bio.long`,
     paragraphs: paragraphs.map(inlineHtml),
     // The opening sentence, as written. Nothing is trimmed off it: an edit that
-    // rewords the sentence changes the quote and nothing else.
-    firstPerson: stripMarkdown(`${(paragraphs[0] ?? '').split('. ')[0]}.`),
+    // rewords the sentence changes the quote and nothing else. The full stop is
+    // put back only when the split took one off — a one-sentence paragraph
+    // still ends with the one it already has.
+    firstPerson: stripMarkdown(sentence((paragraphs[0] ?? '').split('. ')[0])),
     firstPersonSource: `${SOURCES.cv} · profile.bio.long, first sentence`,
   };
 }

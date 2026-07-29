@@ -147,6 +147,12 @@
     \vspace{-2.4mm}
 }
 
+% An empty generated macro, to test the optional prose fields against.
+% NOT `\ifx\cvFocus\empty`: \newcommand makes its macros \long and \empty is
+% not, so \ifx compares false for two macros that both hold nothing, and the
+% heading prints over an empty field. This one is made the same way they are.
+\newcommand{\cvempty}{}
+
 % Separates the paragraphs of a section's `note:`. Spacing is layout, so the
 % amount of it lives here and the generator only says where the break goes.
 \newcommand{\cvnotesep}{\par\vspace{1.2mm}}
@@ -373,13 +379,15 @@
 % NOTE: the \small{ below is deliberately left open, exactly as in the original
 % hand-written CV. Closing it would change the body font size of every section
 % that follows and reflow the whole document.
+\ifx\cvShortBio\cvempty\else
 \section{\textbf{Short Bio}}
+\fi
 \vspace{1mm}
 \small{
 \cvShortBio
 \vspace{-2mm}
 
-\ifx\cvFocus\empty\else
+\ifx\cvFocus\cvempty\else
 \section{\textbf{Research Focus}}
 \vspace{1mm}
 \small{

@@ -12,7 +12,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { about, bibliography, talks, SOURCES } from './record.ts';
+import { about, bibliography, stripMarkdown, talks, SOURCES } from './record.ts';
 import { announcements, formatStamp, say, shortVenue } from './announcements.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -370,6 +370,16 @@ assert.ok(
   'no emphasis rendered from the about page',
 );
 assert.ok(!/[*_]/.test(bio.firstPerson), 'markdown markers left in the first-person line');
+// The quote is the opening sentence verbatim. One full stop, not two — a
+// one-sentence `bio.long` already ends with the one it has.
+assert.ok(!/\.\.$/.test(bio.firstPerson), `doubled full stop: ${bio.firstPerson}`);
+assert.match(bio.firstPerson, /[.!?]$/, `the quote does not end a sentence: ${bio.firstPerson}`);
+// It is the opening of the first paragraph, not a sentence from elsewhere.
+// `paragraphs[0]` is inline HTML, so the comparison is on the plain prefix.
+assert.ok(
+  stripMarkdown(bio.paragraphs[0].replace(/<[^>]+>/g, '')).startsWith(bio.firstPerson.slice(0, 12)),
+  `the quote is not the opening of the first paragraph: ${bio.firstPerson}`,
+);
 // Every source the site reads lives in `content/`. That is the whole adopter
 // interface: a reader pointed anywhere else is a fact the adopter cannot change
 // by editing this directory, and the cold-start test stops being true.
@@ -381,6 +391,17 @@ assert.doesNotMatch(
   reader,
   /_pages\/|_config\.yml|_bibliography\//,
   'record.ts reads one of the pre-migration files again',
+);
+// The header brand is derived too: an adopter must not find someone else's
+// institution in the bar on every page.
+const header = readFileSync(
+  fileURLToPath(new URL('../components/Header.astro', import.meta.url)),
+  'utf8',
+);
+assert.doesNotMatch(
+  header,
+  /Milano-Bicocca/,
+  'the header brand names an institution instead of deriving it from profile.affiliation',
 );
 // `journaltitle` is BibLaTeX's name for `journal` and is what Zotero's Better
 // BibTeX writes. Without it an adopter's most recent article renders with no
