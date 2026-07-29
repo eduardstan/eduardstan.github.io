@@ -2,9 +2,13 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
-// Schemas only. Real content is migrated in a later task — the entries under
-// src/content/ exist to prove the pipeline (schema validation, rendering,
-// routing, RSS) actually works end to end.
+// The blog is the only content collection. Everything else the site shows —
+// publications, talks, service, projects, the CV, the announcement feed — is
+// read from the repository's own data files by `src/lib/record.ts` and
+// `src/lib/cv.ts`, so it has exactly one source and cannot drift from the CV.
+//
+// There was a `projects` collection holding an al-folio template stub. It is
+// gone: `/projects/` renders `cv/cv.yaml`'s `projects[]`.
 
 const blog = defineCollection({
   loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
@@ -20,19 +24,4 @@ const blog = defineCollection({
   }),
 });
 
-const projects = defineCollection({
-  loader: glob({ base: './src/content/projects', pattern: '**/*.{md,mdx}' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    /** Lower numbers sort first. */
-    order: z.number().default(0),
-    category: z.string().optional(),
-    /** Show with a larger card on the projects index. */
-    featured: z.boolean().default(false),
-    github: z.url().optional(),
-    website: z.url().optional(),
-  }),
-});
-
-export const collections = { blog, projects };
+export const collections = { blog };

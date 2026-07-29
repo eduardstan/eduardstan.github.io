@@ -1,26 +1,79 @@
 ---
-import PageHead from '../../components/PageHead.astro';
+/**
+ * The blog index. The blog is the only content collection on the site:
+ * everything else is read from the repository's own data files, but a post is
+ * prose that exists nowhere else, so it is the one thing a collection is for.
+ *
+ * The posts were migrated by hand from `_posts/`, which the Jekyll site still
+ * builds and which `src/lib/announcements.ts` still reads for the news feed, so
+ * a post announces itself from the same date on both sites.
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import Record from '../../components/Record.astro';
+import SectionHead from '../../components/SectionHead.astro';
 import { dateFormat, getPublishedPosts } from '../../lib/content';
 
 const posts = await getPublishedPosts();
+/**
+ * The entry's file as a repository-relative path, which is what every other
+ * source record on the site quotes. Astro reports `filePath` relative to the
+ * Astro project root (`web/`), so the prefix is put back.
+ */
+const sourceOf = (path: string | undefined) =>
+  `web/${(path ?? '').replace(/^(\.\.\/)+/, '')}`;
+const labelsOf = (post: (typeof posts)[number]) => [...post.data.categories, ...post.data.tags];
+const labels = [...new Set(posts.flatMap(labelsOf))];
+
+const description = `${posts.length} posts by Eduard I. Stan.`;
 ---
 
-<BaseLayout title="Blog" description="Posts by Eduard I. Stan.">
-  <PageHead title="Blog" />
-  <ul class="single mt-6 space-y-6">
+<BaseLayout title="Blog" description={description}>
+  <PageHead title="Blog">
+    <p class="blurb">
+      <b>{posts.length} posts</b>, newest first. Each is announced in the <a href="/news/"
+        >news feed</a
+      > on the date its own front matter carries, and syndicated at <a href="/rss.xml">/rss.xml</a>.
+    </p>
+  </PageHead>
+
+  <SectionHead source="web/src/content/blog/">Posts</SectionHead>
+  <ul class="rows">
     {
       posts.map((post) => (
         <li>
-          <a href={`/blog/${post.id}/`} class="font-medium hover:text-accent">
-            {post.data.title}
-          </a>
-          <p class="text-sm text-muted">
+          <span class="k">
+            <a href={`/blog/${post.id}/`}>{post.data.title}</a>
+            {labelsOf(post).length > 0 && <span class="sub">{labelsOf(post).join(' · ')}</span>}
+          </span>
+          <span class="v">{post.data.description}</span>
+          <span class="when">
             <time datetime={post.data.date.toISOString()}>{dateFormat.format(post.data.date)}</time>
-          </p>
-          <p class="mt-1 text-sm">{post.data.description}</p>
+          </span>
         </li>
       ))
     }
   </ul>
+  <Record>
+    <p>
+      The <b>blog</b> collection — {posts.length} published{' '}
+      {posts.length === 1 ? 'entry' : 'entries'}, sorted newest first by front-matter <b>date</b> and
+      filtered by <b>draft</b> in <b>web/src/lib/content.ts</b>. The schema every entry is validated
+      against is <b>web/src/content.config.ts</b>.
+    </p>
+    {
+      posts.map((post) => (
+        <p>
+          <b>{sourceOf(post.filePath)}</b> — “{post.data.title}”, dated{' '}
+          {post.data.date.toISOString().slice(0, 10)}
+          {labelsOf(post).length > 0 && <>, filed under {labelsOf(post).join(', ')}</>}.
+        </p>
+      ))
+    }
+    <p>
+      {labels.length} distinct {labels.length === 1 ? 'label' : 'labels'} across the collection
+      {labels.length > 0 && <> ({labels.join(', ')})</>}, counted from the entries' own{' '}
+      <b>categories</b> and <b>tags</b>.
+    </p>
+  </Record>
 </BaseLayout>

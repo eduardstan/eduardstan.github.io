@@ -38,8 +38,8 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
 
 | Path                           | Purpose                                                        |
 | ------------------------------ | -------------------------------------------------------------- |
-| `src/content.config.ts`        | Typed schemas for the `blog` and `projects` collections        |
-| `src/content/`                 | Sample blog and project entries for later content migration    |
+| `src/content.config.ts`        | Typed schema for the `blog` collection — the only one          |
+| `src/content/blog/<year>/`     | The posts, migrated from the repository root's `_posts/`       |
 | `src/layouts/BaseLayout.astro` | Shared document shell, with a named `head` slot                |
 | `src/components/`              | Header, footer, page and section heads, source record, theme   |
 | `src/lib/announcements.ts`     | Announcement feed generated from the facts it announces        |
@@ -121,6 +121,29 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
 - **Abstracts are per-entry and unconditional.** The reveal renders `entry.abstract` when
   the entry has one and says so when it does not, so adding an `abstract` field to a BibTeX
   entry is the only action needed for it to appear. There is no flag and no list to update.
+- **The CV-fed pages.** `/cv/`, `/professional_activities/`, `/projects/` and the home page's
+  service column all read `cv/cv.yaml`, so the CV, the service list and the funded projects
+  have one source between them. `serviceGroups()` in `src/lib/cv.ts` groups `service[]` by its
+  own `role` field, in the order those roles first appear in the file, and **both** the home
+  page and `/professional_activities/` call it — they render the same list through the same
+  grouping and cannot disagree. Each row hangs a rank badge off `metric`, linked to the
+  `rank_url` beside it. The home page's "editorial boards" figure is `isEditorial()`, a
+  `/\beditor\b/i` match on the role field, so a new editorship counts itself.
+  Nothing reads `_pages/professional_activities.md` any more: it was a hand-written third
+  transcription that had drifted from the CV, and `record.test.ts` fails if a reader for it
+  comes back.
+  `/projects/` renders `projects[]` **including the `funding` figures** — that file's own
+  comment says the amounts are kept out of the printed CV so the website can use them, and
+  no total is summed from them, because a programme total and a grant to one group are not
+  the same quantity. There is no site-side filtering on any of the three.
+- **`/talks/`** reads `cv/pres.bib` through `talks()` in `src/lib/record.ts`, with the same
+  BibTeX parser as the bibliography. Each row keeps the entry's own words: `note` is the
+  sub-line ("Invited talk", "Oral presentation") and `keywords` is the badge. Nothing is
+  filtered and nothing is relabelled, the same contract as `/publications/`.
+- **There is no `/repositories/` route.** Its Jekyll data file (`_data/repositories.yml`) is
+  template content — `torvalds`, `jekyll/jekyll` — and the live site already keeps the page
+  out of its nav. A page of someone else's repositories is worse than no page, so the route
+  was deleted rather than filled in; the GitHub link in the footer is the real one.
 - **The CV page.** `/cv/` renders `cv/cv.yaml` — the same file `scripts/build-cv-data.mjs`
   turns into the printed CV — through `src/lib/cv.ts`, which reads it with Vite's `?raw`
   import (see the sharp-edge note in the repository's `AGENTS.md`: `import.meta.url` fails
@@ -130,8 +153,7 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   bare `*` passes through, keeping "CORE Rank: A\*" intact. `data_protection` and
   `archive.data_protection_optional_sentence` are deliberately not rendered: a GDPR consent
   written for a selection procedure means nothing on a public page. `service[]` and
-  `projects[]` belong to their own pages. Because the Astro build reads `cv/`,
-  `_bibliography/` and `_posts/`, `.github/workflows/web-ci.yml` triggers on those paths too.
+  `projects[]` belong to their own pages.
 - **Announcements belong to their facts.** `src/lib/announcements.ts` generates the home-page
   and `/news/` feeds from `cv/cv.yaml`, `_bibliography/papers.bib`, `cv/pres.bib` and `_posts/`.
   A fact is announced on its own date; `announced:` is added only when the historical
@@ -157,14 +179,24 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   file's own keys minus the ones it renders. `src/lib/record.test.ts` and
   `src/lib/cv.test.ts` (`npm test`, or
   `node --experimental-strip-types src/lib/<name>.test.ts` for one of them) assert the readers
-  still agree with the data; `web-ci.yml` runs them before the build, which is what makes the
-  widened `cv/**`, `_bibliography/**` and `_posts/**` triggers useful.
+  still agree with the data; `web-ci.yml` runs them before the build and keeps its path filters
+  aligned with the repository-root inputs in `SOURCES`.
+
+- **Posts carry their own typography.** The Markdown pipeline runs no smartypants, so a
+  migrated post writes an em dash as the character `—` rather than as `---` — the same rule
+  `cv/cv.yaml` states for its own prose. A `---` left in a paragraph prints as three hyphens.
+  Watch the `$` too: KaTeX is applied globally, and the LaTeX post is full of dollar signs
+  that are safe only because every one of them sits inside a code fence or a code span.
+- **Wide prose scrolls inside itself.** The migrated XAI post carries nine three-column
+  tables. `.prose table` in `global.css` is `display: block; overflow-x: auto`, so a table
+  too wide for a phone scrolls in its own box instead of pushing the page sideways.
 
 ## Not done yet
 
-Content migration and deployment. The home page, `/publications/`, `/news/` and `/cv/`
-render the real data — the home page and `/news/` share the generated announcement feed, so
-they cannot disagree; the `/professional_activities/` and `/repositories/` routes are
-structural placeholders under the Ledger page furniture, and the blog and projects routes
-are wired to their collections but still render the sample entries. `/cv/` does not yet
-offer the PDF: publishing it belongs to the cutover.
+Deployment. Every route now renders real data read from the repository's own files, and the
+blog holds the two migrated posts. `/cv/` does not yet offer the PDF: publishing it belongs
+to the cutover, which also owns every deletion in the Jekyll tree (`_news/`, `_pages/cv.md`,
+`_pages/professional_activities.md`, `assets/json/resume.json`, `_data/cv.yml`, `_drafts/`).
+
+`_pages/professional_activities.md` is now dead to this site — no reader, no `SOURCES` entry
+— so cutover can delete it with the rest of the Jekyll tree without breaking a build.

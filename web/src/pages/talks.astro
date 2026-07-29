@@ -1,0 +1,85 @@
+---
+/**
+ * Talks and presentations, read from `cv/pres.bib` — the file biblatex renders
+ * into the printed CV's presentations section.
+ *
+ * Same shared-source pattern as `/publications/`: one file, read at build by
+ * `src/lib/record.ts`, and nothing filtered out. Each entry keeps its own words
+ * for what it was — `note` is "Invited talk" / "Oral presentation" / "Poster
+ * presentation" and `keywords` is the category badge — so the page relabels
+ * nothing.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import Record from '../components/Record.astro';
+import SectionHead from '../components/SectionHead.astro';
+import { talks } from '../lib/record';
+
+const { source, entries, byCategory, years, undated } = talks();
+
+/** The ISO date rendered as a date. Every entry states a full day. */
+const dateFormat = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'UTC' });
+const shown = (date: string) =>
+  /^\d{4}-\d{2}-\d{2}/.test(date) ? dateFormat.format(new Date(`${date.slice(0, 10)}T00:00:00Z`)) : date;
+
+const description =
+  `${entries.length} talks and presentations, ${years.first}–${years.last}, ` +
+  `read from ${source} at build time.`;
+---
+
+<BaseLayout title="Talks" description={description}>
+  <PageHead title="Talks">
+    <p class="blurb">
+      <b>{entries.length} talks and presentations</b>, {years.first}–{years.last}, newest first, read
+      from <b>{source}</b> when this page was built — the same file the printed CV's presentations are
+      generated from. The badge on each row is that entry's own <b>keywords</b> field ({
+        byCategory.map((category) => `${category.count} ${category.category}`).join(', ')
+      }); nothing is relabelled here and nothing is left out.
+    </p>
+  </PageHead>
+
+  <SectionHead source={source}>Talks and presentations</SectionHead>
+  <ul class="rows">
+    {
+      entries.map((talk) => (
+        <li>
+          <span class="k">
+            {talk.title}
+            <span class="rank">{talk.category}</span>
+            {talk.note && <span class="sub">{talk.note}</span>}
+          </span>
+          <span class="v">
+            {talk.event}
+            {talk.where && <span class="sub">{talk.where}</span>}
+          </span>
+          <span class="when">
+            <time datetime={talk.date}>{shown(talk.date)}</time>
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+  <Record>
+    <p>
+      <b>{source}</b> — {entries.length} <code>@unpublished</code> entries, parsed by the same BibTeX
+      reader as <b>_bibliography/papers.bib</b> and sorted by their own <b>date</b> field, newest first.
+      Each row is one entry: <b>title</b>, then <b>note</b> and <b>keywords</b>, then <b>eventtitle</b>
+      and <b>venue</b>, then <b>date</b>.
+    </p>
+    <p>
+      Categories, counted from the <b>keywords</b> field: {
+        byCategory.map((category) => `${category.category} ${category.count}`).join(', ')
+      }. {
+        undated.length === 0
+          ? 'Every entry states a full ISO 8601 day, so every date below is shown as a day rather than widened or narrowed.'
+          : `${undated.length} entries state no ISO 8601 date and show their date field as written: ${undated.join(', ')}.`
+      }
+    </p>
+    <p>
+      The same file feeds the <a href="/news/">news feed</a>, where each of these talks is announced on
+      the date it carries. Published work is separate and lives in the <a href="/publications/"
+        >publications index</a
+      >.
+    </p>
+  </Record>
+</BaseLayout>
