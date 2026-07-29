@@ -15,11 +15,12 @@ is published. Do not add filters back.
 
 ## `content/` is the interface
 
-**Everything a person editing this site would change is in `content/`** — `cv.yaml`,
-`publications.bib`, `talks.bib`, `posts/`, `media/` — and nothing outside it holds a fact about
-whom the site is about. `content/README.md` is the documentation for it and is written for a
-stranger adopting the repository, not for us. `web/src/lib/record.ts`'s `SOURCES` is the whole
-list of what is read; `record.test.ts` fails if an entry of it ever points outside `content/`.
+**Every adopter-owned record and media asset is in `content/`** — `cv.yaml`,
+`publications.bib`, `talks.bib`, `posts/`, `media/`. `content/README.md` is the documentation
+for that interface, including the two authored-layout exceptions an adopter must review, and is
+written for a stranger adopting the repository, not for us. `web/src/lib/record.ts`'s `SOURCES`
+is the whole list of records the site reads; `record.test.ts` fails if an entry of it ever points
+outside `content/`.
 
 `content/cv.yaml` is also the **repo-root landmark** `repositoryRoot()` walks up for, chosen
 because it is the one file the site cannot run without. `cv/` and `scripts/` are the CV
@@ -28,7 +29,7 @@ pipeline and `cv/cv.tex` is layout only.
 **One entry shape, and a top-level list is a section by construction.** `title` is the only
 required field; `org`, `place`, `dates`, `detail`, `url`, `items`, `announced` and the optional
 extras (`metric`, `rank_url`, `years`, `funding`, `count`, `rows`) are the rest.
-`scripts/build-cv-data.mjs` names no section: every list becomes five `\cv<Section>*` macros and
+`scripts/build-cv-data.mjs` names no section: every list becomes six `\cv<Section>*` macros and
 `cv/cv.tex` prints the ones it has a `\cvpart` line for. Adding a section to the YAML must
 never require editing the generator.
 

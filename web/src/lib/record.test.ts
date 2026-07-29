@@ -12,14 +12,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import {
-  about,
-  bibliography,
-  profile,
-  stripMarkdown,
-  talks,
-  SOURCES,
-} from './record.ts';
+import { about, bibliography, profile, stripMarkdown, talks, SOURCES } from './record.ts';
 import { announcements, formatStamp, say, shortVenue } from './announcements.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));

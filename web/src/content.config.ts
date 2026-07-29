@@ -3,10 +3,10 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 // The blog is the only content collection, and it lives in `content/posts/`
-// with everything else an adopter edits. Everything the site shows —
-// publications, talks, service, projects, the CV, the announcement feed — is
-// read from `content/` by `src/lib/record.ts` and `src/lib/cv.ts`, so it has
-// exactly one source and cannot drift from the CV.
+// with the other adopter-owned records. Publications, talks, service, projects,
+// the CV and the announcement feed are read from `content/` by
+// `src/lib/record.ts` and `src/lib/cv.ts`, so each has exactly one source and
+// cannot drift from the CV.
 //
 // The post ids keep their year directory (`2024/xai2-manifesto`), because that
 // is the address the posts have always been published at.

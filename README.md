@@ -10,8 +10,7 @@ published from `master` by `.github/workflows/deploy.yml`.
 Every fact on the site is read from one record and rendered from it. Nothing is
 transcribed, so nothing can drift:
 
-**Everything you would edit is in [`content/`](content/README.md)**, and nothing outside it
-holds a fact about the person the site is about:
+**Every adopter-owned record and media asset is in [`content/`](content/README.md)**:
 
 | Record                     | Owns                                                                |
 | -------------------------- | ------------------------------------------------------------------- |

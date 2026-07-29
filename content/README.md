@@ -1,6 +1,7 @@
-# `content/` — everything you edit
+# `content/` — the adopter-owned records and media
 
-This directory is the whole interface. Nothing outside it holds a fact about you.
+This directory owns every structured record and media asset about you. The two authored-layout
+exceptions an adopter must review are named below.
 
 ```
 content/
@@ -99,8 +100,9 @@ profile:
 `name` is the only field the CV data shape requires. The website build also requires `site`,
 because it cannot publish honest canonical, feed and sitemap URLs without knowing its origin.
 
-The three lines under your name on the CV are built as: `headline, affiliation[0]` / each further
-affiliation / `affiliation[last], place`. With one affiliation it is a single line.
+The address block under your name on the CV is built as: `headline, affiliation[0]`, then each
+further affiliation, with `place` appended to the last one. With one affiliation it is a single
+line.
 
 ## A section
 
@@ -158,7 +160,7 @@ the names above where they fit.
 **A section you have none of: leave the key out**, or write `awards: []`. Both are the same: no
 heading, no gap, nothing printed, no error.
 
-### Fields some sections need
+### Entry fields some sections need
 
 | Field | Means | Printed as |
 | --- | --- | --- |
@@ -168,7 +170,6 @@ heading, no gap, nothing printed, no error.
 | `funding` | grant or programme amount | website only, never the CV |
 | `count` | how many | a table column — only in a section rendered as a table |
 | `rows` | a table hanging under the entry | see below |
-| `note` | a paragraph above a section's entries | see below |
 
 `years` is a plain list. Only an edition that carries an announcement date grows into a map:
 
@@ -194,7 +195,8 @@ teaching:
         hours: 30 h/yr
 ```
 
-A section that needs a paragraph of its own above its entries is written as a map:
+A section-level `note` is not an entry field. A section that needs a paragraph of its own above
+its entries is written as a map:
 
 ```yaml
 supervision:

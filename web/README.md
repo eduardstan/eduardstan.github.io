@@ -8,10 +8,12 @@ build, and skips only the publish step.
 It replaced a Jekyll/al-folio site in the repository root at the July 2026 cutover.
 `docs/url-parity.md` records what every URL that site published does now.
 
-**Everything the site is about lives in [`content/`](../content/README.md)** — `cv.yaml`,
-`publications.bib`, `talks.bib`, `posts/`, `media/`. Nothing in this directory holds a fact
-about the person; `src/lib/record.ts`'s `SOURCES` is the whole list of what is read, every
-entry of it is under `content/`, and `record.test.ts` fails if one ever is not.
+**Every adopter-owned record and media asset lives in
+[`content/`](../content/README.md)** — `cv.yaml`, `publications.bib`, `talks.bib`, `posts/`,
+`media/`. `src/lib/record.ts`'s `SOURCES` is the whole list of records the site reads, every
+entry of it is under `content/`, and `record.test.ts` fails if one ever is not. The authored
+research strands are the one copy exception; `content/README.md` explains what an adopter must
+do with them.
 
 **`public/.nojekyll` is load-bearing.** Pages serves this repository with `build_type: legacy`,
 so it runs its own Jekyll pass over `gh-pages` and strips `_`-prefixed directories — including

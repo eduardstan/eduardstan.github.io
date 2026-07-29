@@ -157,9 +157,10 @@
 % amount of it lives here and the generator only says where the break goes.
 \newcommand{\cvnotesep}{\par\vspace{1.2mm}}
 
-% Make a section's five macros safe to mention even when content/cv.yaml has no
-% such section. `\cvpart` does this for you; a hand-written section block must
-% call it itself.
+% Make the five generated macros this layout may mention safe even when
+% content/cv.yaml has no such section. (`Header` is the sixth generated macro,
+% but this layout supplies its own table headings.) `\cvpart` does this for you;
+% a hand-written section block must call it itself.
 \newcommand{\cvdeclare}[1]{%
   \expandafter\providecommand\csname cv#1Count\endcsname{0}%
   \expandafter\providecommand\csname cv#1\endcsname{}%

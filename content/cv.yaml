@@ -1,9 +1,9 @@
 # =============================================================================
 # content/cv.yaml - you, and every section of your CV.
 #
-# This file and its three neighbours (`publications.bib`, `talks.bib`,
-# `posts/`) are the whole interface. Nothing outside `content/` holds a fact
-# about you, and this file is the landmark the build walks up to find.
+# This file and its four neighbours (`publications.bib`, `talks.bib`, `posts/`,
+# `media/`) are the adopter-owned record and media interface. This file is the
+# landmark the build walks up to find.
 #
 # Consumers:
 #   * the printed CV - `node scripts/build-cv-data.mjs` -> `cv/generated/cv-data.tex`

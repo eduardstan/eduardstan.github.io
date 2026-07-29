@@ -13,9 +13,10 @@
 //
 // It knows the field names of `profile:` and NOTHING about which sections exist:
 // every other top-level list is a section by construction, and each one becomes
-// the same five macros. Adding `fieldwork:` to content/cv.yaml gives you
-// \cvFieldwork, \cvFieldworkRows, \cvFieldworkHeader, \cvFieldworkInline and
-// \cvFieldworkCount without touching this file. See cv/cv.tex for the contract.
+// the same six macros. Adding `fieldwork:` to content/cv.yaml gives you
+// \cvFieldworkNote, \cvFieldwork, \cvFieldworkRows, \cvFieldworkHeader,
+// \cvFieldworkInline and \cvFieldworkCount without touching this file. See
+// cv/cv.tex for the contract.
 // =============================================================================
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
@@ -289,7 +290,7 @@ function render(cv) {
     macro("cvFocus", renderInline(p.focus)),
     macro("cvFooter", renderInline(p.footer)),
   ];
-  // Every other top-level list is a section. Five macros each, all mechanical:
+  // Every other top-level list is a section. Six macros each, all mechanical:
   // the generator has no idea what any of them mean.
   for (const [key, value] of Object.entries(cv)) {
     if (key === "profile") continue;

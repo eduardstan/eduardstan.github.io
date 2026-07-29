@@ -8,10 +8,9 @@
  * `source:` string and every "this is missing" note below is derived from the
  * files named in `SOURCES`, and changes when they change.
  *
- * Everything it reads lives under `content/` — the whole adopter interface. The
- * blog is the only content collection, and it is `content/posts/`. The shapes
- * returned by these readers are the seam consumed by components and provenance
- * blocks.
+ * Every adopter-owned record it reads lives under `content/`. The blog is the
+ * only content collection, and it is `content/posts/`. The shapes returned by
+ * these readers are the seam consumed by components and provenance blocks.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
@@ -50,9 +49,8 @@ function repositoryRoot(): string {
 const ROOT = repositoryRoot();
 
 /**
- * Everything the site reads. All four live under `content/`: that directory is
- * the whole adopter interface, and nothing outside it holds a fact about the
- * person the site is about.
+ * Every structured record the site reads. All four live under `content/`;
+ * profile-owned media is resolved separately from filenames in the CV.
  */
 export const SOURCES = {
   bibliography: 'content/publications.bib',
