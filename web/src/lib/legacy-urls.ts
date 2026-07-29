@@ -55,6 +55,10 @@ const BLOG_ARCHIVES = [
 
 /** `{ oldPath: newPath }`, in the shape `astro.config.mjs` wants. */
 export const legacyRedirects: Record<string, string> = {
-  ...Object.fromEntries(NEWS_SLUGS.map((slug) => [`/news/${slug}`, '/news/'])),
+  // The feed's own address. The Jekyll site published it at `/news/` and this
+  // site publishes the same register at `/lately/`, the name it carries on the
+  // front page. The old address stays alive rather than 404ing.
+  '/news': '/lately/',
+  ...Object.fromEntries(NEWS_SLUGS.map((slug) => [`/news/${slug}`, '/lately/'])),
   ...Object.fromEntries(BLOG_ARCHIVES.map((path) => [path, '/blog/'])),
 };

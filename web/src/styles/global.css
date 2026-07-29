@@ -280,6 +280,14 @@ body {
   margin: 0;
 }
 
+/* A record is apparatus wherever it sits, and `.lead p` (0,1,1) and `.feed p`
+   otherwise set its paragraphs at reading size. The doubled class outranks
+   both without an `!important`. */
+.record.record :where(p) {
+  font-size: inherit;
+  line-height: inherit;
+}
+
 .record :where(p + p) {
   margin-top: 0.45rem;
 }
@@ -304,6 +312,31 @@ body {
 
 #inspect:checked ~ .wrap .record-of {
   display: inline;
+}
+
+/* ------------------------------------------- the kind filter on /lately/ ---
+   The inspect switch's trick again: one hidden radio per kind, its label a
+   chip. The rules that do the hiding are generated on that page from the kinds
+   the feed actually holds — nothing here knows a kind's name. The rows are the
+   feed's rows and the year markers are `.sec`, so filtering added no styling to
+   either. */
+.kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: clamp(14px, 1.8vw, 22px);
+}
+
+.kinds .chip {
+  cursor: pointer;
+}
+
+.register {
+  margin-top: 1.6rem;
+}
+
+.register section + section {
+  margin-top: 1.6rem;
 }
 
 /* -------------------------------------------------------------- masthead --- */

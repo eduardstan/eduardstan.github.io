@@ -1,0 +1,159 @@
+---
+/**
+ * The register of the record: every announcement this repository generates.
+ *
+ * The home page shows the newest handful of the same feed and links here, so
+ * both read `announcements()` and cannot disagree about what "everything" is.
+ * There is no news content to read — every item is derived from the fact it
+ * announces. See `src/lib/announcements.ts` for the source contract.
+ *
+ * Filtering by kind is a set of radio inputs and one generated general-sibling
+ * rule per kind — the same trick as the inspect switch, so it is
+ * keyboard-operable, has a real focus ring and works with JavaScript off. The
+ * rules are written below from the kinds the feed actually holds, because a
+ * hand-written list of kinds on a page whose argument is derivation would be
+ * the one thing here nobody could check.
+ */
+import PageHead from '../../components/PageHead.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Record from '../../components/Record.astro';
+import { announcements, formatStamp, slug } from '../../lib/announcements';
+
+const feed = announcements();
+
+/** Newest year first — the feed is already ordered, so this preserves it. */
+const years: { year: string; items: typeof feed.items }[] = [];
+for (const item of feed.items) {
+  const year = item.stamp.slice(0, 4);
+  if (years.at(-1)?.year !== year) years.push({ year, items: [] });
+  years.at(-1)!.items.push(item);
+}
+
+/**
+ * One rule per kind: hide the items of every other kind, hide a year whose
+ * items are all hidden, and mark the chosen chip. `is:inline` so it ships as
+ * written rather than being scoped — the selectors key on the ids of the radios
+ * above, which are unique to this page.
+ */
+const filterCss = feed.kinds
+  .map(({ slug }) =>
+    [
+      `#kind-${slug}:checked ~ .register li:not([data-kind='${slug}']) { display: none }`,
+      `#kind-${slug}:checked ~ .register section:not(:has([data-kind='${slug}'])) { display: none }`,
+      `#kind-${slug}:checked ~ .kinds [for='kind-${slug}'] { border-color: var(--color-accent); color: var(--color-accent) }`,
+      `#kind-${slug}:focus-visible ~ .kinds [for='kind-${slug}'] { outline: 2px solid var(--color-accent); outline-offset: 2px }`,
+    ].join('\n'),
+  )
+  .join('\n');
+---
+
+<BaseLayout
+  title="Lately"
+  description={`All ${feed.items.length} announcements, generated from the facts they announce.`}
+>
+  <PageHead title="Lately" />
+  <p class="blurb">
+    All <b>{feed.items.length} items</b>, newest first, in <b>{years.length} years</b>, generated
+    when this page was built from the facts they announce rather than from a second set of files
+    written by hand. Filter by kind below — it is a radio button and a stylesheet, so it works with
+    JavaScript off.
+    {
+      feed.undated.length > 0 && (
+        <>
+          {' '}
+          <b>{feed.undated.length}</b> further fact{feed.undated.length === 1 ? '' : 's'} could be
+          announced but carr{feed.undated.length === 1 ? 'ies' : 'y'} no defensible date; turn{' '}
+          <b>inspect sources</b> on, in the bar above, to see which — and to see the exact record
+          every item below was generated from.
+        </>
+      )
+    }
+  </p>
+
+  {
+    /* The controls. `.vh` is the same visually-hidden class the inspect
+       checkbox uses: off screen, still focusable, still announced. */
+  }
+  <input type="radio" name="kind" id="kind-all" class="vh" checked data-pagefind-ignore />
+  {
+    feed.kinds.map((kind) => (
+      <input type="radio" name="kind" id={`kind-${kind.slug}`} class="vh" data-pagefind-ignore />
+    ))
+  }
+  <div class="kinds label" role="group" aria-label="Filter by kind" data-pagefind-ignore>
+    <label class="chip" for="kind-all">All · {feed.items.length}</label>
+    {
+      feed.kinds.map((kind) => (
+        <label class="chip" for={`kind-${kind.slug}`}>
+          {kind.name} · {kind.count}
+        </label>
+      ))
+    }
+  </div>
+
+  <div class="register">
+    {
+      years.map(({ year, items }) => (
+        <section>
+          <h2 class="sec" id={year}>
+            {year}
+          </h2>
+          <ul class="feed">
+            {items.map((item) => (
+              <li id={item.id} data-kind={slug(item.kind)}>
+                <span class="when label">
+                  <time datetime={item.stamp}>{formatStamp(item)}</time>
+                  {' · '}
+                  {item.kind}
+                </span>
+                <p set:html={item.html} />
+                <Record>
+                  <p>
+                    <b>{item.source}</b> — announced {item.stamp} ({item.precision} precision), kind{' '}
+                    <b>{item.kind}</b>. Anchor <code>#{item.id}</code>.
+                  </p>
+                </Record>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+
+  <Record>
+    <p>
+      {feed.items.length} announcements in {years.length} years, read at build from {
+        feed.sources.map((file, index) => (
+          <>
+            {index > 0 && ', '}
+            <b>{file}</b>
+          </>
+        ))
+      }. A fact is announced on the date it carries; an <code>announced</code> key is written onto a
+      fact only where the announcement happened on a date the fact does not otherwise state. Dates
+      are shown at the precision the source states and no finer, so an item shown as a year is one
+      whose source records only a year.
+    </p>
+    <p>
+      {feed.kinds.map((kind) => `${kind.count} ${kind.name.toLowerCase()}`).join(', ')}. The filter
+      above is one radio input per kind and one generated CSS rule per kind; the kinds themselves are
+      the ones the records state — a CV section's own name, a talk's <b>note</b> field, a
+      bibliography section's <b>short</b> name.
+    </p>
+    <p>
+      <b>{feed.undated.length}</b> announceable facts carry no defensible date and are listed below
+      rather than given an invented one. They are not missing from the site: a manuscript under
+      review is on <a href="/publications/">/publications/</a> like any other entry.
+    </p>
+    {
+      feed.undated.map((fact) => (
+        <p>
+          <b>{fact.source}</b> — “{fact.what}” is not announced: {fact.why}.
+        </p>
+      ))
+    }
+  </Record>
+
+  <style is:inline set:html={filterCss} />
+</BaseLayout>

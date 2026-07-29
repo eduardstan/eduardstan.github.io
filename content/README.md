@@ -155,7 +155,7 @@ YAML and a `\cvpart{Your Heading}{YourKey}` line to `cv.tex` and it is printed.
 | `service` | `/professional_activities/` and the home page |
 | `projects` | `/projects/` |
 
-A section you invent — `fieldwork:`, `outreach:` — reaches the **printed CV** and the **news feed**
+A section you invent — `fieldwork:`, `outreach:` — reaches the **printed CV** and the **register**
 (where it announces as `Fieldwork`), and not a page of its own until a route is added for it. Use
 the names above where they fit.
 
@@ -280,7 +280,7 @@ field is a **comma-separated** list, and a keyword matches only as written. A se
 
 `short` is a display label and nothing reads it for meaning: rename it, translate it, and the
 site and the PDF follow. In particular both halves of the under-review rule — keeping an
-unannounced manuscript out of the news feed, and wording an announced one "submitted to {venue}" —
+unannounced manuscript out of the register, and wording an announced one "submitted to {venue}" —
 read the entry's own `underreview` keyword, not the name of the section it lands in.
 
 **A section whose filter matches nothing prints nothing at all** — no heading, no gap — so
@@ -298,7 +298,7 @@ declaration: its badges and descriptions remain each entry's own `keywords` and 
 @unpublished{talk_agu_2024,
   author     = {Lovelace, Ada},
   title      = {What the engine cannot do},
-  note       = {Invited talk},          % also the label in the news feed
+  note       = {Invited talk},          % also the label in the register, and its filter
   eventtitle = {AGU Fall Meeting},
   venue      = {Washington, D.C., United States},
   date       = {2024-12-11},            % ISO 8601, required
@@ -329,7 +329,8 @@ that address.
 
 ## Announcements
 
-The website's news feed is generated. **You never write a news item.**
+The website's register of announcements, at `/lately/`, is generated. **You never write a news
+item.**
 
 A fact announces itself on a date it already carries: a talk's `date`, a post's `date`, an award's
 month, a paper's `year`. An **entry of `cv.yaml` announces when it gives a month

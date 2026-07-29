@@ -149,10 +149,19 @@ only a year renders as a year. Never widen a date to a day the record does not s
 with no defensible date is listed in the feed's `undated` array and shown in the provenance block,
 not given an invented one.
 
-The 22 hand-written `_news/` files are gone. Their permalinks redirect to `/news/` — see
-`web/src/lib/legacy-urls.ts` and `docs/url-parity.md`. Do not reintroduce a news directory: an
-announcement is generated from the fact it announces, and a second place to write one is the
-drift this design closed.
+**The register is `/lately/`, and one query feeds everything.** `announcements()` is called by
+the home page's six-item column, by `/lately/`, and by `/rss.xml`; nothing filters or re-derives
+the stream on its own. `/lately/` breaks it by year, shows each item's exact record — the BibTeX
+key, or the `cv.yaml` list and entry title — under the inspect switch, and counts the undated
+facts there too. Filtering by kind is one hidden radio per kind and one **generated**
+general-sibling rule per kind, written on the page from the kinds the stream holds: the inspect
+switch's trick, so it works with JavaScript off. Never hand-write the kind list, and keep the
+rows on `.feed`/`.sec` — no CSS was added for them and none should be.
+
+The 22 hand-written `_news/` files are gone, and so is the `/news/` route. Their permalinks and
+the old index redirect to `/lately/` — see `web/src/lib/legacy-urls.ts` and `docs/url-parity.md`.
+Do not reintroduce a news directory: an announcement is generated from the fact it announces, and
+a second place to write one is the drift this design closed.
 
 ## Settled decisions worth not relitigating
 

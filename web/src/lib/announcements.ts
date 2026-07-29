@@ -46,6 +46,12 @@ const cv = parse(readSource(SOURCES.cv)) as CV;
 export type Precision = 'year' | 'month' | 'day' | 'minute';
 
 export interface Announcement {
+  /**
+   * A stable anchor for this item, derived from its stamp and its text. There
+   * is no page per announcement, so this is the finest address one has: the
+   * feed links to `/lately/#id` and the RSS item's guid is the same URL.
+   */
+  id: string;
   /** The date as the source states it: `2024`, `2024-10`, `2024-10-22`, or with a time. */
   stamp: string;
   /** The first instant of the period `stamp` names — the sort key, not a claim. */
@@ -56,7 +62,11 @@ export interface Announcement {
   /** Body as inline HTML. */
   html: string;
   text: string;
-  /** The file the fact lives in. */
+  /**
+   * The record this was generated from, exactly: the file, plus the BibTeX key
+   * or the `cv.yaml` list and entry title inside it. This is what the inspect
+   * switch shows under the item, so it must name one entry and not just a file.
+   */
   source: string;
 }
 
@@ -178,6 +188,7 @@ function item(stamp: string, kind: string, markdown: string, source: string): An
   const precision = precisionOf(stamp);
   if (!precision) throw new Error(`Not an ISO 8601 date: ${stamp} (${source}, "${markdown}")`);
   return {
+    id: '', // assigned once the feed is ordered, below.
     stamp,
     at: instant(stamp, precision),
     precision,
@@ -250,8 +261,14 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
         entry.org ? `, ${stripMarkdown(entry.org)}` : ''
       }`;
 
+      // The provenance a reader gets under the inspect switch: the file, the
+      // list inside it, and the entry's own title. There is no line number —
+      // `cv.yaml` is read as a parsed document here, not as text — but the
+      // triple names exactly one entry.
+      const record = `${SOURCES.cv} (${key}[] · ${stripMarkdown(entry.title)})`;
+
       const stamp = entry.announced ?? monthStamp(entry.dates);
-      if (stamp) into.push(item(stamp, kind, say(kind, { what, where, detail }), SOURCES.cv));
+      if (stamp) into.push(item(stamp, kind, say(kind, { what, where, detail }), record));
 
       for (const edition of entry.years ?? []) {
         const year = typeof edition === 'number' ? edition : edition.year;
@@ -260,12 +277,12 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
           undated.push({
             what: `${subject} ${year}`,
             why: 'the edition records a year but no announcement date, and the CV states no finer date for it',
-            source: SOURCES.cv,
+            source: record,
           });
           continue;
         }
         into.push(
-          item(announced, kind, say(kind, { what, where, detail, year: String(year) }), SOURCES.cv),
+          item(announced, kind, say(kind, { what, where, detail, year: String(year) }), record),
         );
       }
 
@@ -273,7 +290,7 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
         undated.push({
           what: subject,
           why: 'the entry records no announcement date, no term and no editions',
-          source: SOURCES.cv,
+          source: record,
         });
       }
     }
@@ -390,13 +407,33 @@ function fromPosts(into: Announcement[], undated: Undated[]): void {
 
 // ----------------------------------------------------------- the feed ------
 
+/** One kind of fact, with how many items of it the feed holds. */
+export interface Kind {
+  /** As it is printed on the apparatus line: `Journal`, `Invited talk`. */
+  name: string;
+  /** The same, as an HTML id fragment: `invited-talk`. */
+  slug: string;
+  count: number;
+}
+
 export interface Feed {
   items: Announcement[];
+  /** The kinds present, most items first — the filter's whole vocabulary. */
+  kinds: Kind[];
   /** Announceable facts with no defensible date, named rather than invented. */
   undated: Undated[];
   /** The files the feed is derived from, for the provenance block. */
   sources: string[];
 }
+
+/** Words to an HTML id fragment: lowercase, ASCII, hyphens, nothing else. */
+export const slug = (text: string) =>
+  text
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 
 let cache: Feed | undefined;
 
@@ -420,8 +457,26 @@ export function announcements(): Feed {
       a.text.localeCompare(b.text),
   );
 
+  // The anchor is the item's own stamp and words, so it survives a rebuild;
+  // the counter only ever fires if two items say the same thing on the same
+  // date, and then it keeps both addressable rather than colliding.
+  const taken = new Map<string, number>();
+  for (const announcement of items) {
+    const stem = slug(`${announcement.stamp} ${announcement.text}`).slice(0, 80).replace(/-$/, '');
+    const seen = taken.get(stem) ?? 0;
+    taken.set(stem, seen + 1);
+    announcement.id = seen === 0 ? stem : `${stem}-${seen + 1}`;
+  }
+
+  const counts = new Map<string, number>();
+  for (const announcement of items)
+    counts.set(announcement.kind, (counts.get(announcement.kind) ?? 0) + 1);
+
   cache = {
     items,
+    kinds: [...counts]
+      .map(([name, count]) => ({ name, slug: slug(name), count }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
     undated,
     sources: [SOURCES.cv, SOURCES.bibliography, SOURCES.talks, `${SOURCES.posts}/**/*.{md,mdx}`],
   };

@@ -22,18 +22,22 @@ are deliberately dropped and recorded under Assets.
 
 ## Core pages — all resolve
 
-| URL                                        | Now                                                     |
-| ------------------------------------------ | ------------------------------------------------------- |
-| `/`                                        | resolves — home, from `content/cv.yaml`                 |
-| `/publications/`                           | resolves — 44 entries from `content/publications.bib`   |
-| `/cv/`                                     | resolves — from `content/cv.yaml`, with the printed PDF |
-| `/professional_activities/`                | resolves — from `content/cv.yaml`'s `service[]`         |
-| `/news/`                                   | resolves — the generated announcement feed              |
-| `/blog/`                                   | resolves — the two posts                                |
-| `/404.html`                                | resolves — Astro emits `404.html`; Pages serves it      |
-| `/robots.txt`                              | resolves — rewritten, points at `/sitemap-index.xml`    |
-| `/blog/2024/xai2-manifesto/`               | resolves — same address as before                       |
-| `/blog/2025/latex-mistakes-and-solutions/` | resolves — same address as before                       |
+| URL                                        | Now                                                      |
+| ------------------------------------------ | -------------------------------------------------------- |
+| `/`                                        | resolves — home, from `content/cv.yaml`                  |
+| `/publications/`                           | resolves — 44 entries from `content/publications.bib`    |
+| `/cv/`                                     | resolves — from `content/cv.yaml`, with the printed PDF  |
+| `/professional_activities/`                | resolves — from `content/cv.yaml`'s `service[]`          |
+| `/news/`                                   | **redirects** to `/lately/`, the same generated register |
+| `/blog/`                                   | resolves — the two posts                                 |
+| `/404.html`                                | resolves — Astro emits `404.html`; Pages serves it       |
+| `/robots.txt`                              | resolves — rewritten, points at `/sitemap-index.xml`     |
+| `/blog/2024/xai2-manifesto/`               | resolves — same address as before                        |
+| `/blog/2025/latex-mistakes-and-solutions/` | resolves — same address as before                        |
+
+`/lately/` is where the feed the Jekyll site served at `/news/` now lives — the name it
+carries on the front page — and `/news/` redirects to it, so nothing that linked the old
+address breaks.
 
 `/talks/`, `/projects/`, `/search/` and the `/publications/{year-asc,type,title}/` orderings
 are new; they take nothing away.
@@ -45,7 +49,7 @@ are new; they take nothing away.
 | `/feed.xml`    | **resolves** — `src/pages/feed.xml.ts` serves the same document as `/rss.xml`. A redirect would not have worked: feed readers do not follow meta refresh.               |
 | `/sitemap.xml` | **dropped** — `@astrojs/sitemap` publishes `/sitemap-index.xml`, and the rewritten `robots.txt` points crawlers at it. Nothing but `robots.txt` linked the old address. |
 
-## The 22 news permalinks — all redirect to `/news/`
+## The 22 news permalinks — all redirect to `/lately/`
 
 The Jekyll site gave each `_news/` file a page at `/news/<month>-<day>-<slug>/` — the year
 lived in the directory and never reached the address. They were in the sitemap and are
@@ -53,7 +57,7 @@ therefore indexable and linkable, so none of them may 404.
 
 They cannot resolve as pages: this site has no `_news/`. Every announcement is generated
 from the fact it announces, and a fact does not carry the prose of its old stub. So each
-of the 22 redirects to `/news/`, the feed that still contains its announcement. The list
+of the 22 redirects to `/lately/`, the register that still contains its announcement. The list
 is frozen in `web/src/lib/legacy-urls.ts`.
 
 | #   | Redirected address                                                                                                 |
@@ -131,7 +135,7 @@ The redirects are generated, so they can be verified rather than trusted:
 
 ```bash
 cd web && npm run build
-ls dist/news/            # 22 redirect pages plus index.html
+ls dist/news/            # 22 redirect pages plus index.html, all pointing at /lately/
 ls dist/blog/            # 5 redirect pages plus index.html and the posts
 ls dist/.nojekyll dist/robots.txt dist/feed.xml
 ```
