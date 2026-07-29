@@ -103,10 +103,9 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
 - **The printed CV has a baseline gate, not a byte-identical generated file.**
   `data/cv-baseline/` holds the extracted text and the page count of the CV as published;
   `data/cv-baseline/README.md` gives the three commands. A change to `cv.yaml`, the generator or
-  `cv.tex` must leave `pdftotext -layout cv/cv.pdf -` identical to `cv-baseline.txt` at 8 pages,
-  or record the difference there with its reason. `pdftotext -layout` re-quantises a whole page,
-  so a diff that looks like harmless horizontal shifts on unrelated lines is usually a moved page
-  break.
+  `cv.tex` must pass that baseline gate, or record the difference there with its reason.
+  `pdftotext -layout` re-quantises a whole page, so a diff that looks like harmless horizontal
+  shifts on unrelated lines is usually a moved page break.
 
 ## The consistency gate
 

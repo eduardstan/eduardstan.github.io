@@ -89,7 +89,7 @@ export type Section = Entry[] | { note?: string | string[]; entries: Entry[] };
 
 /** The entries of a section, whichever of the two shapes it is written in. */
 export const entriesOf = (section: Section | undefined): Entry[] =>
-  Array.isArray(section) ? section : section?.entries ?? [];
+  Array.isArray(section) ? section : (section?.entries ?? []);
 
 /** The paragraphs above a section's entries, as a list. */
 export const noteOf = (section: Section | undefined): string[] =>
