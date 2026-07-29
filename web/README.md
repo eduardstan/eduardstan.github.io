@@ -34,7 +34,7 @@ npm run dev     # dev server on http://localhost:4321
 npm run build   # astro build, then pagefind indexes dist/
 npm run preview # serve the built dist/ locally
 npm run check   # astro check (TypeScript + Astro diagnostics)
-npm test        # run the build-time data and consistency self-checks
+npm test        # run the repository self-checks
 ```
 
 Site search is powered by [Pagefind](https://pagefind.app/), which indexes `dist/`

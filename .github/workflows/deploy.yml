@@ -89,8 +89,8 @@ jobs:
         run: npx astro check
         working-directory: web
 
-      # The readers and the consistency gate, run against the repository's real
-      # records before the build hook enforces the gate itself.
+      # Repository self-checks, including the readers and consistency gate,
+      # before the build hook enforces the gate itself.
       - name: Self-check 🧪
         run: npm test
         working-directory: web

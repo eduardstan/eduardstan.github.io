@@ -30,12 +30,7 @@ function repositoryPaths(markdown) {
       invalid.add(value);
       continue;
     }
-    if (
-      value.includes(" ") ||
-      value.includes("\\") ||
-      /[[\]()*?:]/.test(value) ||
-      (!value.includes("/") && !rootFile.test(value))
-    ) {
+    if (value.includes(" ") || value.includes("\\") || /[[\]()*?:]/.test(value) || (!value.includes("/") && !rootFile.test(value))) {
       continue;
     }
 
@@ -59,9 +54,7 @@ test("every repository path in AGENTS.md exists", () => {
 });
 
 test("rejects absolute and repository-escaping paths while allowing site routes", () => {
-  const { invalid, paths } = repositoryPaths(
-    "`/cv/` `/tmp/AGENTS.md` `C:\\checkout\\AGENTS.md` `../AGENTS.md` `web/README.md`"
-  );
+  const { invalid, paths } = repositoryPaths("`/cv/` `/tmp/AGENTS.md` `C:\\checkout\\AGENTS.md` `../AGENTS.md` `web/README.md`");
 
   assert.deepEqual(invalid, ["/tmp/AGENTS.md", "C:\\checkout\\AGENTS.md", "../AGENTS.md"]);
   assert.deepEqual(paths, ["web/README.md"]);
