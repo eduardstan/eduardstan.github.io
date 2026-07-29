@@ -153,8 +153,7 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   bare `*` passes through, keeping "CORE Rank: A\*" intact. `data_protection` and
   `archive.data_protection_optional_sentence` are deliberately not rendered: a GDPR consent
   written for a selection procedure means nothing on a public page. `service[]` and
-  `projects[]` belong to their own pages. Because the Astro build reads `cv/`,
-  `_bibliography/` and `_posts/`, `.github/workflows/web-ci.yml` triggers on those paths too.
+  `projects[]` belong to their own pages.
 - **Announcements belong to their facts.** `src/lib/announcements.ts` generates the home-page
   and `/news/` feeds from `cv/cv.yaml`, `_bibliography/papers.bib`, `cv/pres.bib` and `_posts/`.
   A fact is announced on its own date; `announced:` is added only when the historical
@@ -180,8 +179,8 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   file's own keys minus the ones it renders. `src/lib/record.test.ts` and
   `src/lib/cv.test.ts` (`npm test`, or
   `node --experimental-strip-types src/lib/<name>.test.ts` for one of them) assert the readers
-  still agree with the data; `web-ci.yml` runs them before the build, which is what makes the
-  widened `cv/**`, `_bibliography/**` and `_posts/**` triggers useful.
+  still agree with the data; `web-ci.yml` runs them before the build and keeps its path filters
+  aligned with the repository-root inputs in `SOURCES`.
 
 - **Posts carry their own typography.** The Markdown pipeline runs no smartypants, so a
   migrated post writes an em dash as the character `—` rather than as `---` — the same rule
