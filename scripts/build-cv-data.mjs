@@ -297,8 +297,19 @@ const afterEarlier = (own, earlier) => [own, ...earlier.map((predicate) => `not 
  * these files empty, so this is the cold-start path, not an edge case.
  */
 function bibEntryCount(source) {
-  const directives = new Set(["comment", "preamble", "string"]);
-  return [...source.matchAll(/^[^%\n]*@(\w+)\s*[{(]/gm)].filter(([, type]) => !directives.has(type.toLowerCase())).length;
+  const directive = /^[^%\n]*@(?:comment|preamble|string)\s*([{(])/gim;
+  let stripped = "";
+  let end = 0;
+  for (let match; (match = directive.exec(source)); directive.lastIndex = end) {
+    stripped += source.slice(end, match.index);
+    const [open, close] = match[1] === "{" ? ["{", "}"] : ["(", ")"];
+    let depth = 1;
+    for (end = directive.lastIndex; end < source.length && depth; end++) {
+      depth += source[end] === open ? 1 : source[end] === close ? -1 : 0;
+    }
+  }
+  stripped += source.slice(end);
+  return (stripped.match(/^[^%\n]*@\w+\s*[{(]/gm) ?? []).length;
 }
 
 function bibFileEntryCount(key) {

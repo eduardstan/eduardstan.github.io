@@ -298,11 +298,14 @@ test("a directive-only BibTeX file has no entries", () => {
   assert.equal(bibEntryCount("@comment{Nothing to print}"), 0);
 
   const bib = `
-@comment{Nothing to print}
+@comment{
+@article{disabled, title = {Example}}
+}
 @PREAMBLE{"Nothing to print"}
 @String{venue = "Nothing to print"}
 `;
   assert.equal(bibEntryCount(bib), 0);
+  assert.equal(bibEntryCount("@comment{\n@article{disabled, title = {Example}}"), 0);
   assert.equal(bibEntryCount(`${bib}\n@article{paper, title = {Printable}}`), 1);
 });
 
