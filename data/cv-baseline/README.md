@@ -22,12 +22,14 @@ gate.** Any difference must be explained, not accepted.
 
 ## Baseline facts
 
-- Pages: 8
+- Pages: 7
 - Extracted text: 409 lines
-- Text sha256 (first 16): b0fcc9465a255df3
+- Text sha256 (first 16): 2ef100d0e684dbf6
 - `cv-baseline.pdf` is the exact PDF, kept for visual comparison.
 
 ## Known intended differences
 
-None yet. The redesign must not change the printed CV at all. If a difference appears and is
-genuinely intended, record it here with the reason before accepting it.
+- 2026-07-29: Removed the Google Scholar screenshot and its caption because the CV and site now
+  carry the full publication record. The page break that followed the figure was also removed:
+  without the figure it orphaned the Publications heading, while removing it keeps the heading
+  with the first five entries and reduces the CV from 8 pages to 7.
