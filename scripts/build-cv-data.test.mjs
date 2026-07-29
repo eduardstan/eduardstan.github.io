@@ -305,8 +305,15 @@ test("a directive-only BibTeX file has no entries", () => {
 @String{venue = "Nothing to print"}
 `;
   assert.equal(bibEntryCount(bib), 0);
-  assert.equal(bibEntryCount("@comment{\n@article{disabled, title = {Example}}"), 0);
+  assert.equal(bibEntryCount("@comment{\n@article{disabled, title = {Example}}"), 1);
   assert.equal(bibEntryCount(`${bib}\n@article{paper, title = {Printable}}`), 1);
+
+  const quoted = String.raw`
+@string(foo = "Proceedings (")
+@string(bar = "Proceedings \"(\"")
+@article{paper, title = {Printable}}
+`;
+  assert.equal(bibEntryCount(quoted), 1);
 });
 
 // The cold-start trap: cv.tex names a macro the generator only emits when
