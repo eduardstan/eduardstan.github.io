@@ -14,10 +14,11 @@ This is its replacement.
 
 ## The new gate
 
-    pdftotext -layout cv/cv.pdf - | diff - data/cv-baseline/cv-baseline.txt
+    bash scripts/check-cv-baseline.sh
 
-**Identical extracted text and identical page count is the gate.** Any difference must be
-explained, not accepted.
+The script compares `pdftotext -layout` output with `cv-baseline.txt` and the `pdfinfo` page
+count with `cv-baseline-meta.txt`. **Identical extracted text and identical page count is the
+gate.** Any difference must be explained, not accepted.
 
 ## Baseline facts
 

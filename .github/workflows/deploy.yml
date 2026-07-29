@@ -54,6 +54,11 @@ jobs:
       - name: Check generated CV data 🔎
         run: node scripts/build-cv-data.mjs --check
 
+      - name: Install PDF inspection tools 🔎
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes poppler-utils
+
       # The printed CV is typeset from the committed generated form of the same
       # content/cv.yaml the /cv/ page renders. It is never committed — no binary
       # enters git history — so it is built here and dropped into web/public/
@@ -67,6 +72,9 @@ jobs:
           working_directory: cv
           latexmk_use_xelatex: true
           texlive_version: "2024"
+
+      - name: Check the printed CV baseline 🔎
+        run: bash scripts/check-cv-baseline.sh
 
       - name: Stage the CV PDF 📄
         run: |

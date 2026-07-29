@@ -16,7 +16,7 @@
     "prepreview": "npm run stage-media",
     "prestart": "npm run stage-media",
     "preview": "astro preview",
-    "stage-media": "rm -rf public/media && cp -R ../content/media public/media",
+    "stage-media": "rm -rf public/media && mkdir -p public/media && if [ -d ../content/media ]; then cp -R ../content/media/. public/media/; fi",
     "start": "astro dev",
     "test": "node --experimental-strip-types src/lib/record.test.ts && node --experimental-strip-types src/lib/cv.test.ts && node --experimental-strip-types src/lib/consistency.test.ts"
   },

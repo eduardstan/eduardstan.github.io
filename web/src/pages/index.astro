@@ -16,6 +16,11 @@ const bib = bibliography();
 const feed = announcements();
 const research = strands();
 const gate = consistency();
+const researchDescription = research
+  .map((strand, index) =>
+    index === 0 ? strand.title : strand.title[0].toLowerCase() + strand.title.slice(1),
+  )
+  .join(', ');
 
 /**
  * Service, read from `content/cv.yaml` — the file the printed CV is generated
@@ -48,7 +53,7 @@ const withheld = feed.items.length - shown.length;
 
 <BaseLayout
   title={name}
-  description={`${affiliation[0]}, ${affiliation.at(-1)}. Interpretable AI, temporal and logic methods, agentic AI.`}
+  description={`${affiliation[0]}, ${affiliation.at(-1)}. ${researchDescription}.`}
 >
   <section class="masthead">
     <h1>{name}</h1>

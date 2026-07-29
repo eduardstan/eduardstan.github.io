@@ -12,7 +12,16 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { about, bibliography, stripMarkdown, talks, SOURCES } from './record.ts';
+import {
+  about,
+  bibliography,
+  listSources,
+  profile,
+  readSource,
+  stripMarkdown,
+  talks,
+  SOURCES,
+} from './record.ts';
 import { announcements, formatStamp, say, shortVenue } from './announcements.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -75,7 +84,7 @@ for (const entry of bib.entries) {
 
 // An @article and an @inproceedings read differently: the volume belongs to the
 // journal in one and to the series in the other, and neither may print it twice.
-const article = bib.entries.find((entry) => entry.key === 'DBLP:journals/cem/StanAND26')!;
+const article = bib.entries.find((entry) => entry.doi === '10.1109/MCE.2025.3546049')!;
 assert.equal(article.citation, 'IEEE Consumer Electron. Mag. 15(1), 33–40.');
 const paper = bib.entries.find((entry) => entry.key === 'DBLP:conf/time/MilellaPSS25')!;
 assert.ok(
@@ -133,13 +142,14 @@ for (const entry of bib.entries) {
 }
 
 // Accents, particles and both BibTeX name forms — the cases a naive parser gets
-// wrong. `Stan, Ionel Eduard` read as `First Last` yields `S. I. Eduard`.
+// wrong. `Lovelace, Ada Maria` read as `First Last` yields `L. A. Maria`.
 const authors = bib.entries.flatMap((entry) => entry.authors);
+const owner = profile();
 assert.ok(authors.includes('E. Muñoz-Velasco'), 'LaTeX accent not resolved in author names');
 assert.ok(authors.includes('D. Della Monica'), 'surname particle was initialised away');
-assert.ok(authors.includes('I. E. Stan'), 'author name not normalised to initials');
+assert.ok(authors.includes(owner.bibliographyName), 'profile name not normalised like an author');
 assert.ok(
-  !authors.some((author) => /\b(Eduard|Ionel)$/.test(author)),
+  !authors.some((author) => author.endsWith(owner.name.split(/\s+/)[0])),
   '`Last, First` names were read as `First Last`',
 );
 
@@ -403,6 +413,11 @@ assert.doesNotMatch(
   /Milano-Bicocca/,
   'the header brand names an institution instead of deriving it from profile.affiliation',
 );
+const surname = owner.bibliographyName.split(/\s+/).at(-1);
+assert.ok(surname, 'profile name has no surname');
+for (const path of listSources('web/src', ['.astro', '.ts', '.tsx', '.js', '.mjs'])) {
+  assert.ok(!readSource(path).includes(surname), `${path} hard-codes the profile surname`);
+}
 // `journaltitle` is BibLaTeX's name for `journal` and is what Zotero's Better
 // BibTeX writes. Without it an adopter's most recent article renders with no
 // venue and no error anywhere.

@@ -225,12 +225,12 @@ function kindOf(type: string, fields: Record<string, string>): string {
 const PARTICLES = new Set(['della', 'delle', 'del', 'de', 'di', 'da', 'dos', 'van', 'von', 'la']);
 
 /**
- * `Ionel Eduard Stan` → `I. E. Stan`, `{I.E.} Stan` → `I. E. Stan`,
+ * `Ada Maria Lovelace` → `A. M. Lovelace`, `{A.M.} Lovelace` → `A. M. Lovelace`,
  * `Dario Della Monica` → `D. Della Monica`.
  *
  * BibTeX has two name forms and this bibliography uses both: `First von Last`,
  * and `von Last, First` where the comma marks the end of the surname. Reading
- * the second as the first turns `Stan, Ionel Eduard` into `S. I. Eduard`, so
+ * the second as the first turns `Lovelace, Ada Maria` into `L. A. Maria`, so
  * the comma is checked before anything else.
  *
  * A particle starts the surname and everything after it belongs to the surname:
@@ -255,6 +255,9 @@ function formatAuthor(raw: string): string {
     surname = name.slice(0, comma).trim();
   }
   if (!surname || given.length === 0) return name.replace(/,\s*$/, '');
+  if (surname === surname.toUpperCase()) {
+    surname = surname.toLowerCase().replace(/(^|[\s'-])\p{L}/gu, (letter) => letter.toUpperCase());
+  }
   const initials = given.flatMap((word) =>
     // "I.E." is one word carrying two initials.
     word.includes('.')
@@ -720,9 +723,10 @@ export function about(): About {
 export interface Profile {
   source: string;
   name: string;
+  bibliographyName: string;
   email?: string;
   /** Only the accounts `profile.links` actually names; blank ones are dropped. */
-  links: { label: string; href: string }[];
+  links: { kind: string; label: string; href: string }[];
   /** Known account kinds `profile.links` has no ID for, so the gap is visible. */
   missing: string[];
   /** The postal address: the institutions, the street lines, the city. */
@@ -752,9 +756,10 @@ export function profile(): Profile {
   return {
     source: SOURCES.cv,
     name: block.name ?? '',
+    bibliographyName: formatAuthor((block.name ?? '').replace(/,\s*Ph\.D\.\s*$/i, '')),
     email: block.email,
     links: ACCOUNTS.flatMap(([kind, label, href]) =>
-      ids[kind] ? [{ label: `${label} · ${ids[kind]}`, href: href(ids[kind]!) }] : [],
+      ids[kind] ? [{ kind, label: `${label} · ${ids[kind]}`, href: href(ids[kind]!) }] : [],
     ),
     missing: ACCOUNTS.filter(([kind]) => !ids[kind]).map(([kind]) => kind),
     // Broadest first, the way an envelope is addressed, then the street lines

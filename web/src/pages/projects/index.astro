@@ -17,10 +17,12 @@ import Record from '../../components/Record.astro';
 import SectionHead from '../../components/SectionHead.astro';
 import { cv, CV_SOURCE, entriesOf, keysOf } from '../../lib/cv';
 import { inline } from '../../lib/inline';
+import { profile } from '../../lib/record';
 
 const projects = entriesOf(cv.projects);
 const funded = projects.filter((project) => project.funding);
 const running = projects.filter((project) => /present\s*$/i.test(project.dates ?? ''));
+const github = profile().links.find((link) => link.kind === 'github')?.href;
 
 const description =
   `${projects.length} funded research projects, ${running.length} running, ` +
@@ -81,9 +83,14 @@ const description =
       adding them would state something the file does not.
     </p>
     <p>
-      This page renders the whole of <b>projects[]</b>. It is not a software portfolio: the code
-      behind the work is on <a href="https://github.com/eduardstan">GitHub</a> and the papers are in
-      the <a href="/publications/">publications index</a>.
+      This page renders the whole of <b>projects[]</b>. It is not a software portfolio:{' '}
+      {
+        github && (
+          <>
+            the code behind the work is on <a href={github}>GitHub</a> and{' '}
+          </>
+        )
+      }the papers are in the <a href="/publications/">publications index</a>.
     </p>
   </Record>
 </BaseLayout>
