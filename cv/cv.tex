@@ -338,10 +338,10 @@
       \step[fieldsource=note, match=\regexp{\AAccessed\son\sYYYY-MM-DD\.?\Z}, final]
       \step[fieldset=note, null]
     }
-    % A DOI-exported @misc record may repeat the same resolver address in
-    % `howpublished`, `url`, and `doi`. Keep the canonical DOI, discard the
-    % redundant presentation fields, and map its publisher to the field the
-    % standard biblatex @misc driver uses for the artifact's venue.
+    % Prefer structured link fields for every entry: suppress howpublished
+    % whenever a URL or DOI is present, then suppress URL whenever a DOI is
+    % present. For @misc records, map publisher to the field the standard
+    % biblatex driver uses for the artifact's venue.
     \map{
       \step[fieldsource=url, final]
       \step[fieldset=howpublished, null]

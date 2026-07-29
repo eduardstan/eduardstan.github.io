@@ -34,6 +34,7 @@ gate.** Any difference must be explained, not accepted.
   without the figure it orphaned the Publications heading, while removing it keeps the heading
   with the first five entries and reduces the CV from 8 pages to 7.
 - 2026-07-29: Added the Software & artifacts publication section because released software is a
-  research output and belongs in the printed CV. Each entry now prints its publisher and DOI once;
-  the CV layout generally suppresses `howpublished` and `url` when a DOI already supplies the same
-  address. The shorter bibliography reflows within the existing 7 pages.
+  research output and belongs in the printed CV. Its entries print authors, title, the DROPS
+  Artifacts venue, date, and one DOI. The CV generally suppresses `howpublished` whenever a URL or
+  DOI exists, and suppresses `url` whenever a DOI exists. The resulting bibliography reflows from
+  7 pages to 7 pages.
