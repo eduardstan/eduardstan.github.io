@@ -39,7 +39,8 @@ npm test         # the readers and the gate, against the repository's real recor
 
 `content/README.md` is the adopter's documentation — the one file to read if you are
 reusing this site. `web/README.md` documents the routes, the design and the sharp edges,
-and `AGENTS.md` (`CLAUDE.md`) holds the knowledge that should travel with the code.
+and `AGENTS.md` (`.claude/CLAUDE.md` for Claude Code) holds the knowledge that should travel
+with the code.
 
 ## History
 

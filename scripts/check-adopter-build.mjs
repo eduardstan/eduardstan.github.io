@@ -10,8 +10,8 @@ mkdirSync(temporaryRoot, { recursive: true });
 const copy = mkdtempSync(join(temporaryRoot, "adopter-build-"));
 const syntheticName = "Alex Newcomer";
 const syntheticDomain = "alex-newcomer.example";
-const captainSurname = "Stan";
-const captainDomain = "eduardstan.github.io";
+const siteOwnerSurname = "Stan";
+const siteOwnerDomain = "eduardstan.github.io";
 
 function copyTrackedFiles() {
   const result = spawnSync("git", ["ls-files", "-z"], {
@@ -132,8 +132,8 @@ appointments: []
 
   grep(syntheticName, true);
   grep(syntheticDomain, true);
-  grep(captainSurname, false, { ignoreCase: true, word: true });
-  grep(captainDomain, false);
+  grep(siteOwnerSurname, false, { ignoreCase: true, word: true });
+  grep(siteOwnerDomain, false);
   succeeded = true;
 } catch (error) {
   process.stderr.write(`Cold-start adopter check failed: ${error.message}\n`);
