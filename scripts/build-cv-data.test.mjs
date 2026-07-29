@@ -180,6 +180,12 @@ test("a filter token that is not a bare word raises before it reaches biblatex",
   assert.throws(() => bibFilter({ types: ["in proceedings"] }, "x"), /not a usable BibTeX entry type/);
 });
 
+test("an entry type written in upper case raises instead of matching nothing anywhere", () => {
+  // biber lowercases every entry type before testing a filter, and so does the
+  // website's reader, so `type=Article` would select nothing on either side.
+  assert.throws(() => bibFilter({ types: ["Article"] }, "x"), /must be written in lower case/);
+});
+
 test("the numbering letter defaults to the short name's first letter", () => {
   assert.equal(bibPrefix({ short: "Journal" }), "J");
   assert.equal(bibPrefix({ short: "Under review" }), "U");
@@ -193,7 +199,10 @@ test("declared sections become the key line and the printed sections, in file or
       { title: "Books & chapters", short: "Books", types: ["incollection"] },
     ],
   });
-  assert.equal(filters, "\\defbibfilter{publications1}{type=article}\n\\defbibfilter{publications2}{type=incollection}");
+  assert.equal(
+    filters,
+    "\\defbibfilter{publications1}{type=article}\n" + "\\defbibfilter{publications2}{type=incollection and not ( type=article )}"
+  );
   assert.match(key, /J=Journal, B=Books/);
   assert.match(body, /labelprefix=J[\s\S]*title=\{Journal articles\}, filter=publications1/);
   // The heading is escaped on the way into LaTeX like every other prose field.
@@ -207,9 +216,63 @@ test("a section marked `printed: false` is named for the website and never print
       { title: "Software & artifacts", short: "Software", types: ["misc"], printed: false },
     ],
   });
-  assert.doesNotMatch(filters, /misc/);
+  assert.doesNotMatch(filters, /\\defbibfilter\{publications2\}/);
   assert.doesNotMatch(key, /Software/);
   assert.doesNotMatch(body, /Software/);
+});
+
+test("a printed section's filter excludes every predicate declared before it", () => {
+  // biblatex tests each filter on its own, so two filters that both accept an
+  // entry both print it - while the website labels it with the FIRST section it
+  // matches. Subtracting the earlier predicates is what makes the two agree.
+  const [filters] = bibSections("publications", {
+    sections: [
+      { title: "Journal articles", short: "Journal", types: ["article"] },
+      { title: "Conference papers", short: "Conference", types: ["inproceedings"], exclude_keywords: ["workshop"] },
+      { title: "Workshop papers", short: "Workshop", types: ["inproceedings"], keywords: ["workshop"] },
+    ],
+  });
+  assert.match(filters, /\{publications1\}\{type=article\}/);
+  assert.match(filters, /\{publications2\}\{type=inproceedings and not keyword=workshop and not \( type=article \)\}/);
+  assert.match(
+    filters,
+    /\{publications3\}\{type=inproceedings and keyword=workshop and not \( type=article \) and not \( type=inproceedings and not keyword=workshop \)\}/
+  );
+});
+
+test("an unprinted section still claims its entries, so the printed ones below it exclude it", () => {
+  // `printed: false` names a group for the website. An entry the website files
+  // there must not be printed again by a section declared after it.
+  const [filters] = bibSections("publications", {
+    sections: [
+      { title: "Software & artifacts", short: "Software", types: ["misc"], printed: false },
+      { title: "Everything else", short: "Other work", exclude_keywords: ["hidden"] },
+    ],
+  });
+  assert.match(filters, /\{publications2\}\{not keyword=hidden and not \( type=misc \)\}/);
+});
+
+test("an unprinted section is validated too, rather than relabelling the website in silence", () => {
+  // A criteria-less section matches every entry. Placed first, it would take
+  // the whole bibliography's Type column with it on the site while the PDF,
+  // which never prints it, looked untouched.
+  assert.throws(
+    () =>
+      bibSections("publications", {
+        sections: [
+          { title: "Everything", short: "Everything", printed: false },
+          { title: "Journal articles", short: "Journal", types: ["article"] },
+        ],
+      }),
+    /at least one of/
+  );
+  assert.throws(
+    () =>
+      bibSections("publications", {
+        sections: [{ title: "Nameless", types: ["misc"], printed: false }],
+      }),
+    /needs both a title and a short name/
+  );
 });
 
 test("two sections claiming the same numbering letter raise instead of colliding", () => {

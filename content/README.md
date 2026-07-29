@@ -260,11 +260,26 @@ publications:
       printed: false # named on the site; no section in the PDF
 ```
 
-Order is print order. Each entry lands in the **first** section it matches. Two more keys:
-`prefix:` overrides the numbering letter (it defaults to `short`'s first letter, and two sections
-claiming the same one is an error, not a silent collision), and `printed: false` names a group for
-the website without printing a section for it in the PDF — the answer to "on the site, not in the
-CV", as `leadership:` is for ordinary sections.
+Order is print order. Each entry lands in the **first** section it matches, in the PDF exactly as
+on the site: each printed section's biblatex filter is compiled as its own criteria *minus* every
+section declared above it, including any carrying `printed: false`, so an entry two sections
+accept is printed once and labelled the same way. Two more keys: `prefix:` overrides the numbering
+letter (it defaults to `short`'s first letter, and two sections claiming the same one is an error,
+not a silent collision), and `printed: false` names a group for the website without printing a
+section for it in the PDF — the answer to "on the site, not in the CV", as `leadership:` is for
+ordinary sections. Every section is checked, printed or not: one with no criteria at all would
+match the whole bibliography on the site, so it is refused rather than accepted quietly.
+
+**Types and keywords are matched exactly as Biber matches them**, because Biber is the other
+consumer: entry types are written in **lower case** (biber lower-cases every one before testing a
+filter, so `types: [Article]` is refused rather than silently matching nothing), a `keywords`
+field is a **comma-separated** list, and a keyword matches only as written. A semicolon-separated
+`keywords` field — DBLP writes some — is therefore one long keyword to both consumers.
+
+`short` is a display label and nothing reads it for meaning: rename it, translate it, and the
+site and the PDF follow. In particular the rule that keeps an unannounced manuscript under review
+out of the news feed reads the entry's own `underreview` keyword, not the name of the section it
+lands in.
 
 **A section whose filter matches nothing prints nothing at all** — no heading, no gap — so
 declaring one costs nothing until the first entry arrives. An entry matching no section is still

@@ -15,7 +15,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
-import { bibSectionFor, type BibSection, type CV } from './cv-schema.ts';
+import { bibSectionFor, keywordList, type BibSection, type CV } from './cv-schema.ts';
 
 /**
  * Repository root — the directory holding `content/cv.yaml`, found by walking up
@@ -164,6 +164,12 @@ export interface Publication {
   type: string;
   /** "Journal" / "Conference" / "Thesis" — the label shown in the Type column. */
   kind: string;
+  /**
+   * Whether the entry says it is under review. Read from the entry's own
+   * `keywords`, never from `kind`: `kind` is a display label a declaration may
+   * rename, and this decides whether the entry may be announced at all.
+   */
+  underReview: boolean;
   title: string;
   authors: string[];
   year: number;
@@ -215,9 +221,22 @@ export const publicationSections = (): BibSection[] => cvRecord().publications?.
  * declared section is still shown, labelled "Other", which is the visible sign
  * that the interface has no group for it yet.
  */
-function kindOf(type: string, fields: Record<string, string>): string {
+export function publicationKind(type: string, fields: Record<string, string>): string {
   return bibSectionFor(publicationSections(), type, fields.keywords)?.short ?? 'Other';
 }
+
+/**
+ * The keyword an entry states its own under-review status with.
+ *
+ * A manuscript under review is a property of the RECORD, not of the name a
+ * declaration happens to give the group it lands in: `short: Under review` is a
+ * display label an adopter may rewrite in any language, and the rule that keeps
+ * an unannounced manuscript out of the news feed — its `year` is the year it is
+ * aimed at, not a date anything happened on — must survive that rename.
+ * `content/publications.bib` is where the entry says so, so that is where this
+ * reads it.
+ */
+const UNDER_REVIEW = 'underreview';
 
 /** Surname particles that must not be abbreviated away ("D. Della Monica"). */
 const PARTICLES = new Set(['della', 'delle', 'del', 'de', 'di', 'da', 'dos', 'van', 'von', 'la']);
@@ -446,7 +465,8 @@ function toPublication(
   return {
     key,
     type,
-    kind: kindOf(type, fields),
+    kind: publicationKind(type, fields),
+    underReview: keywordList(fields.keywords).includes(UNDER_REVIEW),
     title: deLatex(fields.title ?? ''),
     authors: (fields.author ?? '')
       .split(/\s+and\s+/)

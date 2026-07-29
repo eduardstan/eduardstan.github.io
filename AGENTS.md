@@ -43,6 +43,16 @@ source, and none may be reintroduced there** — that hard-coding is what this r
 false` names a group for the site without a PDF section (how `@misc` is "Software" today); adding
 one to the printed CV is a captain decision, because it moves the baseline.
 
+**Two matchers, one declaration — keep them provably equal.** biblatex/Biber selects the printed
+sections and `matchesBibSection` labels the site's, so every semantic must hold on both sides:
+entry types are lower case and compared as written, `keywords` is comma-separated and
+case-sensitive (Biber's rules, not a convenience), and each printed `\defbibfilter` is compiled as
+its own predicate **minus every predicate declared above it** — including `printed: false` ones,
+which claim the entry on the site — so first-match-wins holds in the PDF too. `record.test.ts`
+evaluates the generated filter expressions against every entry in `content/publications.bib` and
+fails if an entry lands in different sections on the two sides; a pair of matchers that merely
+look alike is not evidence.
+
 Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commit.
 
 ## Sharp edges
@@ -139,6 +149,9 @@ the feed and none should be.
 the year it is aimed at, not a date anything happened on; the year fallback put five of them
 above every real item on the front page. Give one a submission date and it announces as
 "submitted to {venue}". It is on `/publications/` either way — the bibliography is not filtered.
+The rule keys on `Publication.underReview`, derived in `record.ts` from the entry's own
+`underreview` keyword — never on the `short` name of the section it displays under, which is an
+editable label an adopter may rename or translate.
 
 Dates are shown at the precision their source states and no finer: an item whose source records
 only a year renders as a year. Never widen a date to a day the record does not support. A fact

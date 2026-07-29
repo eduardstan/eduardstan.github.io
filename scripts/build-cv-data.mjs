@@ -227,12 +227,32 @@ function token(value, where) {
 }
 
 /**
+ * An entry type, in the one case both consumers can see it in.
+ *
+ * biber lowercases every entry type before a filter is tested against it, and
+ * the website's BibTeX reader does the same, so `type=Article` selects nothing
+ * anywhere. Raising is the difference between an adopter reading this sentence
+ * and an adopter watching a declared section come out empty.
+ */
+function entryType(value, where) {
+  const type = token(value, where);
+  if (type !== String(type).toLowerCase()) {
+    throw new Error(
+      `${where}: "${type}" must be written in lower case.\n` +
+        "  biber lowercases every entry type before testing a filter against it, so a\n" +
+        "  section declaring an upper-case type would match nothing, in the PDF or on the site."
+    );
+  }
+  return type;
+}
+
+/**
  * The biblatex filter one declared section means: any of `types`, all of
  * `keywords`, none of `exclude_keywords`. That is the whole grammar.
  */
 function bibFilter(section, where) {
   const clauses = [];
-  const types = (section.types ?? []).map((t) => `type=${token(t, `${where}.types`)}`);
+  const types = (section.types ?? []).map((t) => `type=${entryType(t, `${where}.types`)}`);
   if (types.length === 1) clauses.push(types[0]);
   else if (types.length) clauses.push(`( ${types.join(" or ")} )`);
   for (const k of section.keywords ?? []) clauses.push(`keyword=${token(k, `${where}.keywords`)}`);
@@ -254,24 +274,45 @@ const bibPrefix = (section) =>
     .toUpperCase();
 
 /**
+ * A printed section's filter: its own predicate, minus every predicate declared
+ * before it.
+ *
+ * biblatex evaluates each `\defbibfilter` on its own, so an entry that satisfies
+ * two of them is printed twice - while the website labels it with the FIRST
+ * section it matches. Subtracting the earlier predicates is what makes
+ * first-match-wins hold identically on both sides. Sections carrying
+ * `printed: false` are subtracted too: they claim the entry on the website, so
+ * a printed section below one of them must not claim it again.
+ */
+const afterEarlier = (own, earlier) => [own, ...earlier.map((predicate) => `not ( ${predicate} )`)].join(" and ");
+
+/**
  * One declared bibliography, as the filters it needs and the two macros cv.tex
  * calls: the key printed beside the section header, and the sections themselves.
  *
- * Only printed sections are emitted. A section carrying `printed: false` is a
- * name for the website and nothing more, exactly as `leadership:` is a section
- * the site renders and the PDF does not.
+ * EVERY declaration is validated, then the printed ones are emitted. A section
+ * carrying `printed: false` is a name for the website and nothing more, exactly
+ * as `leadership:` is a section the site renders and the PDF does not - but it
+ * is still read by the website, so a criteria-less or nameless one is an error
+ * here rather than a silent relabelling of the whole bibliography there.
  */
 function bibSections(key, declaration) {
   const name = macroName(key);
   const all = declaration.sections ?? [];
-  const printed = all.filter((section) => section.printed !== false);
   const seen = new Map();
+  const earlier = [];
+  const printed = [];
   const filters = [];
   const bodies = [];
-  printed.forEach((section, index) => {
+  all.forEach((section, index) => {
     const where = `${key}.sections[${index}]`;
     if (!section.title || !section.short) {
-      throw new Error(`${where}: a printed section needs both a title and a short name.`);
+      throw new Error(`${where}: a section needs both a title and a short name.`);
+    }
+    const own = bibFilter(section, where);
+    if (section.printed === false) {
+      earlier.push(own);
+      return;
     }
     const prefix = bibPrefix(section);
     if (seen.has(prefix)) {
@@ -281,14 +322,16 @@ function bibSections(key, declaration) {
       );
     }
     seen.set(prefix, section.short);
+    printed.push(section);
     const filter = `${key}${index + 1}`;
-    filters.push(`\\defbibfilter{${filter}}{${bibFilter(section, where)}}`);
+    filters.push(`\\defbibfilter{${filter}}{${afterEarlier(own, earlier)}}`);
     bodies.push(
       `\\begin{refcontext}[labelprefix=${escapeLatex(prefix)}]\n` +
         `\\printbibliography[heading=bibsubheading, title={${arg(section.title)}}, ` +
         `filter=${filter}, resetnumbers=true]\n` +
         `\\end{refcontext}`
     );
+    earlier.push(own);
   });
   return [
     filters.join("\n"),

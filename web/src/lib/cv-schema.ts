@@ -128,22 +128,36 @@ export interface BibSections {
   sections: BibSection[];
 }
 
-/** The keywords a BibTeX `keywords` field lists, lowercased. DBLP uses `;`. */
-const keywordList = (field = ''): string[] =>
+/**
+ * The keywords a BibTeX `keywords` field lists.
+ *
+ * Biber's semantics and nothing else: the list is comma-separated, and a
+ * keyword matches only as written. No lowercasing, and `;` is not a separator —
+ * biblatex's `keyword=` test is neither of those things, and this matcher and
+ * the generated `\defbibfilter` have to select the same entries or the site and
+ * the printed CV disagree about how the same work is grouped. A DBLP entry
+ * whose `keywords` are semicolon-delimited is therefore one long keyword to
+ * both consumers, which is what Biber already believed.
+ */
+export const keywordList = (field = ''): string[] =>
   field
-    .toLowerCase()
-    .split(/[,;]/)
+    .split(',')
     .map((keyword) => keyword.trim())
     .filter(Boolean);
 
-/** Whether one entry belongs to one declared section. */
+/**
+ * Whether one entry belongs to one declared section.
+ *
+ * Entry types compare as written too. Both consumers see the type in Biber's
+ * canonical lower case — the BibTeX reader lowercases it here, biber lowercases
+ * it there — so a declaration writes its types in lower case and
+ * `scripts/build-cv-data.mjs` refuses one that does not.
+ */
 export function matchesBibSection(section: BibSection, type: string, keywords = ''): boolean {
   const present = keywordList(keywords);
-  const lower = (value: string) => value.toLowerCase();
-  if (section.types?.length && !section.types.map(lower).includes(type.toLowerCase())) return false;
-  if (!(section.keywords ?? []).every((keyword) => present.includes(lower(keyword)))) return false;
-  if ((section.exclude_keywords ?? []).some((keyword) => present.includes(lower(keyword))))
-    return false;
+  if (section.types?.length && !section.types.includes(type)) return false;
+  if (!(section.keywords ?? []).every((keyword) => present.includes(keyword))) return false;
+  if ((section.exclude_keywords ?? []).some((keyword) => present.includes(keyword))) return false;
   return true;
 }
 

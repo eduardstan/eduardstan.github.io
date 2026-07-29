@@ -283,11 +283,16 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
  * `announced:` — the day it was submitted — and it announces like anything else.
  * Without one it stays fully visible on `/publications/` and is named in
  * `undated` below.
+ *
+ * `underReview` is read off the entry's own record in `record.ts`, not off the
+ * `short` name of the section it lands in: renaming that label is a display
+ * change, and it must not put five unannounced manuscripts on the front page
+ * dated to the year they are aimed at.
  */
 function publicationStamp(entry: Publication): string | undefined {
   const announced = entry.fields.announced?.trim();
   if (announced && precisionOf(announced)) return announced;
-  if (entry.kind === 'Under review') return undefined;
+  if (entry.underReview) return undefined;
   const year = entry.fields.year?.trim();
   if (!/^\d{4}$/.test(year ?? '')) return undefined;
   const month = MONTHS.indexOf((entry.fields.month ?? '').trim().slice(0, 3).toLowerCase());
@@ -301,10 +306,9 @@ function fromBibliography(into: Announcement[], undated: Undated[]): void {
     if (!stamp) {
       undated.push({
         what: entry.title,
-        why:
-          entry.kind === 'Under review'
-            ? 'a manuscript under review states the year it is aimed at, not a date anything happened on; add `announced` with the submission date to announce it'
-            : 'the entry states no year',
+        why: entry.underReview
+          ? 'a manuscript under review states the year it is aimed at, not a date anything happened on; add `announced` with the submission date to announce it'
+          : 'the entry states no year',
         source,
       });
       continue;

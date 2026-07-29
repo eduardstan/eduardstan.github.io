@@ -618,9 +618,9 @@ Ph.D. Representative (35th Ph.D. Cycle) (Academic Board, Ph.D. in Mathematics, U
 \newcommand{\cvLeadershipCount}{5}
 
 \defbibfilter{publications1}{type=article}
-\defbibfilter{publications2}{type=inproceedings and not keyword=workshop}
-\defbibfilter{publications3}{type=inproceedings and keyword=workshop}
-\defbibfilter{publications4}{type=online and keyword=underreview}
+\defbibfilter{publications2}{type=inproceedings and not keyword=workshop and not ( type=article )}
+\defbibfilter{publications3}{type=inproceedings and keyword=workshop and not ( type=article ) and not ( type=inproceedings and not keyword=workshop )}
+\defbibfilter{publications4}{type=online and keyword=underreview and not ( type=article ) and not ( type=inproceedings and not keyword=workshop ) and not ( type=inproceedings and keyword=workshop )}
 
 \newcommand{\cvPublicationsKey}{%
 J=Journal, C=Conference, W=Workshop, U=Under review%
@@ -645,8 +645,8 @@ J=Journal, C=Conference, W=Workshop, U=Under review%
 }
 
 \defbibfilter{talks1}{keyword=invited}
-\defbibfilter{talks2}{keyword=oral}
-\defbibfilter{talks3}{keyword=poster}
+\defbibfilter{talks2}{keyword=oral and not ( keyword=invited )}
+\defbibfilter{talks3}{keyword=poster and not ( keyword=invited ) and not ( keyword=oral )}
 
 \newcommand{\cvTalksKey}{%
 I=Invited talks, O=Oral sessions, P=Poster sessions%
