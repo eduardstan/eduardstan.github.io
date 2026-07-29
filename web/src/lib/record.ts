@@ -233,7 +233,7 @@ export function publicationKind(type: string, fields: Record<string, string>): s
  * A manuscript under review is a property of the RECORD, not of the name a
  * declaration happens to give the group it lands in: `short: Under review` is a
  * display label an adopter may rewrite in any language, and the rule that keeps
- * an unannounced manuscript out of the news feed — its `year` is the year it is
+ * an unannounced manuscript out of the announcement stream — its `year` is the year it is
  * aimed at, not a date anything happened on — must survive that rename.
  * `content/publications.bib` is where the entry says so, so that is where this
  * reads it.

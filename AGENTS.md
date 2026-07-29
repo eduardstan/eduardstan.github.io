@@ -55,13 +55,13 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
   directories — including Astro's `_astro/`. Without that file the site publishes with no CSS
   and no JavaScript. `deploy.yml` asserts it is in `dist` before publishing.
 - `web/` reads `content/` at build time through `web/src/lib/record.ts` and
-  `web/src/lib/cv.ts`. `cv.yaml` feeds four routes, not one: `/cv/`, the home page (`profile`,
-  the feed), `/professional_activities/` (`service[]`) and `/projects/` (`projects[]`, funding
-  figures included); `content/talks.bib` feeds `/talks/`. `record.ts` finds the root by walking
-  up for `content/cv.yaml` rather than from `import.meta.url`, because Astro relocates the
-  bundle during `astro build`. The Ledger design requires every displayed count and source line
-  to be derived there rather than written by hand — see "Notable configuration" in
-  `web/README.md`.
+  `web/src/lib/cv.ts`. `cv.yaml` feeds `/cv/`, the home page (`profile`, the feed),
+  `/professional_activities/` (`service[]`), `/projects/` (`projects[]`, funding figures
+  included), `/lately/` and the `/rss.xml`/`/feed.xml` feed; `content/talks.bib` feeds `/talks/`
+  and those announcement surfaces. `record.ts` finds the root by walking up for
+  `content/cv.yaml` rather than from `import.meta.url`, because Astro relocates the bundle during
+  `astro build`. The Ledger design requires every displayed count and source line to be derived
+  there rather than written by hand — see "Notable configuration" in `web/README.md`.
 - The CV and the site share `content/publications.bib`. The site displays every entry,
   including under-review manuscripts and software artifacts; `web/README.md` owns that index's
   filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`
@@ -131,14 +131,15 @@ byte-identical — check with `--check`.
 **The wording is one table.** `TEMPLATES` at the top of `web/src/lib/announcements.ts` holds one
 canonical sentence per kind and is the only place a sentence literal may live. Grammar: what it
 was, then where; the kind stays on the mono apparatus line and is not repeated in the prose, and
-the venue is the short name. A missing slot must drop its own separator. Zero CSS was added for
-the feed and none should be. **A template is selected by what the record structurally is, never
-by a display label** — `Submitted` is chosen from `underReview`, not from a section's `short` —
-and `record.test.ts` refuses a declared `short` that collides with a template name.
+the venue is the short name. A missing slot must drop its own separator. **A template is selected
+by what the record structurally is, never by a display label** — `Submitted` is chosen from
+`underReview`, not from a section's `short` — and `record.test.ts` refuses a declared `short` that
+collides with a template name. Announcement bodies and rows reuse `.feed`; keep their styling
+there.
 
 **A manuscript under review does not announce without an explicit `announced:`.** Its `year` is
-the year it is aimed at, not a date anything happened on; the year fallback put five of them
-above every real item on the front page. Give one a submission date and it announces as
+the year it is aimed at, not a date anything happened on; the year fallback put every such
+manuscript above real items on the front page. Give one a submission date and it announces as
 "submitted to {venue}". It is on `/publications/` either way — the bibliography is not filtered.
 The rule keys on `Publication.underReview`, derived in `record.ts` from the entry's own
 `underreview` keyword — never on the `short` name of the section it displays under, which is an
@@ -149,10 +150,19 @@ only a year renders as a year. Never widen a date to a day the record does not s
 with no defensible date is listed in the feed's `undated` array and shown in the provenance block,
 not given an invented one.
 
-The 22 hand-written `_news/` files are gone. Their permalinks redirect to `/news/` — see
-`web/src/lib/legacy-urls.ts` and `docs/url-parity.md`. Do not reintroduce a news directory: an
-announcement is generated from the fact it announces, and a second place to write one is the
-drift this design closed.
+**The register is `/lately/`, and one query feeds everything.** `announcements()` is called by
+the home page's six-item column, by `/lately/`, and by `/rss.xml`; nothing filters or re-derives
+the stream on its own. `/lately/` breaks it by year, shows each item's exact record — the BibTeX
+key, or the `cv.yaml` list and entry title — under the inspect switch, and counts the undated
+facts there too. Filtering by kind is one hidden radio per kind and one **generated**
+general-sibling rule per kind, written on the page from the kinds the stream holds: the inspect
+switch's trick, so it works with JavaScript off. Never hand-write the kind list, and keep the
+rows on `.feed`/`.sec` — no CSS was added for them and none should be.
+
+The 22 hand-written `_news/` files are gone, and so is the `/news/` route. Their permalinks and
+the old index redirect to `/lately/` — see `web/src/lib/legacy-urls.ts` and `docs/url-parity.md`.
+Do not reintroduce a news directory: an announcement is generated from the fact it announces, and
+a second place to write one is the drift this design closed.
 
 ## Settled decisions worth not relitigating
 

@@ -21,7 +21,15 @@
  * guessed at: it is listed, with the reason, in `undated`.
  */
 import { parse } from 'yaml';
-import { entriesOf, isEditorial, sections, type CV } from './cv-schema.ts';
+import {
+  editionAnnounced,
+  editionYear,
+  entriesOf,
+  isEditorial,
+  sections,
+  type CV,
+  type Entry,
+} from './cv-schema.ts';
 import {
   bibliography,
   deLatex,
@@ -46,6 +54,12 @@ const cv = parse(readSource(SOURCES.cv)) as CV;
 export type Precision = 'year' | 'month' | 'day' | 'minute';
 
 export interface Announcement {
+  /**
+   * A stable anchor for this item, derived from its stamp and its text. There
+   * is no page per announcement, so this is the finest address one has: the
+   * feed links to `/lately/#id` and the RSS item's guid is the same URL.
+   */
+  id: string;
   /** The date as the source states it: `2024`, `2024-10`, `2024-10-22`, or with a time. */
   stamp: string;
   /** The first instant of the period `stamp` names — the sort key, not a claim. */
@@ -53,10 +67,17 @@ export interface Announcement {
   precision: Precision;
   /** "Journal", "Service", "Invited talk", … — what kind of fact this is. */
   kind: string;
+  /** The collision-safe identifier allocated to `kind` for the register filter. */
+  kindSlug: string;
   /** Body as inline HTML. */
   html: string;
   text: string;
-  /** The file the fact lives in. */
+  /**
+   * The record this was generated from, exactly: the file, plus the BibTeX key
+   * or the `cv.yaml` list and a natural discriminator for the entry inside it.
+   * This is what the inspect switch shows under the item, so it must name one
+   * entry and not just a file.
+   */
   source: string;
 }
 
@@ -178,10 +199,12 @@ function item(stamp: string, kind: string, markdown: string, source: string): An
   const precision = precisionOf(stamp);
   if (!precision) throw new Error(`Not an ISO 8601 date: ${stamp} (${source}, "${markdown}")`);
   return {
+    id: '', // assigned once the feed is ordered, below.
     stamp,
     at: instant(stamp, precision),
     precision,
     kind,
+    kindSlug: '',
     html: inlineHtml(markdown),
     text: stripMarkdown(markdown),
     source,
@@ -225,6 +248,90 @@ const singular = (key: string) => {
   return stem.charAt(0).toUpperCase() + stem.slice(1);
 };
 
+function cvEntryLabel(entries: Entry[], index: number): string {
+  const entry = entries[index];
+  const title = stripMarkdown(entry.title);
+  const peers = entries.filter((candidate) => stripMarkdown(candidate.title) === title);
+  if (peers.length === 1) return title;
+  const clean = (value: string | number | undefined) =>
+    value === undefined ? undefined : stripMarkdown(String(value)).trim() || undefined;
+  const org = (candidate: Entry) => clean(candidate.org);
+  const shortOrg = (candidate: Entry) =>
+    candidate.org ? clean(shortVenue(candidate.org)) : undefined;
+  const years = (candidate: Entry) => {
+    const values = candidate.years?.map((edition) => {
+      const announced = editionAnnounced(edition);
+      return `${editionYear(edition)}${announced ? `@${announced}` : ''}`;
+    });
+    return values?.length ? values.join('/') : undefined;
+  };
+  const fields: {
+    value: (candidate: Entry) => string | undefined;
+    display: (candidate: Entry) => string | undefined;
+  }[] = [
+    {
+      value: org,
+      display: (candidate) => {
+        const abbreviated = shortOrg(candidate);
+        return abbreviated && peers.filter((peer) => shortOrg(peer) === abbreviated).length === 1
+          ? abbreviated
+          : org(candidate);
+      },
+    },
+    {
+      value: (candidate) => clean(candidate.dates),
+      display: (candidate) => clean(candidate.dates),
+    },
+    {
+      value: (candidate) => clean(candidate.place),
+      display: (candidate) => clean(candidate.place),
+    },
+    {
+      value: (candidate) => clean(candidate.detail),
+      display: (candidate) => clean(candidate.detail),
+    },
+    { value: years, display: years },
+    {
+      value: (candidate) => clean(candidate.announced),
+      display: (candidate) => clean(candidate.announced),
+    },
+    { value: (candidate) => clean(candidate.url), display: (candidate) => clean(candidate.url) },
+    {
+      value: (candidate) => clean(candidate.metric),
+      display: (candidate) => clean(candidate.metric),
+    },
+    {
+      value: (candidate) => clean(candidate.rank_url),
+      display: (candidate) => clean(candidate.rank_url),
+    },
+    {
+      value: (candidate) => clean(candidate.funding),
+      display: (candidate) => clean(candidate.funding),
+    },
+    {
+      value: (candidate) => clean(candidate.count),
+      display: (candidate) => clean(candidate.count),
+    },
+  ];
+  const discriminators: (typeof fields)[number][] = [];
+
+  for (const field of fields) {
+    if (!field.value(entry)) continue;
+    discriminators.push(field);
+    const matches = peers.filter((peer) =>
+      discriminators.every((candidate) => candidate.value(peer) === candidate.value(entry)),
+    );
+    if (matches.length === 1) {
+      return [title, ...discriminators.map((candidate) => candidate.display(entry))].join(', ');
+    }
+  }
+
+  return `${title} · entry #${index + 1}`;
+}
+
+const cvSource = (key: string, label: string, edition?: number) =>
+  `${SOURCES.cv} (${key}[] · ${label}${edition === undefined ? '' : ` · ${edition} edition`})`;
+
 function fromCv(into: Announcement[], undated: Undated[]): void {
   for (const [key, section] of sections(cv)) {
     const entries = entriesOf(section);
@@ -238,7 +345,7 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
         (entry.years ?? []).some((edition) => typeof edition === 'object' && edition.announced),
     );
 
-    for (const entry of entries) {
+    for (const [entryIndex, entry] of entries.entries()) {
       // An editorship is an editorship whichever section it sits in; the mono
       // line gets the right word for free from the rule the home page already
       // counts with.
@@ -250,22 +357,30 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
         entry.org ? `, ${stripMarkdown(entry.org)}` : ''
       }`;
 
+      const record = cvSource(key, cvEntryLabel(entries, entryIndex));
+
       const stamp = entry.announced ?? monthStamp(entry.dates);
-      if (stamp) into.push(item(stamp, kind, say(kind, { what, where, detail }), SOURCES.cv));
+      if (stamp) into.push(item(stamp, kind, say(kind, { what, where, detail }), record));
 
       for (const edition of entry.years ?? []) {
         const year = typeof edition === 'number' ? edition : edition.year;
         const announced = typeof edition === 'number' ? undefined : edition.announced;
+        const editionRecord = cvSource(key, cvEntryLabel(entries, entryIndex), year);
         if (!announced) {
           undated.push({
             what: `${subject} ${year}`,
             why: 'the edition records a year but no announcement date, and the CV states no finer date for it',
-            source: SOURCES.cv,
+            source: editionRecord,
           });
           continue;
         }
         into.push(
-          item(announced, kind, say(kind, { what, where, detail, year: String(year) }), SOURCES.cv),
+          item(
+            announced,
+            kind,
+            say(kind, { what, where, detail, year: String(year) }),
+            editionRecord,
+          ),
         );
       }
 
@@ -273,7 +388,7 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
         undated.push({
           what: subject,
           why: 'the entry records no announcement date, no term and no editions',
-          source: SOURCES.cv,
+          source: record,
         });
       }
     }
@@ -294,8 +409,8 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
  *
  * `underReview` is read off the entry's own record in `record.ts`, not off the
  * `short` name of the section it lands in: renaming that label is a display
- * change, and it must not put five unannounced manuscripts on the front page
- * dated to the year they are aimed at.
+ * change, and it must not put unannounced manuscripts on the front page dated
+ * to the year they are aimed at.
  */
 function publicationStamp(entry: Publication): string | undefined {
   const announced = entry.fields.announced?.trim();
@@ -390,12 +505,46 @@ function fromPosts(into: Announcement[], undated: Undated[]): void {
 
 // ----------------------------------------------------------- the feed ------
 
+/** One kind of fact, with how many items of it the feed holds. */
+export interface Kind {
+  /** As it is printed on the apparatus line: `Journal`, `Invited talk`. */
+  name: string;
+  /** Its collision-safe HTML id fragment: `invited-talk`. */
+  slug: string;
+  count: number;
+}
+
 export interface Feed {
   items: Announcement[];
+  /** The kinds present, most items first — the filter's whole vocabulary. */
+  kinds: Kind[];
   /** Announceable facts with no defensible date, named rather than invented. */
   undated: Undated[];
   /** The files the feed is derived from, for the provenance block. */
   sources: string[];
+}
+
+/** Words to an HTML id fragment: lowercase, ASCII, hyphens, nothing else. */
+export const slug = (text: string) =>
+  text
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+export function allocateKindSlugs(names: Iterable<string>): Map<string, string> {
+  const allocated = new Map<string, string>();
+  const taken = new Set(['all']);
+  for (const name of [...new Set(names)].sort()) {
+    const stem = slug(name) || 'kind';
+    let candidate = stem;
+    let suffix = 2;
+    while (taken.has(candidate)) candidate = `${stem}-${suffix++}`;
+    taken.add(candidate);
+    allocated.set(name, candidate);
+  }
+  return allocated;
 }
 
 let cache: Feed | undefined;
@@ -420,8 +569,28 @@ export function announcements(): Feed {
       a.text.localeCompare(b.text),
   );
 
+  // The anchor is the item's own stamp and words, so it survives a rebuild;
+  // the counter only ever fires if two items say the same thing on the same
+  // date, and then it keeps both addressable rather than colliding.
+  const taken = new Map<string, number>();
+  for (const announcement of items) {
+    const stem = slug(`${announcement.stamp} ${announcement.text}`).slice(0, 80).replace(/-$/, '');
+    const seen = taken.get(stem) ?? 0;
+    taken.set(stem, seen + 1);
+    announcement.id = seen === 0 ? stem : `${stem}-${seen + 1}`;
+  }
+
+  const counts = new Map<string, number>();
+  for (const announcement of items)
+    counts.set(announcement.kind, (counts.get(announcement.kind) ?? 0) + 1);
+  const kindSlugs = allocateKindSlugs(counts.keys());
+  for (const announcement of items) announcement.kindSlug = kindSlugs.get(announcement.kind)!;
+
   cache = {
     items,
+    kinds: [...counts]
+      .map(([name, count]) => ({ name, slug: kindSlugs.get(name)!, count }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
     undated,
     sources: [SOURCES.cv, SOURCES.bibliography, SOURCES.talks, `${SOURCES.posts}/**/*.{md,mdx}`],
   };

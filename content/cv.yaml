@@ -532,8 +532,8 @@ publications:
       keywords: [workshop]
     # `short` is a display label — the website's Type column and the CV's key
     # line — and nothing reads it for meaning. What keeps a manuscript under
-    # review out of the news feed is the `underreview` keyword on the entry
-    # itself, so renaming this section is safe.
+    # review out of the announcement stream is the `underreview` keyword on the
+    # entry itself, so renaming this section is safe.
     - title: Under review
       short: Under review
       types: [online]
