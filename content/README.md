@@ -298,7 +298,6 @@ publications:
     - title: Software & artifacts
       short: Software
       types: [misc]
-      printed: false # named on the site; no section in the PDF
 ```
 
 Declaration order is match order and, among printed sections, print order. Each publication lands
