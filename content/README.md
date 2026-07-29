@@ -76,7 +76,7 @@ its DOI link carries `%5C_`. Until that is fixed for everyone, unescape them you
 sed -i '/doi *=/ s/\\_/_/g' content/publications.bib
 ```
 
-It is a known blemish that the captain's own published CV carries — not something you did wrong.
+It is a known blemish that the site owner's own published CV carries — not something you did wrong.
 
 ## `profile:`
 

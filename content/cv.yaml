@@ -540,7 +540,7 @@ publications:
       keywords: [underreview]
     # Released software, filed by DBLP as @misc. Named on the website; the
     # printed CV does not carry a section for it. Delete `printed: false` to
-    # add one - that is a change to the printed CV, so it is the captain's call.
+    # add one - that is a change to the printed CV, so it is the site owner's call.
     - title: Software & artifacts
       short: Software
       types: [misc]

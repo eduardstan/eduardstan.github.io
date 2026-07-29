@@ -10,8 +10,8 @@ mkdirSync(temporaryRoot, { recursive: true });
 const copy = mkdtempSync(join(temporaryRoot, "adopter-build-"));
 const syntheticName = "Alex Newcomer";
 const syntheticDomain = "alex-newcomer.example";
-const captainSurname = "Stan";
-const captainDomain = "eduardstan.github.io";
+const siteOwnerSurname = "Stan";
+const siteOwnerDomain = "eduardstan.github.io";
 
 function copyTrackedFiles() {
   const result = spawnSync("git", ["ls-files", "-z"], {
@@ -74,19 +74,19 @@ function grep(needle, expected, options = {}) {
     const condition = expected ? "was not derived into" : "leaked into";
     throw new Error(
       `${JSON.stringify(needle)} ${condition} the synthetic adopter build. ` +
-        "This second build proves the template works for someone other than the captain."
+        "This second build proves the template works for someone other than the site owner."
     );
   }
 }
 
 let succeeded = false;
 try {
-  process.stdout.write("Cold-start adopter check: this second build proves the template works for someone other than the captain.\n");
+  process.stdout.write("Cold-start adopter check: this second build proves the template works for someone other than the site owner.\n");
   const trackedCount = copyTrackedFiles();
   process.stdout.write(`Materialized ${trackedCount} tracked paths; ignored and untracked build outputs were not copied.\n`);
   const stagedCv = join(copy, "web/public/assets/cv.pdf");
   if (existsSync(stagedCv)) {
-    throw new Error("the tracked-only fixture copied the captain’s staged CV");
+    throw new Error("the tracked-only fixture copied the site owner’s staged CV");
   }
   const content = join(copy, "content");
   mkdirSync(join(content, "media"), { recursive: true });
@@ -127,13 +127,13 @@ appointments: []
   symlinkSync(dependencies, join(copy, "web/node_modules"), "dir");
   run("npm", ["run", "build"], { cwd: join(copy, "web"), stdio: "inherit" });
   if (existsSync(join(copy, "web/dist/assets/cv.pdf"))) {
-    throw new Error("the synthetic adopter build published the captain’s staged CV");
+    throw new Error("the synthetic adopter build published the site owner’s staged CV");
   }
 
   grep(syntheticName, true);
   grep(syntheticDomain, true);
-  grep(captainSurname, false, { ignoreCase: true, word: true });
-  grep(captainDomain, false);
+  grep(siteOwnerSurname, false, { ignoreCase: true, word: true });
+  grep(siteOwnerDomain, false);
   succeeded = true;
 } catch (error) {
   process.stderr.write(`Cold-start adopter check failed: ${error.message}\n`);

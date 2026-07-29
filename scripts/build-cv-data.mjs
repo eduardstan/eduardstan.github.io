@@ -51,7 +51,7 @@ const ESCAPES = {
   "^": "\\textasciicircum{}",
 };
 
-// Characters the captain writes as real Unicode because they carry typographic
+// Characters the repository owner writes as real Unicode because they carry typographic
 // meaning. Applied after escaping, so their replacements are emitted verbatim.
 const TYPOGRAPHY = [
   ["—", "---"], // em dash

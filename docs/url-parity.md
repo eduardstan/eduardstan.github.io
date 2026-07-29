@@ -113,13 +113,13 @@ site rendered the same sentence twice. Redirecting it loses nothing that was tru
 | `/_pages/dropdown/`                    | in the old sitemap but already a 404 on the live site                          |
 
 `/projects/` itself is **not** dropped: it resolves, now rendering `content/cv.yaml`'s
-`projects[]` — the captain's real funded projects.
+`projects[]` — the site owner's real funded projects.
 
 ## Assets
 
 | URL                                                                                                                                                                                                      | Now                                                                                                                                                                                       |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/assets/pdf/publications/**` (7 PDFs)                                                                                                                                                                   | **resolve** — moved to `web/public/assets/pdf/publications/`, same addresses. They are the captain's own papers and nothing regenerates them.                                             |
+| `/assets/pdf/publications/**` (7 PDFs)                                                                                                                                                                   | **resolve** — moved to `web/public/assets/pdf/publications/`, same addresses. They are the site owner's own papers and nothing regenerates them.                                          |
 | `/assets/img/eduard.jpg` (+ webp sizes)                                                                                                                                                                  | **dropped** — the same portrait is served at `/media/portrait.jpg`                                                                                                                        |
 | `/assets/img/xai2-manifesto.png`                                                                                                                                                                         | **dropped** — the post's image moved with the post, to `/media/xai2-manifesto.png`                                                                                                        |
 | `/img/portrait.jpg`                                                                                                                                                                                      | **dropped** — adopter-owned media moved into `content/media/` and is served at `/media/portrait.jpg`; only this site's pages referenced the old address, and they now use `/media/`       |

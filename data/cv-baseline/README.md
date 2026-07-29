@@ -7,7 +7,7 @@ Captured from `origin/master` at commit 78d915e, BEFORE the adopter-interface re
 Every CV change so far was gated on `cv/generated/cv-data.tex` coming out **byte-identical**.
 That gate **cannot survive the interface redesign**: reshaping `cv.yaml` necessarily changes the
 generated intermediate file, so the old gate would fail by construction and would have to be
-switched off — leaving the migration with no protection on the artifact the captain cares most
+switched off — leaving the migration with no protection on the artifact the site owner cares most
 about.
 
 This is its replacement.
