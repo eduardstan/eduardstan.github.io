@@ -72,6 +72,9 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
   out of the rendered venue: `VENUE_FIELDS` tries `publisher` before `note`, and `cv/cv.tex`'s
   `\DeclareSourcemap` nulls a `note` matching that exact placeholder, so a declared
   `types: [misc]` section renders.
+  The printed layout also removes redundant `howpublished`/`url` DOI addresses and maps the
+  publisher to the standard `@misc` driver's printable organization field. Keep these as
+  rendering rules — do not edit the canonical bibliography to suit LaTeX.
 - `web/src/lib/cv.ts` reads `content/cv.yaml` through Vite's `?raw` import, not `node:fs`. Do
   **not** rewrite it as `readFileSync(new URL('../../../content/cv.yaml', import.meta.url))`:
   that builds and then fails at prerender with `ENOENT`, for the same relocation reason as the
