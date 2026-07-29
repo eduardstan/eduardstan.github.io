@@ -8,7 +8,7 @@ content/
   publications.bib   standard BibTeX
   talks.bib          standard BibTeX
   posts/             blog posts, Markdown with front matter
-  media/             portrait and images
+  media/             portrait, favicon and post images
 ```
 
 Two consumers read it: the website (`web/`) and the printed CV (`cv/cv.tex`, via
@@ -22,6 +22,7 @@ Two consumers read it: the website (`web/`) and the printed CV (`cv/cv.tex`, via
 ```yaml
 profile:
   name: Alex Newcomer
+  site: https://alex-newcomer.example
   headline: Postdoctoral Researcher
   affiliation:
     - label: University of Somewhere
@@ -44,6 +45,8 @@ profile:
                                 # the site's masthead. Surname capitalised and a
                                 # degree appended are conventions, not rules —
                                 # write your name the way you want it set.
+  site: https://ada.example     # where THIS site is published. Canonical links,
+                                # feeds and the sitemap all use this one origin.
   headline: Reader in Analytical Engines        # your role, alone. No institution.
   affiliation:                  # smallest unit first: group, then department,
     - label: Analytical Engine Group            # then institution. A list, so a
@@ -65,6 +68,8 @@ profile:
                                 # in web/src/lib/record.ts, plus a \cvicon<kind>
                                 # macro in cv/cv.tex. The build tells you so.
   portrait: portrait.jpg        # a file in content/media/
+  favicon: favicon.svg          # another file in content/media/. Optional: if it
+                                # is omitted or missing, no icon link is emitted.
   bio:
     short: >-                   # THIRD person, one paragraph. Printed as the CV's
                                 # "Short Bio". The site does not show it.
@@ -91,7 +96,8 @@ profile:
     **Data protection and permitted use.** I authorize the processing of ...
 ```
 
-Only `name` is required.
+`name` is the only field the CV data shape requires. The website build also requires `site`,
+because it cannot publish honest canonical, feed and sitemap URLs without knowing its origin.
 
 The three lines under your name on the CV are built as: `headline, affiliation[0]` / each further
 affiliation / `affiliation[last], place`. With one affiliation it is a single line.
@@ -260,8 +266,9 @@ draft: false
 
 ## `media/`
 
-Images. `profile.portrait` names a file here by bare filename; **inside a post or an item, refer to
-one as `/media/<file>`** — the directory is published at that address.
+Images. `profile.portrait` and the optional `profile.favicon` name files here by bare filename;
+**inside a post or an item, refer to one as `/media/<file>`** — the directory is published at
+that address.
 
 ## Announcements
 

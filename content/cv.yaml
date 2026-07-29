@@ -55,6 +55,7 @@
 
 profile:
   name: Ionel Eduard STAN, Ph.D.
+  site: https://eduardstan.github.io
   headline: Assistant Professor (RTD/a)
   affiliation:
     - label: Intelligent Sensing Laboratory (ISLab)
@@ -79,6 +80,7 @@ profile:
     linkedin: edust
     github: eduardstan
   portrait: portrait.jpg
+  favicon: favicon.svg
   bio:
     short: Ionel Eduard Stan is an Assistant Professor (RTD/a) at the University of Milano-Bicocca
       (DISCo), within the Intelligent Sensing Laboratory (ISLab). His research builds

@@ -26,6 +26,7 @@ import { announcements, formatStamp, say, shortVenue } from './announcements.ts'
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const bib = bibliography();
+const owner = profile();
 
 // The count the page shows must be the count in the file.
 const grepped = readFileSync(root + SOURCES.bibliography, 'utf8').match(/^@/gm)!.length;
@@ -144,13 +145,14 @@ for (const entry of bib.entries) {
 // Accents, particles and both BibTeX name forms — the cases a naive parser gets
 // wrong. `Lovelace, Ada Maria` read as `First Last` yields `L. A. Maria`.
 const authors = bib.entries.flatMap((entry) => entry.authors);
-const owner = profile();
 assert.ok(authors.includes('E. Muñoz-Velasco'), 'LaTeX accent not resolved in author names');
 assert.ok(authors.includes('D. Della Monica'), 'surname particle was initialised away');
 assert.ok(authors.includes(owner.bibliographyName), 'profile name not normalised like an author');
-assert.ok(
-  !authors.some((author) => author.endsWith(owner.name.split(/\s+/)[0])),
-  '`Last, First` names were read as `First Last`',
+const commaFormOwner = bib.entries.find((entry) => entry.key === '11122906');
+assert.equal(
+  commaFormOwner?.authors[0],
+  owner.bibliographyName,
+  '`Last, First` owner name was read as `First Last`',
 );
 
 // The generated feed. Every publication and talk is announceable, so the feed
@@ -415,8 +417,12 @@ assert.doesNotMatch(
 );
 const surname = owner.bibliographyName.split(/\s+/).at(-1);
 assert.ok(surname, 'profile name has no surname');
+const escapedSurname = surname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const surnameToken = new RegExp(`(?<![\\p{L}\\p{N}_])${escapedSurname}(?![\\p{L}\\p{N}_])`, 'iu');
+assert.doesNotMatch(`interface ${surname}nk {}`, surnameToken, 'surname guard matches a substring');
+assert.match(`const owner = "${surname}"`, surnameToken, 'surname guard misses a standalone token');
 for (const path of listSources('web/src', ['.astro', '.ts', '.tsx', '.js', '.mjs'])) {
-  assert.ok(!readSource(path).includes(surname), `${path} hard-codes the profile surname`);
+  assert.doesNotMatch(readSource(path), surnameToken, `${path} hard-codes the profile surname`);
 }
 // `journaltitle` is BibLaTeX's name for `journal` and is what Zotero's Better
 // BibTeX writes. Without it an adopter's most recent article renders with no

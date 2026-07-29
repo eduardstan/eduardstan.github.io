@@ -3,7 +3,7 @@ import '../styles/global.css';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import ThemeScript from '../components/ThemeScript.astro';
-import { profile } from '../lib/record';
+import { identity, profile } from '../lib/record';
 
 interface Props {
   title: string;
@@ -19,6 +19,7 @@ interface Props {
 }
 
 const { name } = profile();
+const { favicon } = identity();
 const { title, description = `Personal site of ${name}.`, canonical: canonicalPath, noindex = false } =
   Astro.props;
 const canonical = new URL(canonicalPath ?? Astro.url.pathname, Astro.site);
@@ -31,7 +32,7 @@ const canonical = new URL(canonicalPath ?? Astro.url.pathname, Astro.site);
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {favicon && <link rel="icon" href={favicon} />}
     <link rel="alternate" type="application/rss+xml" title={name} href="/rss.xml" />
     {
       /* The masthead face and the body face are needed for first paint; the

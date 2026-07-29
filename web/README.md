@@ -237,8 +237,8 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   too wide for a phone scrolls in its own box instead of pushing the page sideways.
 
 - **`content/media/` is staged into `public/`.** Astro's `publicDir` can only be one
-  directory and `public/` already holds the fonts, `favicon.svg`, `robots.txt` and the
-  load-bearing `.nojekyll`, so the `stage-media` npm script copies `content/media/` to
+  directory and `public/` already holds the fonts and the load-bearing `.nojekyll`, so the
+  `stage-media` npm script copies `content/media/` to
   `public/media/` before `dev`, `build` and `preview` (npm runs it through the matching
   `pre*` scripts). `.gitignore` covers the destination: `content/` is the source.
 

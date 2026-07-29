@@ -97,6 +97,7 @@ export const noteOf = (section: Section | undefined): string[] =>
 
 export interface Profile {
   name: string;
+  site?: string;
   headline?: string;
   affiliation?: { label: string; url?: string }[];
   place?: string;
@@ -106,6 +107,7 @@ export interface Profile {
   website?: { label: string; url: string };
   links?: Record<string, string>;
   portrait?: string;
+  favicon?: string;
   bio?: { short?: string; long?: string };
   focus?: string;
   footer?: string;

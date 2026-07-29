@@ -669,6 +669,7 @@ export function stripMarkdown(markdown: string): string {
  */
 interface ProfileBlock {
   name?: string;
+  site?: string;
   headline?: string;
   affiliation?: { label: string; url?: string }[];
   place?: string;
@@ -678,6 +679,7 @@ interface ProfileBlock {
   website?: { label: string; url: string };
   links?: Record<string, string | undefined>;
   portrait?: string;
+  favicon?: string;
   bio?: { short?: string; long?: string };
   focus?: string;
   footer?: string;
@@ -774,13 +776,16 @@ export function profile(): Profile {
   };
 }
 
-/** The display name, the headline and the portrait, for the pages that set them. */
+const mediaUrl = (filename: string | undefined) =>
+  filename && hasSource(`content/media/${filename}`) ? `/media/${filename}` : undefined;
+
+/** The display name, headline and profile-owned media for the pages that set them. */
 export const identity = () => {
   const block = profileBlock();
   return {
     name: block.name ?? '',
     headline: block.headline ?? '',
-    /** A file in `content/media/`, published at `/media/`. */
-    portrait: block.portrait ? `/media/${block.portrait}` : undefined,
+    portrait: mediaUrl(block.portrait),
+    favicon: mediaUrl(block.favicon),
   };
 };
