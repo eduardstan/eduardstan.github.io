@@ -69,6 +69,21 @@ Jekyll output risks colliding with that route.
   be read as markdown emphasis. `cv/pres.bib` is LaTeX like `papers.bib` is, so its fields need
   `deLatex()` first.
 
+## The consistency gate
+
+`web/src/lib/consistency.ts` compares the repository's records against each other and
+**fails `astro build`** (never `astro dev`) when two hand-typed records of one fact
+contradict. Joins are by being the same entry — never by matching prose; the design proved
+name matching fails in both directions on this repository's data. `web/README.md` owns the
+contract. Two things to know before touching it:
+
+- **The Frontiers pair is correct, not a bug.** Appointed Mar 2024, announced 2025-03-03.
+  The gate fires on it and `cv/cv.yaml` carries a declared `except:` for it. Do not "fix"
+  either date; renew or re-argue the exception instead.
+- Checks joining against `_pages/professional_activities.md` or `_news/` were designed and
+  deliberately **not** built — nothing in `web/` reads either file, and adding a reader
+  would re-open the second-copy problem the rebuild closed.
+
 ## Announcements
 
 In `web/`, every announcement is derived from the fact it announces; there is no separate news

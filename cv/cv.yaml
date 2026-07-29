@@ -34,6 +34,20 @@
 #   EUR EURO SIGN (U+20AC) ->  \euro{}
 #
 # Everything else is escaped automatically: &, %, $, #, _, {, }, ~, ^, backslash.
+#
+# -----------------------------------------------------------------------------
+# `except:` - a declared exception to one website consistency check, written on
+# the fact it excuses:
+#
+#   except:
+#     - check: announced-in-own-year   # exactly one id from web/src/lib/consistency.ts
+#       because: >-                    # prose, rendered to the reader
+#         why both values are correct
+#       until: 2027-01-01              # ISO day, or `permanent`
+#
+# The website's build refuses an exception naming an unknown check, carrying a
+# blank reason, or past its `until` date. `build-cv-data.mjs` ignores the key,
+# so adding one leaves `cv/generated/cv-data.tex` byte-identical.
 # =============================================================================
 
 person:
@@ -254,6 +268,16 @@ service:
     rank_url: https://www.scimagojr.com/journalsearch.php?q=21101062817&tip=sid&clean=0
     announced: 2025-03-03T10:00:00+02:00
     dates: Mar 2024–Present
+    # Both dates are correct, so the consistency gate is told so here rather
+    # than either of them being changed to satisfy it. See the `except:` grammar
+    # note at the top of this file.
+    except:
+      - check: announced-in-own-year
+        because: >-
+          Appointed to the board in March 2024 and announced on the site a year
+          later, on 2025-03-03, when the special issue launched. Both dates are
+          correct and both are stated here.
+        until: 2027-01-01
     items:
       - >-
         Lead Editor of the Special Issue on [Explainable Artificial Intelligence

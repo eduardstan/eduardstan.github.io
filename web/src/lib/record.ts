@@ -254,6 +254,19 @@ function formatAuthor(raw: string): string {
   return [...initials, surname].join(' ');
 }
 
+/**
+ * The span a set of years covers. `Math.min()` of nothing is `Infinity`, so an
+ * empty bibliography — a fresh copy of this template, before anything has been
+ * written — would otherwise render as `Infinity–-Infinity`. A file with no
+ * entries has no span, and the pages state the span only when there is one.
+ */
+const span = (years: number[]) =>
+  years.length ? { first: Math.min(...years), last: Math.max(...years) } : { first: 0, last: 0 };
+
+/** That span as the pages print it — `2017–2026`, or nothing where there is none. */
+export const yearSpan = (years: { first: number; last: number }) =>
+  years.first ? `${years.first}–${years.last}` : '';
+
 /** Reads `field = {value}` / `field = "value"` with brace-depth awareness. */
 function parseFields(body: string): Record<string, string> {
   const fields: Record<string, string> = {};
@@ -489,7 +502,7 @@ export function bibliography(): Bibliography {
     source: SOURCES.bibliography,
     entries,
     byKind: [...counts].map(([kind, count]) => ({ kind, count })).sort((a, b) => b.count - a.count),
-    years: { first: Math.min(...years), last: Math.max(...years) },
+    years: span(years),
   };
   return bibliographyCache;
 }
@@ -563,7 +576,7 @@ export function talks(): Talks {
     byCategory: [...counts]
       .map(([category, count]) => ({ category, count }))
       .sort((a, b) => b.count - a.count || a.category.localeCompare(b.category)),
-    years: { first: Math.min(...years), last: Math.max(...years) },
+    years: span(years),
     undated: entries
       .filter((talk) => !/^\d{4}-\d{2}-\d{2}/.test(talk.date))
       .map((talk) => talk.key),

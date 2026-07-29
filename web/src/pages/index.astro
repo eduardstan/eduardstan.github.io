@@ -2,17 +2,19 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Record from '../components/Record.astro';
 import SectionHead from '../components/SectionHead.astro';
-import { about, bibliography, profile, SOURCES } from '../lib/record';
+import { about, bibliography, profile, SOURCES, yearSpan } from '../lib/record';
 import { cv, CV_SOURCE, isEditorial, serviceGroups, serviceWhen } from '../lib/cv';
 import { inline } from '../lib/inline';
 import { announcements, formatStamp } from '../lib/announcements';
 import { strands } from '../lib/strands';
+import { consistency, coverage } from '../lib/consistency';
 
 const { name, affiliation } = profile();
 const bio = about();
 const bib = bibliography();
 const feed = announcements();
 const research = strands();
+const gate = consistency();
 
 /**
  * Service, read from `cv/cv.yaml` — the file the printed CV is generated from —
@@ -142,8 +144,8 @@ const withheld = feed.items.length - shown.length;
       </ul>
       <Record>
         <p>
-          <b>{SOURCES.bibliography}</b> — {bib.entries.length} entries, {bib.years.first}–{
-            bib.years.last
+          <b>{SOURCES.bibliography}</b> — {bib.entries.length} entries{
+            yearSpan(bib.years) && `, ${yearSpan(bib.years)}`
           }, counted at build by parsing the file. The two service figures are counted from <b
             >{CV_SOURCE}</b
           >: <b>{editorials.length}</b> entries of <b>service[]</b> whose <b>role</b> matches
@@ -204,6 +206,78 @@ const withheld = feed.items.length - shown.length;
           hand-written third copy of the same facts that had drifted from the file the CV is generated
           from. Nothing on this site reads it any more.
         </p>
+      </Record>
+
+      {
+        /* The consistency gate's own record. The same function that renders here
+           throws in `astro:build:done`, so a published page cannot show an
+           unexcused contradiction — what a visitor can see is the roster, the
+           coverage, and anything that has been excused, with the reason. */
+      }
+      <Record>
+        <p>
+          <b>web/src/lib/consistency.ts</b> — the consistency gate: {coverage(gate)}. Each check
+          compares two hand-typed records of one fact — a date the fact states and the date it says
+          it was announced on — joined by being the same entry rather than by matching prose. A
+          contradiction refuses <code>astro build</code>; <code>astro dev</code> never fails, so this
+          block is where the author sees one.
+        </p>
+        {
+          gate.checks.map((check) => (
+            <p>
+              <b>{check.id}</b> — {check.statement}. Over {check.sources.join(', ')}.
+            </p>
+          ))
+        }
+        {
+          gate.contradictions.map((finding) => (
+            <p>
+              <b>{finding.check}</b> — contradiction · {finding.subject}
+              {finding.sides.map((side) => (
+                <>
+                  <br />
+                  {side.label}: {side.value} — <b>{side.source}</b>
+                </>
+              ))}
+              <br />
+              {finding.why}
+            </p>
+          ))
+        }
+        {
+          gate.excused.map((finding) => (
+            <p>
+              <b>{finding.check}</b> — excused ·{' '}
+              {finding.sides.map((side) => `${side.label} ${side.value}`).join(' vs ')} ·{' '}
+              {finding.subject} · <b>{finding.sides.map((side) => side.source).join(', ')}</b>
+              <br />
+              {finding.excused!.because} · expires {finding.excused!.until}
+            </p>
+          ))
+        }
+        {
+          gate.exceptionProblems.map((item) => (
+            <p>
+              Exception rejected — {item.what} {item.why} (<b>{item.source}</b>).
+            </p>
+          ))
+        }
+        {
+          gate.stale.map(({ subject, exception }) => (
+            <p>
+              <b>{exception.check}</b> — stale exception · {subject}
+              <br />
+              {exception.because} · expires {exception.until}
+            </p>
+          ))
+        }
+        {
+          gate.uncomparable.map((item) => (
+            <p>
+              Not compared — {item.what} {item.why} (<b>{item.source}</b>).
+            </p>
+          ))
+        }
       </Record>
     </div>
 
