@@ -1,9 +1,8 @@
 /**
  * The announcement feed, derived from the facts themselves.
  *
- * `web/` does not read `_news/`; those files remain temporarily for the live
- * Jekyll site until cutover. Every item below is generated from a fact this
- * repository already holds:
+ * There is no news content in this repository. Every item below is generated
+ * from a fact it already holds:
  *
  *   `cv/cv.yaml`               appointments, service roles and editions, awards
  *   `_bibliography/papers.bib` publications, preprints, released software

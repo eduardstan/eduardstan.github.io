@@ -1,17 +1,17 @@
-# web/ — Astro rebuild
+# web/ — the site
 
-The from-scratch rebuild of <https://eduardstan.github.io>, kept in a self-contained
-directory so it can grow incrementally without touching the published site.
+<https://eduardstan.github.io>. `.github/workflows/deploy.yml` builds this directory on every
+push to `master` and publishes `dist/` to the `gh-pages` branch, which GitHub Pages serves.
+That workflow is also the CI: a pull request runs the type-check, the self-checks and the
+build, and skips only the publish step.
 
-**The live site is still the Jekyll/al-folio tree in the repository root.** It is built
-from `master` by `.github/workflows/deploy.yml` and published to the `gh-pages` branch.
-Nothing here is deployed. Jekyll ignores this directory via the `exclude` list in
-`_config.yml`, and `.github/workflows/web-ci.yml` only validates the rebuild — it has
-`permissions: contents: read` and no deploy step. Cutover is a separate, explicitly approved
-change.
+It replaced a Jekyll/al-folio site in the repository root at the July 2026 cutover.
+`docs/url-parity.md` records what every URL that site published does now.
 
-That `exclude` list also carries a `cv/` entry, which is a publication guard and not dead
-configuration — see "Two sites live in this repo" in the repository root's `AGENTS.md`.
+**`public/.nojekyll` is load-bearing.** Pages serves this repository with `build_type: legacy`,
+so it runs its own Jekyll pass over `gh-pages` and strips `_`-prefixed directories — including
+`_astro/`. Without that file the site publishes with no CSS and no JavaScript. `deploy.yml`
+asserts it reached `dist/` before publishing.
 
 ## Requirements
 
@@ -140,10 +140,10 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   BibTeX parser as the bibliography. Each row keeps the entry's own words: `note` is the
   sub-line ("Invited talk", "Oral presentation") and `keywords` is the badge. Nothing is
   filtered and nothing is relabelled, the same contract as `/publications/`.
-- **There is no `/repositories/` route.** Its Jekyll data file (`_data/repositories.yml`) is
-  template content — `torvalds`, `jekyll/jekyll` — and the live site already keeps the page
-  out of its nav. A page of someone else's repositories is worse than no page, so the route
-  was deleted rather than filled in; the GitHub link in the footer is the real one.
+- **There is no `/repositories/` route.** The Jekyll site's version listed `torvalds` and
+  `jekyll/jekyll` — template content. A page of someone else's repositories is worse than no
+  page, so the route was dropped rather than filled in; the GitHub link in the footer is the
+  real one. `docs/url-parity.md` records the drop.
 - **The CV page.** `/cv/` renders `cv/cv.yaml` — the same file `scripts/build-cv-data.mjs`
   turns into the printed CV — through `src/lib/cv.ts`, which reads it with Vite's `?raw`
   import (see the sharp-edge note in the repository's `AGENTS.md`: `import.meta.url` fails
@@ -155,12 +155,13 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   written for a selection procedure means nothing on a public page. `service[]` and
   `projects[]` belong to their own pages.
 - **Announcements belong to their facts.** `src/lib/announcements.ts` generates the home-page
-  and `/news/` feeds from `cv/cv.yaml`, `_bibliography/papers.bib`, `cv/pres.bib` and `_posts/`.
+  and `/news/` feeds from `cv/cv.yaml`, `_bibliography/papers.bib`, `cv/pres.bib` and the blog
+  collection.
   A fact is announced on its own date; `announced:` is added only when the historical
   announcement happened on a date the fact does not otherwise state. Dates render at the
   precision recorded by the source and no finer, while facts with no defensible date stay in
-  the feed's `undated` provenance instead of receiving a guess. `_news/` remains only for the
-  live Jekyll news page and is deleted at cutover; nothing in `web/` reads it.
+  the feed's `undated` provenance instead of receiving a guess. The Jekyll site's `_news/`
+  directory is gone; its 22 permalinks redirect to `/news/` through `src/lib/legacy-urls.ts`.
 - **The dense row.** `.rows` in `global.css` is the table primitive the CV-fed pages need:
   `.defs`' label-left/meta-right pattern with a middle column and the dates in Go Mono. It
   stacks below 760px the way `.entry` does, so nothing scrolls sideways on a phone. Reuse it
@@ -179,8 +180,8 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   file's own keys minus the ones it renders. `src/lib/record.test.ts` and
   `src/lib/cv.test.ts` (`npm test`, or
   `node --experimental-strip-types src/lib/<name>.test.ts` for one of them) assert the readers
-  still agree with the data; `web-ci.yml` runs them before the build and keeps its path filters
-  aligned with the repository-root inputs in `SOURCES`.
+  still agree with the data; `deploy.yml` runs them before the build. That workflow has no
+  path filters, so no filter list has to be kept in step with `SOURCES`.
 - **The consistency gate.** `src/lib/consistency.ts` compares the records that state one fact
   twice and refuses the build when they disagree. Today that is one check,
   `announced-in-own-year`: a fact carrying both its own date and an `announced:` date is the
@@ -203,12 +204,9 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   tables. `.prose table` in `global.css` is `display: block; overflow-x: auto`, so a table
   too wide for a phone scrolls in its own box instead of pushing the page sideways.
 
-## Not done yet
+## The printed CV
 
-Deployment. Every route now renders real data read from the repository's own files, and the
-blog holds the two migrated posts. `/cv/` does not yet offer the PDF: publishing it belongs
-to the cutover, which also owns every deletion in the Jekyll tree (`_news/`, `_pages/cv.md`,
-`_pages/professional_activities.md`, `assets/json/resume.json`, `_data/cv.yml`, `_drafts/`).
-
-`_pages/professional_activities.md` is now dead to this site — no reader, no `SOURCES` entry
-— so cutover can delete it with the rest of the Jekyll tree without breaking a build.
+`/cv/` offers the PDF when the build has one. `deploy.yml` typesets `cv/cv.tex` and stages the
+result at `public/assets/cv.pdf` before `astro build`; `.gitignore` covers that path, so the
+binary never enters git history. A plain local build has no PDF and the page simply does not
+offer one — `src/pages/cv.astro` checks rather than assumes.
