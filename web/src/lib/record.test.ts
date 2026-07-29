@@ -12,8 +12,18 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { about, bibliography, profile, stripMarkdown, talks, SOURCES } from './record.ts';
-import { announcements, formatStamp, say, shortVenue } from './announcements.ts';
+import {
+  about,
+  bibliography,
+  profile,
+  publicationKind,
+  publicationSections,
+  stripMarkdown,
+  talks,
+  SOURCES,
+} from './record.ts';
+import { keywordList } from './cv-schema.ts';
+import { announcements, formatStamp, say, shortVenue, TEMPLATES } from './announcements.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const bib = bibliography();
@@ -31,7 +41,6 @@ for (const entry of bib.entries) {
   assert.ok(entry.year > 1990, `${entry.key}: implausible year ${entry.year}`);
   assert.ok(entry.authors.length > 0, `${entry.key}: no authors`);
   assert.ok(entry.venue, `${entry.key}: no venue`);
-  assert.ok(entry.kind !== 'Other', `${entry.key}: unlabelled entry type @${entry.type}`);
   assert.ok(!/[{}\\]/.test(entry.title), `${entry.key}: unresolved LaTeX in title`);
   assert.ok(
     !entry.authors.some((a) => /[{}\\]/.test(a)),
@@ -46,6 +55,138 @@ for (const key of ['DBLP:data/11/MilellaPSS25', 'DBLP:data/11/MilellaPSS25a']) {
   assert.equal(software.kind, 'Software', `${key}: incorrect kind`);
   assert.equal(software.venue, 'DROPS Artifacts', `${key}: incorrect venue`);
   assert.notEqual(software.venue, software.fields.note, `${key}: placeholder note used as venue`);
+}
+
+// One declaration, two consumers. `publications:` in content/cv.yaml says how
+// the bibliography is grouped; this file labels the Type column from it and
+// `scripts/build-cv-data.mjs` translates the same list into the filters and
+// headings the PDF prints. The failure this guards is the two drifting apart —
+// which is the whole reason the grouping left cv/cv.tex.
+const declared = publicationSections();
+assert.ok(declared.length, `${SOURCES.cv}: no publication sections declared`);
+
+// The agnostic promise, asserted rather than assumed: an entry type nobody
+// declared a section for is still labelled and still shown. An adopter whose
+// career is patents adds `@patent` to the bibliography and SEES it on the site
+// under "Other" — which is the visible sign that the interface has no group for
+// it yet, not a build that refuses to render the entry.
+assert.equal(publicationKind('patent', {}), 'Other', 'an undeclared entry type lost its label');
+for (const entry of bib.entries) {
+  const label = declared.find((section) => section.short === entry.kind);
+  assert.ok(
+    label || entry.kind === 'Other',
+    `${entry.key}: "${entry.kind}" is neither declared in ${SOURCES.cv} nor the "Other" fallback`,
+  );
+}
+
+// A property of THIS repository's data as it stands, not an invariant of the
+// reader: every one of the captain's entries is claimed by a declared section,
+// so a group quietly dropped from the declaration still fails loudly here.
+const unlabelled = bib.entries.filter((entry) => entry.kind === 'Other');
+assert.deepEqual(
+  unlabelled.map((entry) => `${entry.key} (@${entry.type})`),
+  [],
+  `${SOURCES.cv}: these entries match no declared publication section`,
+);
+
+const generated = readFileSync(root + 'cv/generated/cv-data.tex', 'utf8');
+const printedHeadings = [
+  ...generated.matchAll(
+    /\\printbibliography\[heading=bibsubheading, title=\{(.+?)\}, filter=Publications/g,
+  ),
+].map((match) => match[1].replace(/\\&/g, '&'));
+assert.deepEqual(
+  printedHeadings,
+  declared.filter((section) => section.printed !== false).map((section) => section.title),
+  'the printed CV and this file disagree about the publication sections',
+);
+
+// -----------------------------------------------------------------------------
+// The two matchers, proved equal over the real bibliography.
+//
+// One declaration, two engines: biblatex/Biber selects the printed sections and
+// `matchesBibSection` labels the site's. Similar-looking code is not evidence
+// they agree, so this evaluates the GENERATED `\defbibfilter` expressions —
+// the ones biber will actually run — against every entry in the file and
+// checks each entry lands in the same section on both sides.
+// -----------------------------------------------------------------------------
+
+/**
+ * A biblatex filter expression, evaluated the way biber does: `type=` and
+ * `keyword=` tests joined by `and` / `or` / `not`, with parentheses. Keyword
+ * lists are comma-separated and every comparison is case-sensitive.
+ */
+function evaluateFilter(expression: string, type: string, keywords: string): boolean {
+  const tokens = expression.match(/\(|\)|[^\s()]+/g) ?? [];
+  let at = 0;
+  const peek = () => tokens[at];
+  const eat = (token: string) => (peek() === token ? (at++, true) : false);
+  const atom = (): boolean => {
+    if (eat('not')) return !atom();
+    if (eat('(')) {
+      const value = or();
+      assert.ok(eat(')'), `unbalanced parentheses in filter: ${expression}`);
+      return value;
+    }
+    const token = tokens[at++];
+    const [field, wanted] = token.split('=');
+    if (field === 'type') return type === wanted;
+    if (field === 'keyword') return keywordList(keywords).includes(wanted);
+    throw new Error(`unsupported filter test "${token}" in: ${expression}`);
+  };
+  const and = (): boolean => {
+    let value = atom();
+    while (eat('and')) value = atom() && value;
+    return value;
+  };
+  const or = (): boolean => {
+    let value = and();
+    while (eat('or')) value = and() || value;
+    return value;
+  };
+  const result = or();
+  assert.equal(at, tokens.length, `filter not fully consumed: ${expression}`);
+  return result;
+}
+
+// Filter N belongs to the Nth declared section: the generator numbers them by
+// declaration order so an unprinted section cannot shift the ones below it.
+const compiled = [
+  ...generated.matchAll(/\\defbibfilter\{Publications(\d+)\}\{([\s\S]*?)\}\n/g),
+].map((match) => ({
+  section: declared[Number(match[1]) - 1],
+  expression: match[2],
+}));
+assert.equal(
+  compiled.length,
+  declared.filter((section) => section.printed !== false).length,
+  'the generated filters and the declared printed sections do not correspond',
+);
+
+for (const entry of bib.entries) {
+  const type = entry.type.toLowerCase();
+  const keywords = entry.fields.keywords ?? '';
+  const printed = compiled.filter((filter) => evaluateFilter(filter.expression, type, keywords));
+  assert.ok(
+    printed.length <= 1,
+    `${entry.key}: printed under ${printed.length} sections but labelled once — ` +
+      `${printed.map((f) => f.section.title).join(', ')}`,
+  );
+  const site = declared.find((section) => section.short === entry.kind);
+  const inPdf = printed[0]?.section;
+  if (site && site.printed !== false) {
+    assert.equal(
+      inPdf,
+      site,
+      `${entry.key}: the site files it under "${site.title}" and the PDF does not`,
+    );
+  } else {
+    assert.equal(
+      inPdf,
+      undefined,
+      `${entry.key}: the site prints it nowhere and the PDF prints it under "${inPdf?.title}"`,
+    );
+  }
 }
 
 // The citation assembled for the collapsed row. The cases that matter are the
@@ -201,10 +342,10 @@ assert.equal(
 );
 assert.equal(say('Talk', { what: 'Modal Symbolic Learning' }), '_Modal Symbolic Learning_.');
 assert.equal(
-  say('Under review', { what: 'A paper', where: 'JAIR' }),
+  say('Submitted', { what: 'A paper', where: 'JAIR' }),
   '**A paper**, submitted to JAIR.',
 );
-assert.equal(say('Under review', { what: 'A paper' }), '**A paper**.');
+assert.equal(say('Submitted', { what: 'A paper' }), '**A paper**.');
 assert.equal(say('Writing', { what: 'A post' }), '**A post**.');
 // An unknown kind — a section an adopter invents — falls back, it does not throw.
 assert.equal(
@@ -238,7 +379,9 @@ for (const item of feed.items) {
 
 // A manuscript under review does not announce on the year it is aimed at, and
 // says so in the provenance rather than vanishing.
-const underReview = bib.entries.filter((entry) => entry.kind === 'Under review');
+// Read off the entries' own records, so renaming the section that displays them
+// cannot quietly turn this check — or the rule it guards — into a no-op.
+const underReview = bib.entries.filter((entry) => entry.underReview);
 assert.ok(underReview.length > 0, 'no under-review entries to check the rule against');
 for (const entry of underReview) {
   if (entry.fields.announced) continue;
@@ -249,6 +392,18 @@ for (const entry of underReview) {
   assert.ok(
     feed.undated.some((fact) => fact.what === entry.title),
     `${entry.key}: not in the feed and not named in the undated list either`,
+  );
+}
+
+// The wording is chosen from what the record structurally is, never from the
+// label the declaration displays it under. `TEMPLATES` is keyed on the first,
+// so a key that collides with a declared `short` would hand that group another
+// group's sentence the moment an adopter renamed one — the same fragile-string
+// class the under-review rule above was moved off.
+for (const section of declared) {
+  assert.ok(
+    !(section.short in TEMPLATES),
+    `${SOURCES.cv}: section "${section.short}" shares its name with an announcement template`,
   );
 }
 

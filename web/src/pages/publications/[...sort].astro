@@ -15,25 +15,22 @@
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Record from '../../components/Record.astro';
-import { bibliography, profile, SOURCES, yearSpan, type Publication } from '../../lib/record';
+import {
+  bibliography,
+  profile,
+  publicationSections,
+  SOURCES,
+  yearSpan,
+  type Publication,
+} from '../../lib/record';
 
 /**
- * The order the CV prints them in — journals, conferences, workshops, under
- * review — with the entry types the CV's Publications section does not print
- * after them. Anything unrecognised sorts last rather than being dropped.
+ * The order `content/cv.yaml` declares the groups in, which is also the order
+ * the printed CV prints them in. Nothing is listed here by hand, so "by type"
+ * cannot come to disagree with the CV. An entry in no declared group is
+ * labelled "Other" and sorts last rather than being dropped.
  */
-const KIND_ORDER = [
-  'Journal',
-  'Conference',
-  'Workshop',
-  'Under review',
-  'Preprint',
-  'Chapter',
-  'Book',
-  'Report',
-  'Software',
-  'Thesis',
-];
+const KIND_ORDER = publicationSections().map((section) => section.short);
 const byKind = (entry: Publication) => {
   const rank = KIND_ORDER.indexOf(entry.kind);
   return rank === -1 ? KIND_ORDER.length : rank;

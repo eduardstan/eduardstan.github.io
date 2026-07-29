@@ -106,7 +106,9 @@ line.
 
 ## A section
 
-A section is a top-level key holding a list. Every field except `title` is optional:
+A section is a top-level key holding a list. (`publications:` and `talks:` hold `sections:`
+instead of entries — they group the two BibTeX files and are documented further down.) Every field
+except `title` is optional:
 
 ```yaml
 appointments:
@@ -228,14 +230,67 @@ Standard BibTeX. Export from Zotero, Mendeley, DBLP or Google Scholar and drop t
 Nothing is filtered: every entry is shown on the site, including manuscripts under review.
 Both `journal` and BibLaTeX's `journaltitle` are read, so a Better BibTeX BibLaTeX export works.
 
-**The printed CV shows fewer.** `cv/cv.tex` prints six lists, selected by entry type and
-`keywords`: `@article` → journal articles, `@inproceedings` → conference papers,
-`@inproceedings` + `keywords = {workshop}` → workshop papers, `@online` +
-`keywords = {underreview}` → under review, `@incollection`/`@book` → books and chapters, and
-`@phdthesis`/`@techreport` → other. A list with no entries prints nothing at all — no heading, no
-gap — so the last two cost nothing and mean an adopter whose career is books does not lose it
-silently. An `@misc` is on the site and not in the PDF; add `or type=misc` to the `other` filter
-in `cv.tex` if you want it there too.
+### How they are grouped: `publications:` and `talks:` in `cv.yaml`
+
+**A section is a title plus a filter, and you declare it.** No publication entry type is named in
+`cv.tex` or in the website's source, so every BibTeX type is expressible — an adopter whose career
+is books, datasets or patents declares a section and it works, with no LaTeX edit. The
+`publications:` declaration is read by both, so the PDF and the publication index cannot disagree
+about how the work is grouped.
+
+```yaml
+publications:
+  sections:
+    - title: Journal articles (peer-reviewed) # the heading in the PDF
+      short: Journal # the site's Type column, and the "J=Journal" key
+      types: [article] # entry types, ANY of which matches
+    - title: Conference papers (peer-reviewed)
+      short: Conference
+      types: [inproceedings]
+      exclude_keywords: [workshop] # keywords, NONE of which may be present
+    - title: Workshop papers
+      short: Workshop
+      types: [inproceedings]
+      keywords: [workshop] # keywords, ALL of which must be present
+    - title: Books & chapters
+      short: Books
+      types: [incollection, book]
+    - title: Software & artifacts
+      short: Software
+      types: [misc]
+      printed: false # named on the site; no section in the PDF
+```
+
+Declaration order is match order and, among printed sections, print order. Each publication lands
+in the **first** section it matches, in the PDF exactly as on the site: each printed section's
+biblatex filter is compiled as its own criteria *minus* every section declared above it, including
+any carrying `printed: false`, so an entry two sections accept is printed once and labelled the
+same way. Two more keys: `prefix:` overrides the numbering letter (it defaults to `short`'s first
+letter, and two printed sections claiming the same one is an error, not a silent collision), and
+`printed: false` omits a section from the PDF; a publication section remains named on the website
+— the answer to "on the site, not in the CV", as `leadership:` is for ordinary sections. Every
+section is checked, printed or not: one with no criteria at all would match the whole bibliography,
+so it is refused rather than accepted quietly.
+
+**Types and keywords are matched exactly as Biber matches them**, because Biber is the other
+consumer: entry types are written in **lower case** (biber lower-cases every one before testing a
+filter, so `types: [Article]` is refused rather than silently matching nothing), a `keywords`
+field is a **comma-separated** list, and a keyword matches only as written. A semicolon-separated
+`keywords` field — DBLP writes some — is therefore one long keyword to both consumers.
+
+`short` is a display label and nothing reads it for meaning: rename it, translate it, and the
+site and the PDF follow. In particular both halves of the under-review rule — keeping an
+unannounced manuscript out of the news feed, and wording an announced one "submitted to {venue}" —
+read the entry's own `underreview` keyword, not the name of the section it lands in.
+
+**A section whose filter matches nothing prints nothing at all** — no heading, no gap — so
+declaring one costs nothing until the first entry arrives. An entry matching no section is still
+shown on the site, labelled `Other`; that is the visible sign that you have no group for it yet.
+
+`talks:` takes the same shape over `talks.bib` and controls the PDF's talk headings, filters,
+numbering prefixes and key. The `/talks/` page deliberately does not relabel talks from this
+declaration: its badges and descriptions remain each entry's own `keywords` and `note`, so
+`printed: false` on a talk section only omits that section from the PDF.
 
 `talks.bib` entries look like this — the entry type and every field name matters:
 

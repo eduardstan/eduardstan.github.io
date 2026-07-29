@@ -9,9 +9,10 @@
 #   * the printed CV - `node scripts/build-cv-data.mjs` -> `cv/generated/cv-data.tex`
 #   * the website    - `web/src/lib/cv.ts` and `web/src/lib/record.ts`
 #
-# Layout, spacing, fonts, table column widths and section order are NOT here:
-# they belong to `cv/cv.tex`, which owns the design and decides which of the
-# sections below the PDF prints.
+# Layout, spacing, fonts, table column widths and the order of ordinary CV parts
+# are NOT here: they belong to `cv/cv.tex`, which owns the design and decides
+# which top-level entry lists the PDF prints. The order and inclusion of
+# bibliography subsections are declared under `publications:` and `talks:`.
 #
 # `content/README.md` is the documentation. Everything below is described there.
 #
@@ -490,3 +491,69 @@ leadership:
       Mathematics, Computer Science and Physics, University of Udine
     dates: October 2018 – September 2019
     place: Udine, Italy
+
+# -----------------------------------------------------------------------------
+# How the two bibliographies are grouped.
+#
+# A section is a title plus a filter over `publications.bib` / `talks.bib`. The
+# generator reads both declarations for the printed CV. The website also reads
+# `publications:` for its Type column and "by type" order; `/talks/` deliberately
+# keeps each entry's own `keywords` and `note` instead of relabelling it.
+#
+#   title             the heading the printed CV gives the group
+#   short             its short name in the key beside the section header
+#                     ("J=Journal, ..."); publications also use it as the
+#                     website's Type label
+#   types             BibTeX entry types, ANY of which matches (omit for any)
+#   keywords          keywords, ALL of which must be present
+#   exclude_keywords  keywords, NONE of which may be present
+#   prefix            the entry-numbering letter; defaults to short's first
+#   printed           `false` omits the section from the PDF; a publication
+#                     group remains named on the website
+#
+# Declaration order is match order and, among printed sections, print order. A
+# printed section whose filter matches nothing prints nothing - no heading, no
+# gap - so declaring one costs nothing until an entry arrives. Every BibTeX
+# entry type is expressible here; a publication matching no section is still
+# shown on the website, labelled "Other".
+# -----------------------------------------------------------------------------
+publications:
+  sections:
+    - title: Journal articles (peer-reviewed)
+      short: Journal
+      types: [article]
+    - title: Conference papers (peer-reviewed)
+      short: Conference
+      types: [inproceedings]
+      exclude_keywords: [workshop]
+    - title: Workshop papers
+      short: Workshop
+      types: [inproceedings]
+      keywords: [workshop]
+    # `short` is a display label — the website's Type column and the CV's key
+    # line — and nothing reads it for meaning. What keeps a manuscript under
+    # review out of the news feed is the `underreview` keyword on the entry
+    # itself, so renaming this section is safe.
+    - title: Under review
+      short: Under review
+      types: [online]
+      keywords: [underreview]
+    # Released software, filed by DBLP as @misc. Named on the website; the
+    # printed CV does not carry a section for it. Delete `printed: false` to
+    # add one - that is a change to the printed CV, so it is the captain's call.
+    - title: Software & artifacts
+      short: Software
+      types: [misc]
+      printed: false
+
+talks:
+  sections:
+    - title: Invited talks
+      short: Invited talks
+      keywords: [invited]
+    - title: Conference oral presentations
+      short: Oral sessions
+      keywords: [oral]
+    - title: Poster presentations
+      short: Poster sessions
+      keywords: [poster]

@@ -104,10 +104,14 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   is exactly one canonical tag per page. Searching is Pagefind at `/search/`, not a second search box.
   Every row is a `<details>`: opening it reveals the abstract, the record and the entry's
   own BibTeX. **Nothing in the bibliography is filtered out** — manuscripts under review
-  and released software artifacts are entries like any other. Labels follow the entry types
-  and keywords `cv/cv.tex` filters on (`type=online and keyword=underreview` is "Under
-  review", `keyword=workshop` is "Workshop"); DBLP's `@misc` artifacts are labelled
-  "Software" explicitly because the CV does not print that type. `VENUE_FIELDS` reads
+  and released software artifacts are entries like any other. **The Type column and the "by
+  type" order are read from `publications:` in `content/cv.yaml`**, the same declaration
+  `scripts/build-cv-data.mjs` translates into the printed CV's biblatex filters and headings:
+  a section is a title plus a filter over entry types and keywords, `record.ts` contains no
+  parallel type taxonomy, and an entry matching no declared section is still shown, labelled
+  "Other". A section may carry `printed: false` to be named here without printing in the PDF — how DBLP's
+  `@misc` artifacts are labelled "Software" while the CV has no section for them.
+  `VENUE_FIELDS` reads
   `journaltitle` as well as `journal`, because that is what a Better BibTeX **BibLaTeX**
   export writes — the export an adopter picks for a biblatex CV. The shared bibliography is
   the record; the site mirrors it.

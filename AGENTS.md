@@ -33,6 +33,14 @@ extras (`metric`, `rank_url`, `years`, `funding`, `count`, `rows`) are the rest.
 `cv/cv.tex` prints the ones it has a `\cvpart` line for. Adding a section to the YAML must
 never require editing the generator.
 
+**Publication and talk grouping is declared too.** `content/README.md` owns the `sections:`
+interface. The generator translates both declarations for the PDF; the publication declaration
+also drives the site's Type column and "by type" order, while `/talks/` continues to display each
+talk's own `keywords` and `note` without relabelling it. **No grouping opinion or BibTeX entry type
+may be reintroduced in `cv/cv.tex` or the website's publication source.** `record.test.ts`
+evaluates the generated publication filters against every bibliography entry and proves
+first-match-wins agrees with the site, including around `printed: false` sections.
+
 Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commit.
 
 ## Sharp edges
@@ -59,11 +67,10 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
   filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`
   BibTeX name forms; reading the second as the first silently renames authors. `VENUE_FIELDS`
   reads `journaltitle` as well as `journal`: that is what a Better BibTeX BibLaTeX export writes.
-- **Latent, not fixed:** DBLP's `@misc` artifacts carry an unfilled `note = {Accessed on
-YYYY-MM-DD.}`. The website already works around it — `VENUE_FIELDS` tries `publisher` before
-  `note` for exactly this reason — but `cv/cv.tex` has no equivalent, so the placeholder would
-  print verbatim if `@misc` were ever added to its `other` filter. It is not today. Fixing the
-  printed side is a separate task.
+- DBLP's `@misc` artifacts carry an unfilled `note = {Accessed on YYYY-MM-DD.}`. Both sides keep it
+  out of the rendered venue: `VENUE_FIELDS` tries `publisher` before `note`, and `cv.tex`'s
+  `\DeclareSourcemap` nulls a `note` matching that exact placeholder, so a declared
+  `types: [misc]` section renders.
 - `web/src/lib/cv.ts` reads `content/cv.yaml` through Vite's `?raw` import, not `node:fs`. Do
   **not** rewrite it as `readFileSync(new URL('../../../content/cv.yaml', import.meta.url))`:
   that builds and then fails at prerender with `ENOENT`, for the same relocation reason as the
@@ -125,12 +132,17 @@ byte-identical — check with `--check`.
 canonical sentence per kind and is the only place a sentence literal may live. Grammar: what it
 was, then where; the kind stays on the mono apparatus line and is not repeated in the prose, and
 the venue is the short name. A missing slot must drop its own separator. Zero CSS was added for
-the feed and none should be.
+the feed and none should be. **A template is selected by what the record structurally is, never
+by a display label** — `Submitted` is chosen from `underReview`, not from a section's `short` —
+and `record.test.ts` refuses a declared `short` that collides with a template name.
 
 **A manuscript under review does not announce without an explicit `announced:`.** Its `year` is
 the year it is aimed at, not a date anything happened on; the year fallback put five of them
 above every real item on the front page. Give one a submission date and it announces as
 "submitted to {venue}". It is on `/publications/` either way — the bibliography is not filtered.
+The rule keys on `Publication.underReview`, derived in `record.ts` from the entry's own
+`underreview` keyword — never on the `short` name of the section it displays under, which is an
+editable label an adopter may rename or translate.
 
 Dates are shown at the precision their source states and no finer: an item whose source records
 only a year renders as a year. Never widen a date to a day the record does not support. A fact
