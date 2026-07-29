@@ -1,96 +1,108 @@
 name: Deploy site
 
+# Builds the Astro site under web/ and publishes it to the gh-pages branch,
+# which GitHub Pages serves at https://eduardstan.github.io/.
+#
+# There are no path filters. The site reads the repository's own records at
+# build time — cv/cv.yaml, the bibliography, cv/pres.bib, _pages/about.md,
+# _config.yml, the blog collection — so almost any file can change what is
+# published, and a filter list that has to stay in step with
+# `web/src/lib/record.ts`'s SOURCES is one more thing to get wrong. Rebuilding
+# on every push costs a few minutes and cannot silently skip a change.
+#
+# On a pull request everything runs except the publish step, so a PR proves the
+# site still builds. This is the only workflow that builds web/; there is no
+# separate CI workflow to disagree with it.
+
 on:
   push:
     branches:
       - master
       - main
-    paths:
-      - "assets/**"
-      - "**.bib"
-      - "**.html"
-      - "**.js"
-      - "**.liquid"
-      - "**/*.md"
-      - "**.yml"
-      - "Gemfile"
-      - "Gemfile.lock"
-      - "!.github/workflows/axe.yml"
-      - "!.github/workflows/broken-links.yml"
-      - "!.github/workflows/deploy-docker-tag.yml"
-      - "!.github/workflows/deploy-image.yml"
-      - "!.github/workflows/docker-slim.yml"
-      - "!.github/workflows/lighthouse-badger.yml"
-      - "!.github/workflows/prettier.yml"
-      - "!lighthouse_results/**"
-      - "!CONTRIBUTING.md"
-      - "!CUSTOMIZE.md"
-      - "!FAQ.md"
-      - "!INSTALL.md"
-      - "!README.md"
   pull_request:
     branches:
       - master
       - main
-    paths:
-      - "assets/**"
-      - "**.bib"
-      - "**.html"
-      - "**.js"
-      - "**.liquid"
-      - "**/*.md"
-      - "**.yml"
-      - "Gemfile"
-      - "Gemfile.lock"
-      - "!.github/workflows/axe.yml"
-      - "!.github/workflows/broken-links.yml"
-      - "!.github/workflows/deploy-docker-tag.yml"
-      - "!.github/workflows/deploy-image.yml"
-      - "!.github/workflows/docker-slim.yml"
-      - "!.github/workflows/lighthouse-badger.yml"
-      - "!.github/workflows/prettier.yml"
-      - "!lighthouse_results/**"
-      - "!CONTRIBUTING.md"
-      - "!CUSTOMIZE.md"
-      - "!FAQ.md"
-      - "!INSTALL.md"
-      - "!README.md"
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   deploy:
-    # available images: https://github.com/actions/runner-images#available-images
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
+
+      - name: Setup Node.js ⚙️
+        uses: actions/setup-node@v4
         with:
-          ruby-version: "3.2.2"
-          bundler-cache: true
-      - name: Update _config.yml ⚙️
-        uses: fjogeleit/yaml-update-action@main
+          # Astro 7 requires Node >= 22.12.0.
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      - name: Install CV data dependencies 💾
+        run: npm ci
+
+      - name: Check generated CV data 🔎
+        run: node scripts/build-cv-data.mjs --check
+
+      # The printed CV is typeset from the committed generated form of the same
+      # cv/cv.yaml the /cv/ page renders. It is never committed — no binary
+      # enters git history — so it is built here and dropped into web/public/
+      # before astro build picks it up. The texlive pin and the xelatex
+      # requirement are explained in cv.yml, which builds the same document on
+      # its own for review.
+      - name: Build the CV PDF 📄
+        uses: xu-cheng/latex-action@v3
         with:
-          commitChange: false
-          valueFile: "_config.yml"
-          propertyPath: "giscus.repo"
-          value: ${{ github.repository }}
-      - name: Install and Build 🔧
+          root_file: cv.tex
+          working_directory: cv
+          latexmk_use_xelatex: true
+          texlive_version: "2024"
+
+      - name: Stage the CV PDF 📄
         run: |
-          sudo apt-get update && sudo apt-get install -y imagemagick
-          pip3 install --upgrade jupyter
-          export JEKYLL_ENV=production
-          bundle exec jekyll build
-      - name: Purge unused CSS 🧹
+          mkdir -p web/public/assets
+          cp cv/cv.pdf web/public/assets/cv.pdf
+
+      - name: Install web dependencies 💾
+        run: npm ci
+        working-directory: web
+
+      - name: Type-check 🔎
+        run: npx astro check
+        working-directory: web
+
+      # The readers and the consistency gate, run against the repository's real
+      # records before the build hook enforces the gate itself.
+      - name: Self-check 🧪
+        run: npm test
+        working-directory: web
+
+      - name: Build 🔧
+        run: npm run build
+        working-directory: web
+
+      # Without .nojekyll, Pages' own legacy Jekyll pass over gh-pages strips
+      # _astro/ and the site publishes with no CSS and no JavaScript. It ships
+      # from web/public/, so this only fails the build if it ever stops.
+      - name: Check the build is publishable 🔍
         run: |
-          npm install -g purgecss
-          purgecss -c purgecss.config.js
+          test -f web/dist/.nojekyll
+          test -f web/dist/assets/cv.pdf
+          test -f web/dist/index.html
+
       - name: Deploy 🚀
         if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: _site
+          folder: web/dist

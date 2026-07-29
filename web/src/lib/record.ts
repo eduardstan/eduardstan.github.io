@@ -13,7 +13,7 @@
  * returned by these readers are the seam consumed by components and provenance
  * blocks.
  */
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 /**
@@ -47,7 +47,10 @@ export const SOURCES = {
   bibliography: '_bibliography/papers.bib',
   about: '_pages/about.md',
   talks: 'cv/pres.bib',
-  posts: '_posts',
+  // The blog collection itself, read as files rather than through
+  // `astro:content` because `announcements.ts` also runs under plain `node` in
+  // the self-check, where that API does not exist.
+  posts: 'web/src/content/blog',
   config: '_config.yml',
   // Read by `src/lib/cv.ts` through Vite's `?raw`, not by `read()` below: it is
   // named here so there is one registry of where the site's facts come from.
@@ -66,21 +69,22 @@ const repoPath = (absolute: string) => relative(ROOT, absolute);
 export const readSource = read;
 
 /**
- * Every file under a repository-relative directory, one level of subdirectory
- * deep, as repository-relative paths. `_posts/` uses both root files and year
- * directories, so both levels are included.
+ * Every matching file under a repository-relative directory, recursively, as
+ * repository-relative paths.
  */
-export function listSources(directory: string, extension = '.md'): string[] {
+export function listSources(directory: string, extensions: readonly string[] = ['.md']): string[] {
   const base = join(ROOT, directory);
   if (!existsSync(base)) return [];
   const found: string[] = [];
-  for (const entry of readdirSync(base)) {
-    const path = join(base, entry);
-    if (statSync(path).isDirectory()) {
-      for (const file of readdirSync(path))
-        if (file.endsWith(extension)) found.push(repoPath(join(path, file)));
-    } else if (entry.endsWith(extension)) found.push(repoPath(path));
-  }
+  const visit = (current: string) => {
+    for (const entry of readdirSync(current, { withFileTypes: true })) {
+      const path = join(current, entry.name);
+      if (entry.isDirectory()) visit(path);
+      else if (entry.isFile() && extensions.some((extension) => entry.name.endsWith(extension)))
+        found.push(repoPath(path));
+    }
+  };
+  visit(base);
   return found.sort();
 }
 

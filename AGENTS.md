@@ -2,52 +2,44 @@
 
 This file is the project's committed home for project-intrinsic agent knowledge: build, test, release, architecture, and sharp-edge notes that should travel with the code.
 
-## Two sites live in this repo
+## One site lives in this repo
 
-- **Repository root** — the Jekyll/al-folio site. This is what visitors see. It is built from
-  `master` by `.github/workflows/deploy.yml` and published to the `gh-pages` branch by
-  `JamesIves/github-pages-deploy-action`; GitHub Pages serves `gh-pages`.
-- **`web/`** — an in-progress from-scratch Astro rebuild. Not deployed. See `web/README.md`.
+The Astro site in **`web/`** is the published site. `.github/workflows/deploy.yml` builds it
+and publishes `web/dist` to the `gh-pages` branch; GitHub Pages serves `gh-pages`. The
+Jekyll/al-folio site that used to live in the repository root was removed at the July 2026
+cutover — `docs/url-parity.md` records what every URL it published does now.
 
-Until an explicitly approved cutover, **nothing in `web/` may affect what is published.** The
-guards are: `web/` and `node_modules` in the `exclude:` list of `_config.yml`, and
-`.github/workflows/web-ci.yml` being build-only (`permissions: contents: read`, no deploy step).
-When changing either site, verify the other still builds.
+**Pushing to `master` publishes within minutes.** `deploy.yml` has no path filters, on purpose:
+the site reads the repository's own records at build time, so almost any file can change what
+is published. Do not add filters back.
 
-That same `exclude:` list carries a `cv/` entry, and `cv/` now exists. **Do not delete it as dead
-configuration**: `/cv/` is already a page permalink, so copying the root source directory into the
-Jekyll output risks colliding with that route.
+Three root paths survived the cutover because `web/` reads them, not because Jekyll did:
+`_config.yml` (identity and footer accounts, and the landmark `repositoryRoot()` walks up for),
+`_pages/about.md` (biography and affiliation lines) and `_bibliography/`. `cv/` and `scripts/`
+are the CV pipeline. Deleting or renaming any of them breaks the build.
+
+Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commit.
 
 ## Sharp edges
 
-- `.github/workflows/deploy.yml` triggers on broad globs (`**/*.md`, `**.yml`, `**.js`, …), so
-  edits under `web/` re-run the Jekyll build and republish. That is safe only while `_config.yml`
-  excludes `web/` — the output must stay byte-identical.
 - `.github/workflows/prettier.yml` runs `npx prettier . --check` over the **whole repo** with the
   root `.prettierrc` and no per-project dependencies installed, which constrains what a nested
   `.prettierrc` may declare — see "Notable configuration" in `web/README.md`.
-- Jekyll needs Ruby native extensions. There is no local `ruby-dev`; build it in Docker
-  (`ruby:3.2.2` plus `imagemagick build-essential zlib1g-dev jupyter-nbconvert`), matching
-  `deploy.yml`. Note the Docker daemon cannot see the agent sandbox's `/tmp`, so bind-mount a path
-  inside the worktree.
 - Astro 7's default Markdown processor (Sätteri) is **not** remark/rehype compatible, so `web/`
   opts back into the unified processor — see "Notable configuration" in `web/README.md`.
-- `web/` reads the repository root's data files (`_bibliography/`, `_posts/`, `_pages/`, `cv/`
-  and `_config.yml`) at build time through `web/src/lib/record.ts` and `web/src/lib/cv.ts`, so the
-  two sites share one set of sources. `cv.yaml` feeds three routes, not one: `/cv/`,
-  `/professional_activities/` (`service[]`) and `/projects/` (`projects[]`, funding figures
-  included), and `cv/pres.bib` feeds `/talks/`. `record.ts` finds the root by walking up for `_config.yml`
-  rather than from `import.meta.url`, because Astro relocates the bundle during `astro build`.
-  The Ledger design requires every displayed count and source line to be derived there rather than
-  written by hand — see "Notable configuration" in `web/README.md`.
-- **`_pages/professional_activities.md` is a stale third copy of `cv.yaml`'s `service[]` and
-  nothing in `web/` reads it.** It dates the Frontiers editorship to 2025 where `cv.yaml` has the
-  confirmed `Mar 2024–Present`, names the ICLR role "Reviewer", and omits two roles entirely. The
-  home page and `/professional_activities/` both read `service[]` through `serviceGroups()` in
-  `web/src/lib/cv.ts`, so they cannot disagree; `web/src/lib/record.test.ts` fails if a reader for
-  the markdown file comes back. It still renders on the live Jekyll site, so its deletion belongs to
-  cutover. Never edit it to fix a fact — fix `cv.yaml`.
-- The CV and both sites share `_bibliography/papers.bib`. The Astro rebuild displays every entry,
+- **`.nojekyll` in `web/public/` is load-bearing.** GitHub Pages serves this repository with
+  `build_type: legacy`, so it runs its own Jekyll pass over `gh-pages` and strips `_`-prefixed
+  directories — including Astro's `_astro/`. Without that file the site publishes with no CSS
+  and no JavaScript. `deploy.yml` asserts it is in `dist` before publishing.
+- `web/` reads the repository root's records (`_bibliography/`, `_pages/about.md`, `cv/`,
+  `_config.yml`) at build time through `web/src/lib/record.ts` and `web/src/lib/cv.ts`.
+  `cv.yaml` feeds three routes, not one: `/cv/`, `/professional_activities/` (`service[]`) and
+  `/projects/` (`projects[]`, funding figures included), and `cv/pres.bib` feeds `/talks/`.
+  `record.ts` finds the root by walking up for `_config.yml` rather than from `import.meta.url`,
+  because Astro relocates the bundle during `astro build`. The Ledger design requires every
+  displayed count and source line to be derived there rather than written by hand — see
+  "Notable configuration" in `web/README.md`.
+- The CV and the site share `_bibliography/papers.bib`. The site displays every entry,
   including under-review manuscripts and software artifacts; `web/README.md` owns that index's
   filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`
   BibTeX name forms; reading the second as the first silently renames authors.
@@ -58,12 +50,10 @@ Jekyll output risks colliding with that route.
   walk-up-for-`_config.yml` only where a whole directory has to be read — or, as
   `announcements.ts` does, where the module also has to run under plain `node` in a self-check,
   which `?raw` cannot.
-- `.github/workflows/web-ci.yml` must keep its path filters aligned with the repository-root inputs
-  named by `SOURCES`: an edit to any of them can break the Astro build without touching `web/`.
-- `_news/` still exists but **nothing in `web/` reads it**. It is kept only so the live Jekyll
-  site's news section keeps working until the cutover, which deletes it — the same parity-first
-  holding pattern `_pages/cv.md` was in. Every date it carried now lives on the fact itself, so do
-  not add a file there and do not treat it as a source; see "Announcements" below.
+- `web/src/lib/legacy-urls.ts` is the one hand-written list on the site: the addresses the
+  Jekyll site published that this one does not generate. It is a historical fact, not a record
+  to derive from, and `docs/url-parity.md` explains every entry. Removing one turns a live URL
+  into a silent 404.
 - Text spliced into a generated announcement must go through that module's `md()` escaper: the
   bibliography really contains `OVERLAY@AI*IA 2019` and DOIs ending `…-7_26`, which would otherwise
   be read as markdown emphasis. `cv/pres.bib` is LaTeX like `papers.bib` is, so its fields need
@@ -80,9 +70,9 @@ contract. Two things to know before touching it:
 - **The Frontiers pair is correct, not a bug.** Appointed Mar 2024, announced 2025-03-03.
   The gate fires on it and `cv/cv.yaml` carries a declared `except:` for it. Do not "fix"
   either date; renew or re-argue the exception instead.
-- Checks joining against `_pages/professional_activities.md` or `_news/` were designed and
-  deliberately **not** built — nothing in `web/` reads either file, and adding a reader
-  would re-open the second-copy problem the rebuild closed.
+- Checks joining against the old `_pages/professional_activities.md` or `_news/` were designed
+  and deliberately **not** built. Both files are gone; do not recreate a second copy of a fact
+  in order to compare it against the first.
 
 ## Announcements
 
@@ -90,7 +80,7 @@ In `web/`, every announcement is derived from the fact it announces; there is no
 content. A fact is announced on the date it already carries — a talk's ISO `date`, a post's
 front-matter `date`, an award's month, a paper's `year`. An `announced:` key is written **only**
 where the announcement demonstrably happened on a date the fact does not otherwise state
-(harvested from `_news/`); it is optional and additive everywhere, and
+(harvested from the old `_news/` before it was deleted); it is optional and additive everywhere, and
 `scripts/build-cv-data.mjs` ignores it, so adding one leaves `cv/generated/cv-data.tex`
 byte-identical — check with `--check`.
 
@@ -99,25 +89,26 @@ only a year renders as a year. Never widen a date to a day the record does not s
 with no defensible date is listed in the feed's `undated` array and shown in the provenance block,
 not given an invented one.
 
-**The root Jekyll site has no generator for this** and still renders `_news/` through
-`_includes/news.liquid`. So the two sites' news differ by construction — Jekyll shows the 22
-hand-written files, `web/` shows the generated feed — and that is deliberate until the cutover.
-Deleting `_news/` before then takes the live news page down.
+The 22 hand-written `_news/` files are gone. Their permalinks redirect to `/news/` — see
+`web/src/lib/legacy-urls.ts` and `docs/url-parity.md`. Do not reintroduce a news directory: an
+announcement is generated from the fact it announces, and a second place to write one is the
+drift this design closed.
 
 ## Settled decisions worth not relitigating
 
 - The UniMiB lab is the **Intelligent Sensing Laboratory (ISLab)**. Any "Imaging and Vision
   Laboratory (IVL)" left anywhere is wrong.
-- **No analytics and no visitor tracking in `web/`.** `_config.yml` still carries the Jekyll
-  site's `google_analytics` ID; do not carry it, or any provider, into the rebuild, and do not
-  port `_includes/cluster_map.html` (ClustrMaps). A template shipping someone else's tracking
-  ID is a hazard for whoever copies it.
+- **No analytics and no visitor tracking.** The Jekyll site's `google_analytics` ID and its
+  ClustrMaps globe went with it and are not coming back — not this provider, not another.
 - **The bibliography is sacred and the site mirrors it.** There is no site-side publication
   filtering: manuscripts under review render publicly. Do not reintroduce a render-time filter.
 - The Frontiers dates — appointed **Mar 2024**, announced **2025-03-03** — are both true and
   both recorded in `cv.yaml`. They are not a bug to reconcile.
-- `_projects/` (9 files) and `_drafts/` (30 files) are al-folio template stubs. They are not
-  migrated. `_projects/` is still live on the Jekyll site, so its deletion belongs to cutover.
+- The al-folio template content (`_projects/`, `_drafts/`, the Einstein pages) was deleted at
+  cutover, not migrated. `/projects/` now renders `cv/cv.yaml`'s real `projects[]`.
+- **`LICENSE` stays exactly as it is** — MIT, "Copyright (c) 2022 Maruan Al-Shedivat".
+  al-folio's attribution is preserved even though none of its code remains. Changing it is a
+  captain decision.
 
 ## This repository is public
 
@@ -126,8 +117,7 @@ address is approved for publication.
 
 ## CV pipeline
 
-The CV's facts live in exactly one place and both the PDF and (later) the site
-are generated from it:
+The CV's facts live in exactly one place and both the PDF and the site are generated from it:
 
 | File                       | Owns                                             |
 | -------------------------- | ------------------------------------------------ |
@@ -140,6 +130,10 @@ are generated from it:
   `cv/generated/cv-data.tex` (committed, public).
 - `node scripts/build-cv-data.mjs --check` fails when the committed generated
   file is stale; CI runs it, so never hand-edit `cv/generated/`.
+- The PDF is **built at deploy and never committed** — `deploy.yml` typesets it and stages it
+  at `web/public/assets/cv.pdf`, which `.gitignore` covers, so `/cv/` can offer a current
+  download without a binary entering git history. `cv.yml` builds the same document as a
+  reviewable artifact. Both pin `texlive_version: "2024"`; `cv.yml` says why.
 - Build with **xelatex** - `latexmk -xelatex -cd cv/cv.tex`. pdflatex fails:
   `academicons` needs TU encoding.
 - The prose markup allowed in `cv.yaml` (`**bold**`, `_italic_`, `[text](url)`,
