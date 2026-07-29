@@ -240,3 +240,6 @@ Keep this file for knowledge useful to almost every future agent session in this
 No value that lives in another file may be restated here; point to the authoritative file or
 command instead. Prefer rewriting or pruning existing entries over appending new ones. When
 updating this file, preserve this bar for all agents and keep entries concise.
+
+`.claude/CLAUDE.md` is the hidden Claude Code compatibility pointer that imports this file. Keep
+that pointer so Claude Code reads the same memory without adding a second root-level document.
