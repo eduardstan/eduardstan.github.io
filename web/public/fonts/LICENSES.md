@@ -1,20 +1,24 @@
 # Font licences
 
 Every face served from this directory is subset with `pyftsubset --flavor=woff2` from an
-upstream release and self-hosted. Both licences below permit modification and
-redistribution, and both require these notices to travel with the files.
+upstream release and self-hosted. The licences below permit modification and
+redistribution, and require these notices to travel with the files.
 
-| File                                                                | Family        | Upstream                                                       | Licence      |
-| ------------------------------------------------------------------- | ------------- | -------------------------------------------------------------- | ------------ |
-| `Archivo-Black.woff2`                                               | Archivo Black | <https://github.com/Omnibus-Type/Archivo>                      | SIL OFL 1.1  |
-| `Inter-Regular.woff2`, `Inter-Italic.woff2`, `Inter-SemiBold.woff2` | Inter         | <https://github.com/rsms/inter>                                | SIL OFL 1.1  |
-| `GoMono-Regular.woff2`, `GoMono-Bold.woff2`                         | Go Mono       | <https://go.googlesource.com/image/+/master/font/gofont/ttfs/> | BSD 3-Clause |
+| File                                                                  | Family        | Upstream                                                                      | Licence      |
+| --------------------------------------------------------------------- | ------------- | ----------------------------------------------------------------------------- | ------------ |
+| `Archivo-Black.woff2`                                                 | Archivo Black | <https://github.com/Omnibus-Type/Archivo>                                     | SIL OFL 1.1  |
+| `PTSerif-Regular.woff2`, `PTSerif-Italic.woff2`, `PTSerif-Bold.woff2` | Ledger Serif  | [PT Serif by ParaType](https://github.com/google/fonts/tree/main/ofl/ptserif) | SIL OFL 1.1  |
+| `GoMono-Regular.woff2`, `GoMono-Bold.woff2`                           | Go Mono       | <https://go.googlesource.com/image/+/master/font/gofont/ttfs/>                | BSD 3-Clause |
 
-## SIL Open Font License 1.1 — Archivo and Inter
+The Ledger Serif files are renamed subsets of PT Serif, satisfying the OFL Reserved Font
+Name condition while preserving clear attribution to the original family and authors.
+
+## SIL Open Font License 1.1 — Archivo Black and Ledger Serif
 
 Copyright 2020 The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo)
 
-Copyright (c) 2016 The Inter Project Authors (https://github.com/rsms/inter)
+Copyright (c) 2010, ParaType Ltd. (http://www.paratype.com/public),
+with Reserved Font Names "PT Sans", "PT Serif" and "ParaType".
 
 ```
 PREAMBLE
@@ -74,20 +78,17 @@ Copyright Holder. This restriction only applies to the primary font name as
 presented to the users.
 
 4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
-Software shall not be used to promote, endorse or advertise any
-Modified Version, except to acknowledge the contribution(s) of the
-Copyright Holder(s) and the Author(s) or with their explicit written
-permission.
+Software shall not be used to promote, endorse or advertise any Modified
+Version, except to acknowledge the contribution(s) of the Copyright
+Holder(s) and the Author(s) or with their explicit written permission.
 
-5) The Font Software, modified or unmodified, in part or in whole,
-must be distributed entirely under this license, and must not be
-distributed under any other license. The requirement for fonts to
-remain under this license does not apply to any document created
-using the Font Software.
+5) The Font Software, modified or unmodified, in part or in whole, must be
+distributed entirely under this license, and must not be distributed under
+any other license. The requirement for fonts to remain under this license
+does not apply to any document created using the Font Software.
 
 TERMINATION
-This license becomes null and void if any of the above conditions are
-not met.
+This license becomes null and void if any of the above conditions are not met.
 
 DISCLAIMER
 THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
@@ -97,8 +98,8 @@ OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
 COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
-OTHER DEALINGS IN THE FONT SOFTWARE.
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER
+DEALINGS IN THE FONT SOFTWARE.
 ```
 
 ## BSD 3-Clause — Go Mono
@@ -113,8 +114,7 @@ License: BSD-3-clause
 
 License: BSD-3-clause
  Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions
- are met:
+ modification, are permitted provided that the following conditions are met:
  .
      1. Redistributions of source code must retain the above copyright
         notice, this list of conditions and the following disclaimer.
@@ -129,13 +129,13 @@ License: BSD-3-clause
  .
  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- SUCH DAMAGE.
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
 ```
