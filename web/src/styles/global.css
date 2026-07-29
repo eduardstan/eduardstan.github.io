@@ -11,9 +11,9 @@
    Display — Archivo Black (Omnibus-Type, SIL OFL 1.1). A grotesque cut for
    headlines: flat-sided bowls, square terminals, no optical softening. It sets
    the masthead and the section rules.
-   Text — Ledger Serif (a renamed PT Serif subset, SIL OFL 1.1), whose figures
-   are tabular by construction so years, volumes and page ranges align down a
-   column.
+   Text — Ledger Serif (a renamed PT Serif subset, SIL OFL 1.1). Keep `tnum`
+   explicit: the italic source has two nonzero digit kern pairs, so we cannot
+   prove every style aligns figures without it.
    Apparatus — Go Mono (Bigelow & Holmes, BSD 3-Clause) for dates, ranks, column
    heads and every source record. The mono is not decoration: it is the boundary
    between a rendered claim and the data underneath it.
