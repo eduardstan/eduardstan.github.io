@@ -181,6 +181,18 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   `node --experimental-strip-types src/lib/<name>.test.ts` for one of them) assert the readers
   still agree with the data; `web-ci.yml` runs them before the build and keeps its path filters
   aligned with the repository-root inputs in `SOURCES`.
+- **The consistency gate.** `src/lib/consistency.ts` compares the records that state one fact
+  twice and refuses the build when they disagree. Today that is one check,
+  `announced-in-own-year`: a fact carrying both its own date and an `announced:` date is the
+  one duplicate the one-source architecture cannot remove, so it is the one thing left to
+  check. It runs in an `astro:build:done` integration in `astro.config.mjs` — which runs on
+  `astro build` and never on `astro dev`, so an author mid-edit is never blocked and nothing
+  publishable ships a contradiction — renders under the inspect switch on the home page, and
+  is asserted by `src/lib/consistency.test.ts`. Joins are by being the same entry, never by
+  matching prose; a comparator that cannot read a value does not fire, and the gate prints its
+  own coverage. A contradiction that is genuinely two correct facts is declared on the fact
+  itself with `except:` (grammar at the top of `cv/cv.yaml`) — one named check, a reason that
+  is rendered to the reader, and an expiry the build enforces.
 
 - **Posts carry their own typography.** The Markdown pipeline runs no smartypants, so a
   migrated post writes an em dash as the character `—` rather than as `---` — the same rule

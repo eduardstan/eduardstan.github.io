@@ -15,7 +15,7 @@
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Record from '../../components/Record.astro';
-import { bibliography, SOURCES, type Publication } from '../../lib/record';
+import { bibliography, SOURCES, yearSpan, type Publication } from '../../lib/record';
 
 /**
  * The order the CV prints them in — journals, conferences, workshops, under
@@ -92,7 +92,8 @@ const marker = (column: string) => (SORTS[active].column === column ? ` ${SORTS[
 
 const isHim = (author: string) => author === 'I. E. Stan';
 const pad = (index: number) => String(index + 1).padStart(2, '0');
-const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.years.last}, read from ${SOURCES.bibliography} at build time.`;
+const span = yearSpan(bib.years);
+const description = `${bib.entries.length} entries${span && `, ${span}`}, read from ${SOURCES.bibliography} at build time.`;
 ---
 
 {
@@ -109,7 +110,7 @@ const description = `${bib.entries.length} entries, ${bib.years.first}–${bib.y
   <section class="pagehead">
     <h1>Index</h1>
     <p class="blurb">
-      <b>{bib.entries.length} entries, {bib.years.first}–{bib.years.last}</b>, read from <b
+      <b>{bib.entries.length} entries{span && `, ${span}`}</b>, read from <b
         >{SOURCES.bibliography}</b
       > when this page was built, and nothing is left out — manuscripts under review and released
       software are entries here like any other. Open a row for its abstract, its record and its

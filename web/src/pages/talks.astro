@@ -13,9 +13,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import Record from '../components/Record.astro';
 import SectionHead from '../components/SectionHead.astro';
-import { talks } from '../lib/record';
+import { talks, yearSpan } from '../lib/record';
 
 const { source, entries, byCategory, years, undated } = talks();
+const span = yearSpan(years);
 
 /** The ISO date rendered as a date. Every entry states a full day. */
 const dateFormat = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'UTC' });
@@ -23,14 +24,14 @@ const shown = (date: string) =>
   /^\d{4}-\d{2}-\d{2}/.test(date) ? dateFormat.format(new Date(`${date.slice(0, 10)}T00:00:00Z`)) : date;
 
 const description =
-  `${entries.length} talks and presentations, ${years.first}–${years.last}, ` +
+  `${entries.length} talks and presentations${span && `, ${span}`}, ` +
   `read from ${source} at build time.`;
 ---
 
 <BaseLayout title="Talks" description={description}>
   <PageHead title="Talks">
     <p class="blurb">
-      <b>{entries.length} talks and presentations</b>, {years.first}–{years.last}, newest first, read
+      <b>{entries.length} talks and presentations</b>{span && `, ${span}`}, newest first, read
       from <b>{source}</b> when this page was built — the same file the printed CV's presentations are
       generated from. The badge on each row is that entry's own <b>keywords</b> field ({
         byCategory.map((category) => `${category.count} ${category.category}`).join(', ')

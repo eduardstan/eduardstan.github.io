@@ -6,6 +6,32 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { consistency, report } from './src/lib/consistency.ts';
+
+/**
+ * The consistency gate, with teeth.
+ *
+ * `astro:build:done` runs on `astro build` and never on `astro dev` — no
+ * environment sniffing, no `CI=true`, no flag. The author editing `cv.yaml` at
+ * 2am sees the findings render live under the inspect switch and keeps working;
+ * nothing publishable ships a contradiction. Locally and in CI it is the same
+ * code and the same message, because a CI failure nobody can reproduce locally
+ * is a CI failure people learn to click through.
+ */
+/** @returns {import('astro').AstroIntegration} */
+function consistencyGate() {
+  return {
+    name: 'consistency-gate',
+    hooks: {
+      'astro:build:done': ({ logger }) => {
+        const gate = consistency();
+        const text = report(gate);
+        if (gate.contradictions.length + gate.exceptionProblems.length > 0) throw new Error(text);
+        logger.info(text);
+      },
+    },
+  };
+}
 
 // https://docs.astro.build/en/reference/configuration-reference/
 export default defineConfig({
@@ -31,7 +57,7 @@ export default defineConfig({
       wrap: true,
     },
   },
-  integrations: [mdx(), sitemap()],
+  integrations: [mdx(), sitemap(), consistencyGate()],
   vite: {
     plugins: [tailwindcss()],
   },
