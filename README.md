@@ -46,5 +46,6 @@ with the code.
 
 The site was a [Jekyll](https://jekyllrb.com/) site on the
 [al-folio](https://github.com/alshedivat/al-folio) theme until the July 2026 cutover to
-this rebuild. `LICENSE` keeps al-folio's MIT licence and its copyright notice.
+this rebuild. Earlier commits contain al-folio-derived code under al-folio's MIT licence.
+The current site is licensed under MIT to Ionel Eduard Stan.
 `docs/url-parity.md` records what every URL the Jekyll site published does now.
