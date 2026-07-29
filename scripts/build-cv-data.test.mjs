@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { load } from "js-yaml";
 import {
   affiliationBlock,
+  bibEntryCount,
   bibFilter,
   bibPrefix,
   bibSections,
@@ -293,6 +294,18 @@ test("two sections claiming the same numbering letter raise instead of colliding
   );
 });
 
+test("a directive-only BibTeX file has no entries", () => {
+  assert.equal(bibEntryCount("@comment{Nothing to print}"), 0);
+
+  const bib = `
+@comment{Nothing to print}
+@PREAMBLE{"Nothing to print"}
+@String{venue = "Nothing to print"}
+`;
+  assert.equal(bibEntryCount(bib), 0);
+  assert.equal(bibEntryCount(`${bib}\n@article{paper, title = {Printable}}`), 1);
+});
+
 // The cold-start trap: cv.tex names a macro the generator only emits when
 // cv.yaml declares the section it comes from, so an adopter's first
 // `latexmk -xelatex -cd cv/cv.tex` stops at TeX's interactive `?` prompt with
@@ -303,7 +316,27 @@ test("cv.tex defines every generated macro it names, for README's smallest file 
   const readme = readFileSync(join(root, "content/README.md"), "utf8");
   const minimal = readme.match(/## The smallest file that works\s*```yaml\n([\s\S]*?)```/);
   assert.ok(minimal, "content/README.md no longer carries a `The smallest file that works` example");
-  const tex = readFileSync(join(root, "cv/cv.tex"), "utf8");
+  const tex = readFileSync(join(root, "cv/cv.tex"), "utf8").replace(/(^|[^\\])((?:\\\\)*)%.*$/gm, "$1$2");
+
+  const cvdeclare = tex.match(/\\newcommand\{\\cvdeclare\}\[1\]\{([\s\S]*?)\n\}/);
+  assert.ok(cvdeclare, "\\cvdeclare must remain defined");
+  for (const suffix of ["Count", "", "Note", "Rows", "Inline"]) {
+    assert.match(cvdeclare[1], new RegExp(String.raw`\\providecommand\\csname cv#1${suffix}\\endcsname`));
+  }
+
+  const cvdeclarebib = tex.match(/\\newcommand\{\\cvdeclarebib\}\[1\]\{([\s\S]*?)\n\}/);
+  assert.ok(cvdeclarebib, "\\cvdeclarebib must remain defined");
+  for (const suffix of ["Count", "Key", "Sections"]) {
+    assert.match(cvdeclarebib[1], new RegExp(String.raw`\\providecommand\\csname cv#1${suffix}\\endcsname`));
+  }
+
+  const cvpart = tex.match(/\\newcommand\{\\cvpart\}\[2\]\{([\s\S]*?)\n\}/);
+  assert.ok(cvpart, "\\cvpart must remain defined");
+  assert.match(cvpart[1], /\\cvdeclare\{#2\}/);
+
+  const cvpartflush = tex.match(/\\newcommand\{\\cvpartflush\}\[2\]\{\{([\s\S]*?)\n\n/);
+  assert.ok(cvpartflush, "\\cvpartflush must remain defined");
+  assert.match(cvpartflush[1], /\\cvpart\{#1\}\{#2\}/);
 
   const defined = new Set();
   const add = (names) => names.forEach((name) => defined.add(name));

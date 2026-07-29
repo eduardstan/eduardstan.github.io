@@ -296,10 +296,15 @@ const afterEarlier = (own, earlier) => [own, ...earlier.map((predicate) => `not 
  * rather than print a silently mis-numbered bibliography. Adopters start with
  * these files empty, so this is the cold-start path, not an edge case.
  */
-function bibEntryCount(key) {
+function bibEntryCount(source) {
+  const directives = new Set(["comment", "preamble", "string"]);
+  return [...source.matchAll(/^[^%\n]*@(\w+)\s*[{(]/gm)].filter(([, type]) => !directives.has(type.toLowerCase())).length;
+}
+
+function bibFileEntryCount(key) {
   const path = join(ROOT, "content", `${key}.bib`);
   if (!existsSync(path)) return 0;
-  return (readFileSync(path, "utf8").match(/^[^%\n]*@\w+\s*[{(]/gm) ?? []).length;
+  return bibEntryCount(readFileSync(path, "utf8"));
 }
 
 /**
@@ -452,7 +457,7 @@ function render(cv) {
   for (const [key, value] of Object.entries(cv)) {
     if (key === "profile") continue;
     if (Array.isArray(value?.sections)) {
-      blocks.push(`\\newcommand{\\cv${macroName(key)}Count}{${bibEntryCount(key)}}`, ...bibSections(key, value));
+      blocks.push(`\\newcommand{\\cv${macroName(key)}Count}{${bibFileEntryCount(key)}}`, ...bibSections(key, value));
       continue;
     }
     const rows = Array.isArray(value) ? value : value?.entries;
@@ -504,6 +509,6 @@ function main() {
   console.log(`wrote ${rel(OUT_PUBLIC)}`);
 }
 
-export { renderInline, where, editions, affiliationBlock, profilesLine, macroName, tableHeader, entry, bibFilter, bibPrefix, bibSections, render };
+export { renderInline, where, editions, affiliationBlock, profilesLine, macroName, tableHeader, entry, bibFilter, bibPrefix, bibSections, bibEntryCount, render };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();
