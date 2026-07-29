@@ -22,15 +22,16 @@ import { SOURCES } from './record';
  *
  * Not a suppressions file and not a flag: it lives in the data beside what it
  * silences, it names exactly one check, it states a reason that is rendered to
- * the reader, and it expires. `src/lib/consistency.ts` enforces all four rules
- * on the exception itself — an unknown check id or a blank reason fails the
- * build, because a typo must never look like a successful excuse.
+ * the reader, and it carries an expiry or an explicit permanent scope.
+ * `src/lib/consistency.ts` enforces all four rules on the exception itself — an
+ * unknown check id or a blank reason fails the build, because a typo must never
+ * look like a successful excuse.
  */
 export interface Exception {
   /** One check id from `CHECKS` in `src/lib/consistency.ts`. No wildcards. */
   check: string;
   because: string;
-  /** ISO day, or `permanent` — which is allowed, and rendered as its own list. */
+  /** ISO day, or the explicit non-expiring marker `permanent`. */
   until: string;
 }
 
