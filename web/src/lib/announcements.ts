@@ -21,7 +21,15 @@
  * guessed at: it is listed, with the reason, in `undated`.
  */
 import { parse } from 'yaml';
-import { entriesOf, isEditorial, sections, type CV } from './cv-schema.ts';
+import {
+  editionAnnounced,
+  editionYear,
+  entriesOf,
+  isEditorial,
+  sections,
+  type CV,
+  type Entry,
+} from './cv-schema.ts';
 import {
   bibliography,
   deLatex,
@@ -59,13 +67,16 @@ export interface Announcement {
   precision: Precision;
   /** "Journal", "Service", "Invited talk", … — what kind of fact this is. */
   kind: string;
+  /** The collision-safe identifier allocated to `kind` for the register filter. */
+  kindSlug: string;
   /** Body as inline HTML. */
   html: string;
   text: string;
   /**
    * The record this was generated from, exactly: the file, plus the BibTeX key
-   * or the `cv.yaml` list and entry title inside it. This is what the inspect
-   * switch shows under the item, so it must name one entry and not just a file.
+   * or the `cv.yaml` list and a natural discriminator for the entry inside it.
+   * This is what the inspect switch shows under the item, so it must name one
+   * entry and not just a file.
    */
   source: string;
 }
@@ -193,6 +204,7 @@ function item(stamp: string, kind: string, markdown: string, source: string): An
     at: instant(stamp, precision),
     precision,
     kind,
+    kindSlug: '',
     html: inlineHtml(markdown),
     text: stripMarkdown(markdown),
     source,
@@ -236,6 +248,90 @@ const singular = (key: string) => {
   return stem.charAt(0).toUpperCase() + stem.slice(1);
 };
 
+function cvEntryLabel(entries: Entry[], index: number): string {
+  const entry = entries[index];
+  const title = stripMarkdown(entry.title);
+  const peers = entries.filter((candidate) => stripMarkdown(candidate.title) === title);
+  if (peers.length === 1) return title;
+  const clean = (value: string | number | undefined) =>
+    value === undefined ? undefined : stripMarkdown(String(value)).trim() || undefined;
+  const org = (candidate: Entry) => clean(candidate.org);
+  const shortOrg = (candidate: Entry) =>
+    candidate.org ? clean(shortVenue(candidate.org)) : undefined;
+  const years = (candidate: Entry) => {
+    const values = candidate.years?.map((edition) => {
+      const announced = editionAnnounced(edition);
+      return `${editionYear(edition)}${announced ? `@${announced}` : ''}`;
+    });
+    return values?.length ? values.join('/') : undefined;
+  };
+  const fields: {
+    value: (candidate: Entry) => string | undefined;
+    display: (candidate: Entry) => string | undefined;
+  }[] = [
+    {
+      value: org,
+      display: (candidate) => {
+        const abbreviated = shortOrg(candidate);
+        return abbreviated && peers.filter((peer) => shortOrg(peer) === abbreviated).length === 1
+          ? abbreviated
+          : org(candidate);
+      },
+    },
+    {
+      value: (candidate) => clean(candidate.dates),
+      display: (candidate) => clean(candidate.dates),
+    },
+    {
+      value: (candidate) => clean(candidate.place),
+      display: (candidate) => clean(candidate.place),
+    },
+    {
+      value: (candidate) => clean(candidate.detail),
+      display: (candidate) => clean(candidate.detail),
+    },
+    { value: years, display: years },
+    {
+      value: (candidate) => clean(candidate.announced),
+      display: (candidate) => clean(candidate.announced),
+    },
+    { value: (candidate) => clean(candidate.url), display: (candidate) => clean(candidate.url) },
+    {
+      value: (candidate) => clean(candidate.metric),
+      display: (candidate) => clean(candidate.metric),
+    },
+    {
+      value: (candidate) => clean(candidate.rank_url),
+      display: (candidate) => clean(candidate.rank_url),
+    },
+    {
+      value: (candidate) => clean(candidate.funding),
+      display: (candidate) => clean(candidate.funding),
+    },
+    {
+      value: (candidate) => clean(candidate.count),
+      display: (candidate) => clean(candidate.count),
+    },
+  ];
+  const discriminators: (typeof fields)[number][] = [];
+
+  for (const field of fields) {
+    if (!field.value(entry)) continue;
+    discriminators.push(field);
+    const matches = peers.filter((peer) =>
+      discriminators.every((candidate) => candidate.value(peer) === candidate.value(entry)),
+    );
+    if (matches.length === 1) {
+      return [title, ...discriminators.map((candidate) => candidate.display(entry))].join(', ');
+    }
+  }
+
+  return `${title} · entry #${index + 1}`;
+}
+
+const cvSource = (key: string, label: string, edition?: number) =>
+  `${SOURCES.cv} (${key}[] · ${label}${edition === undefined ? '' : ` · ${edition} edition`})`;
+
 function fromCv(into: Announcement[], undated: Undated[]): void {
   for (const [key, section] of sections(cv)) {
     const entries = entriesOf(section);
@@ -249,7 +345,7 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
         (entry.years ?? []).some((edition) => typeof edition === 'object' && edition.announced),
     );
 
-    for (const entry of entries) {
+    for (const [entryIndex, entry] of entries.entries()) {
       // An editorship is an editorship whichever section it sits in; the mono
       // line gets the right word for free from the rule the home page already
       // counts with.
@@ -261,11 +357,7 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
         entry.org ? `, ${stripMarkdown(entry.org)}` : ''
       }`;
 
-      // The provenance a reader gets under the inspect switch: the file, the
-      // list inside it, and the entry's own title. There is no line number —
-      // `cv.yaml` is read as a parsed document here, not as text — but the
-      // triple names exactly one entry.
-      const record = `${SOURCES.cv} (${key}[] · ${stripMarkdown(entry.title)})`;
+      const record = cvSource(key, cvEntryLabel(entries, entryIndex));
 
       const stamp = entry.announced ?? monthStamp(entry.dates);
       if (stamp) into.push(item(stamp, kind, say(kind, { what, where, detail }), record));
@@ -273,16 +365,22 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
       for (const edition of entry.years ?? []) {
         const year = typeof edition === 'number' ? edition : edition.year;
         const announced = typeof edition === 'number' ? undefined : edition.announced;
+        const editionRecord = cvSource(key, cvEntryLabel(entries, entryIndex), year);
         if (!announced) {
           undated.push({
             what: `${subject} ${year}`,
             why: 'the edition records a year but no announcement date, and the CV states no finer date for it',
-            source: record,
+            source: editionRecord,
           });
           continue;
         }
         into.push(
-          item(announced, kind, say(kind, { what, where, detail, year: String(year) }), record),
+          item(
+            announced,
+            kind,
+            say(kind, { what, where, detail, year: String(year) }),
+            editionRecord,
+          ),
         );
       }
 
@@ -411,7 +509,7 @@ function fromPosts(into: Announcement[], undated: Undated[]): void {
 export interface Kind {
   /** As it is printed on the apparatus line: `Journal`, `Invited talk`. */
   name: string;
-  /** The same, as an HTML id fragment: `invited-talk`. */
+  /** Its collision-safe HTML id fragment: `invited-talk`. */
   slug: string;
   count: number;
 }
@@ -434,6 +532,20 @@ export const slug = (text: string) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
+
+export function allocateKindSlugs(names: Iterable<string>): Map<string, string> {
+  const allocated = new Map<string, string>();
+  const taken = new Set(['all']);
+  for (const name of [...new Set(names)].sort()) {
+    const stem = slug(name) || 'kind';
+    let candidate = stem;
+    let suffix = 2;
+    while (taken.has(candidate)) candidate = `${stem}-${suffix++}`;
+    taken.add(candidate);
+    allocated.set(name, candidate);
+  }
+  return allocated;
+}
 
 let cache: Feed | undefined;
 
@@ -471,11 +583,13 @@ export function announcements(): Feed {
   const counts = new Map<string, number>();
   for (const announcement of items)
     counts.set(announcement.kind, (counts.get(announcement.kind) ?? 0) + 1);
+  const kindSlugs = allocateKindSlugs(counts.keys());
+  for (const announcement of items) announcement.kindSlug = kindSlugs.get(announcement.kind)!;
 
   cache = {
     items,
     kinds: [...counts]
-      .map(([name, count]) => ({ name, slug: slug(name), count }))
+      .map(([name, count]) => ({ name, slug: kindSlugs.get(name)!, count }))
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
     undated,
     sources: [SOURCES.cv, SOURCES.bibliography, SOURCES.talks, `${SOURCES.posts}/**/*.{md,mdx}`],

@@ -11,7 +11,7 @@
  * review is named as undated rather than announced in the year it is aimed at.
  */
 import assert from 'node:assert/strict';
-import { announcements, slug, TEMPLATES } from './announcements.ts';
+import { allocateKindSlugs, announcements, TEMPLATES } from './announcements.ts';
 import { bibliography, SOURCES } from './record.ts';
 
 const feed = announcements();
@@ -23,6 +23,11 @@ assert.ok(feed.items.length > 40, `only ${feed.items.length} announcements`);
 // anchor, so a collision would make two announcements one item in a reader.
 const ids = new Set(feed.items.map((item) => item.id));
 assert.equal(ids.size, feed.items.length, 'two announcements share an anchor');
+assert.equal(
+  new Set(feed.items.map((item) => item.source)).size,
+  feed.items.length,
+  'two announcements name the same source record',
+);
 for (const item of feed.items) {
   assert.match(item.id, /^[a-z0-9][a-z0-9-]*$/, `not an HTML id fragment: ${item.id}`);
   // Provenance is generated, never written: every item names the file it came
@@ -43,12 +48,16 @@ assert.equal(
 for (const item of feed.items) {
   const kind = feed.kinds.find((candidate) => candidate.name === item.kind);
   assert.ok(kind, `no kind entry for ${item.kind}`);
-  // The page writes `data-kind` with `slug(item.kind)` and the generated CSS
-  // rule keys on `kind.slug`. They must be the same string.
-  assert.equal(slug(item.kind), kind.slug);
+  assert.equal(item.kindSlug, kind.slug);
 }
 // Slugs are unique too, or one radio would filter two kinds.
 assert.equal(new Set(feed.kinds.map((kind) => kind.slug)).size, feed.kinds.length);
+const adversarialKindSlugs = allocateKindSlugs(['R&D', 'R D', '研究', '開発', 'All']);
+assert.equal(new Set(adversarialKindSlugs.values()).size, adversarialKindSlugs.size);
+for (const identifier of adversarialKindSlugs.values()) {
+  assert.match(identifier, /^[a-z0-9][a-z0-9-]*$/);
+  assert.notEqual(identifier, 'all');
+}
 
 // Newest first, and the year markers on the register follow from that ordering
 // alone: a year that appeared twice would print two markers for one year.

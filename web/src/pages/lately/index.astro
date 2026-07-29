@@ -17,9 +17,13 @@
 import PageHead from '../../components/PageHead.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Record from '../../components/Record.astro';
-import { announcements, formatStamp, slug } from '../../lib/announcements';
+import { announcements, formatStamp } from '../../lib/announcements';
 
 const feed = announcements();
+const filters = [
+  { name: 'All', slug: 'all', count: feed.items.length, kind: false },
+  ...feed.kinds.map((kind) => ({ ...kind, kind: true })),
+];
 
 /** Newest year first — the feed is already ordered, so this preserves it. */
 const years: { year: string; items: typeof feed.items }[] = [];
@@ -35,11 +39,15 @@ for (const item of feed.items) {
  * written rather than being scoped — the selectors key on the ids of the radios
  * above, which are unique to this page.
  */
-const filterCss = feed.kinds
-  .map(({ slug }) =>
+const filterCss = filters
+  .map(({ slug, kind }) =>
     [
-      `#kind-${slug}:checked ~ .register li:not([data-kind='${slug}']) { display: none }`,
-      `#kind-${slug}:checked ~ .register section:not(:has([data-kind='${slug}'])) { display: none }`,
+      ...(kind
+        ? [
+            `#kind-${slug}:checked ~ .register li:not([data-kind='${slug}']) { display: none }`,
+            `#kind-${slug}:checked ~ .register section:not(:has([data-kind='${slug}'])) { display: none }`,
+          ]
+        : []),
       `#kind-${slug}:checked ~ .kinds [for='kind-${slug}'] { border-color: var(--color-accent); color: var(--color-accent) }`,
       `#kind-${slug}:focus-visible ~ .kinds [for='kind-${slug}'] { outline: 2px solid var(--color-accent); outline-offset: 2px }`,
     ].join('\n'),
@@ -74,18 +82,23 @@ const filterCss = feed.kinds
     /* The controls. `.vh` is the same visually-hidden class the inspect
        checkbox uses: off screen, still focusable, still announced. */
   }
-  <input type="radio" name="kind" id="kind-all" class="vh" checked data-pagefind-ignore />
   {
-    feed.kinds.map((kind) => (
-      <input type="radio" name="kind" id={`kind-${kind.slug}`} class="vh" data-pagefind-ignore />
+    filters.map((filter) => (
+      <input
+        type="radio"
+        name="kind"
+        id={`kind-${filter.slug}`}
+        class="vh"
+        checked={!filter.kind}
+        data-pagefind-ignore
+      />
     ))
   }
   <div class="kinds label" role="group" aria-label="Filter by kind" data-pagefind-ignore>
-    <label class="chip" for="kind-all">All · {feed.items.length}</label>
     {
-      feed.kinds.map((kind) => (
-        <label class="chip" for={`kind-${kind.slug}`}>
-          {kind.name} · {kind.count}
+      filters.map((filter) => (
+        <label class="chip" for={`kind-${filter.slug}`}>
+          {filter.name} · {filter.count}
         </label>
       ))
     }
@@ -100,7 +113,7 @@ const filterCss = feed.kinds
           </h2>
           <ul class="feed">
             {items.map((item) => (
-              <li id={item.id} data-kind={slug(item.kind)}>
+              <li id={item.id} data-kind={item.kindSlug}>
                 <span class="when label">
                   <time datetime={item.stamp}>{formatStamp(item)}</time>
                   {' · '}
