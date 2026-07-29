@@ -34,10 +34,19 @@ Jekyll output risks colliding with that route.
   opts back into the unified processor — see "Notable configuration" in `web/README.md`.
 - `web/` reads the repository root's data files (`_bibliography/`, `_posts/`, `_pages/`, `cv/`
   and `_config.yml`) at build time through `web/src/lib/record.ts` and `web/src/lib/cv.ts`, so the
-  two sites share one set of sources. `record.ts` finds the root by walking up for `_config.yml`
+  two sites share one set of sources. `cv.yaml` feeds three routes, not one: `/cv/`,
+  `/professional_activities/` (`service[]`) and `/projects/` (`projects[]`, funding figures
+  included), and `cv/pres.bib` feeds `/talks/`. `record.ts` finds the root by walking up for `_config.yml`
   rather than from `import.meta.url`, because Astro relocates the bundle during `astro build`.
   The Ledger design requires every displayed count and source line to be derived there rather than
   written by hand — see "Notable configuration" in `web/README.md`.
+- **`_pages/professional_activities.md` is a third copy of `cv.yaml`'s `service[]` and has already
+  drifted** — it dates the Frontiers editorship to 2025 where `cv.yaml` has the confirmed
+  `Mar 2024–Present`, and it names the ICLR role "Reviewer" where `cv.yaml` records one Programme
+  Committee role. `web/`'s `/professional_activities/` route reads `cv.yaml`; the **home page still
+  reads the markdown file** through `activities()`, so the two disagree on screen. Point
+  `web/src/pages/index.astro` at `cv.service` before deleting that file, or the home-page build
+  breaks with it. Never edit the markdown copy to fix a fact: fix `cv.yaml`.
 - The CV and both sites share `_bibliography/papers.bib`. The Astro rebuild displays every entry,
   including under-review manuscripts and software artifacts; `web/README.md` owns that index's
   filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`
@@ -79,6 +88,21 @@ not given an invented one.
 `_includes/news.liquid`. So the two sites' news differ by construction — Jekyll shows the 22
 hand-written files, `web/` shows the generated feed — and that is deliberate until the cutover.
 Deleting `_news/` before then takes the live news page down.
+
+## Settled decisions worth not relitigating
+
+- The UniMiB lab is the **Intelligent Sensing Laboratory (ISLab)**. Any "Imaging and Vision
+  Laboratory (IVL)" left anywhere is wrong.
+- **No analytics and no visitor tracking in `web/`.** `_config.yml` still carries the Jekyll
+  site's `google_analytics` ID; do not carry it, or any provider, into the rebuild, and do not
+  port `_includes/cluster_map.html` (ClustrMaps). A template shipping someone else's tracking
+  ID is a hazard for whoever copies it.
+- **The bibliography is sacred and the site mirrors it.** There is no site-side publication
+  filtering: manuscripts under review render publicly. Do not reintroduce a render-time filter.
+- The Frontiers dates — appointed **Mar 2024**, announced **2025-03-03** — are both true and
+  both recorded in `cv.yaml`. They are not a bug to reconcile.
+- `_projects/` (9 files) and `_drafts/` (30 files) are al-folio template stubs. They are not
+  migrated. `_projects/` is still live on the Jekyll site, so its deletion belongs to cutover.
 
 ## This repository is public
 

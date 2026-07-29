@@ -1241,6 +1241,87 @@ body {
   font-size: 0.9em;
 }
 
+/* The post byline: date, labels, apparatus. */
+.postmeta {
+  margin: 0.5rem 0 0;
+  color: var(--color-muted);
+}
+
+/* Migrated posts carry three-column tables of open problems. A table cannot
+   scroll inside itself, so it becomes its own scroll container rather than
+   pushing the page sideways; cells wrap, so at a phone width it scrolls only if
+   the content genuinely cannot fit. Rules, not boxes: a hairline between rows
+   and the 2px section rule under the head, same as every other table here. */
+.prose :where(table) {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.prose :where(th, td) {
+  border-top: 1px solid var(--color-hair);
+  padding: 0.5rem 0.8rem 0.5rem 0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose :where(thead th) {
+  border-top: 0;
+  border-bottom: 2px solid var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+/* A long aside a post folds away. The summary is the control, so it reads as
+   apparatus — mono, and in the one accent colour every other control uses. */
+.prose :where(details) {
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+  margin-block: 1.5em;
+}
+
+.prose :where(summary) {
+  cursor: pointer;
+  padding-block: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.prose :where(figure) {
+  margin: 1.5em 0;
+}
+
+.prose :where(img) {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid var(--color-rule);
+}
+
+.prose :where(figcaption) {
+  margin-top: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+/* Section breaks between a post's parts. */
+.prose :where(hr) {
+  border: 0;
+  border-top: 1px solid var(--color-rule);
+  margin-block: 2em;
+}
+
 /* KaTeX display math can be wider than the column. */
 .prose :where(.katex-display) {
   overflow-x: auto;

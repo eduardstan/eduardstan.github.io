@@ -41,14 +41,29 @@ export interface ServiceYear {
   announced?: string;
 }
 
-export interface ServiceEntry {
+export interface ServiceEntry extends Block {
   role: string;
   venue: string;
   section?: string;
+  /** "CORE Rank: A*", "IF: 6.5, Q1" — the file's own words for the ranking. */
   metric?: string;
   url?: string;
+  /** Where `metric` is evidenced: a CORE portal or SCImago page. */
+  rank_url?: string;
   announced?: string;
   years?: ServiceYear[];
+}
+
+/**
+ * A funded research project. `funding` is deliberately not printed by the LaTeX
+ * CV — the comment above `projects:` in the file says it is kept so the website
+ * can use it, and `/projects/` is the site doing that.
+ */
+export interface Project extends Block {
+  title: string;
+  detail: string;
+  url?: string;
+  funding?: string;
 }
 
 export interface Degree extends Block {
@@ -99,10 +114,18 @@ export interface CV {
   };
   awards: Award[];
   service: ServiceEntry[];
+  projects: Project[];
   languages: { name: string; level: string }[];
   archive: { leadership: Leadership[] };
 }
 
 export const CV_SOURCE = SOURCES.cv;
+
+/**
+ * The field names a set of rows actually carries, so a source record names real
+ * keys rather than the ones this file happens to declare.
+ */
+export const keysOf = (rows: object[]) =>
+  [...new Set(rows.flatMap((row) => Object.keys(row)))].join(', ');
 
 export const cv = parse(raw) as CV;

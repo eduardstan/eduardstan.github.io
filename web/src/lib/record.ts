@@ -8,9 +8,10 @@
  * `source:` string and every "this is missing" note below is derived from the
  * files named in `SOURCES`, and changes when they change.
  *
- * The blog and project collections still contain migration samples, but the
- * repository facts read here remain authoritative. The shapes returned by these
- * readers are the seam consumed by components and provenance blocks.
+ * The blog is the only content collection left; everything else the site shows
+ * is read from the repository's own files here or in `src/lib/cv.ts`. The shapes
+ * returned by these readers are the seam consumed by components and provenance
+ * blocks.
  */
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
@@ -492,6 +493,83 @@ export function bibliography(): Bibliography {
     years: { first: Math.min(...years), last: Math.max(...years) },
   };
   return bibliographyCache;
+}
+
+// ---------------------------------------------------------------- talks ----
+
+export interface Talk {
+  key: string;
+  title: string;
+  /** `invited` / `oral` / `poster` — the entry's own `keywords` field. */
+  category: string;
+  /** The entry's own `note`: "Invited talk", "Oral presentation", … */
+  note: string;
+  event: string;
+  where: string;
+  /** ISO 8601, as the entry's `date` field states it. */
+  date: string;
+  year: number;
+}
+
+export interface Talks {
+  source: string;
+  entries: Talk[];
+  /** Counts by category, largest first — the same shape as `byKind`. */
+  byCategory: { category: string; count: number }[];
+  years: { first: number; last: number };
+  /** Entries whose `date` is not ISO 8601, named rather than given a guess. */
+  undated: string[];
+}
+
+let talksCache: Talks | undefined;
+
+/**
+ * `cv/pres.bib`, the talks the CV renders with biblatex, read with the same
+ * parser as the bibliography.
+ *
+ * Nothing is filtered and nothing is relabelled: `note` is the talk's own word
+ * for what it was and `keywords` its own category, exactly as `announcements.ts`
+ * already treats them. The file is LaTeX like `papers.bib` is (`Krak{\'{o}}w`,
+ * `{HS3}`), so every field goes through `deLatex`.
+ */
+export function talks(): Talks {
+  if (talksCache) return talksCache;
+  const entries = parseBib(read(SOURCES.talks)).map((entry): Talk => {
+    const field = (name: string) => deLatex(entry.fields[name] ?? '');
+    const date = (entry.fields.date ?? '').trim();
+    return {
+      key: entry.key,
+      title: field('title'),
+      category: field('keywords'),
+      note: field('note'),
+      event: field('eventtitle'),
+      where: field('venue'),
+      date,
+      year: Number.parseInt(date.slice(0, 4), 10),
+    };
+  });
+  // ISO 8601 sorts lexicographically, so the string is the sort key. An entry
+  // with no date has nothing to sort on and goes last rather than to 1970.
+  entries.sort(
+    (a, b) => (b.date || '').localeCompare(a.date || '') || a.title.localeCompare(b.title),
+  );
+
+  const counts = new Map<string, number>();
+  for (const talk of entries) counts.set(talk.category, (counts.get(talk.category) ?? 0) + 1);
+  const years = entries.map((talk) => talk.year).filter((year) => year > 0);
+
+  talksCache = {
+    source: SOURCES.talks,
+    entries,
+    byCategory: [...counts]
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count || a.category.localeCompare(b.category)),
+    years: { first: Math.min(...years), last: Math.max(...years) },
+    undated: entries
+      .filter((talk) => !/^\d{4}-\d{2}-\d{2}/.test(talk.date))
+      .map((talk) => talk.key),
+  };
+  return talksCache;
 }
 
 // ---------------------------------------------------------------- prose ----

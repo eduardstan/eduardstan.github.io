@@ -12,7 +12,7 @@ authors:
   - name: Ionel Eduard Stan
     url: "https://eduardstan.github.io/"
     affiliations:
-      name: Imaging and Vision Laboratory (IVL), Department of Informatics, Systemsn and Communication (DISCo), University of Milano-Bicocca
+      name: Intelligent Sensing Laboratory (ISLab), Department of Informatics, Systems and Communication (DISCo), University of Milano-Bicocca
 
 bibliography: 2018-12-22-distill.bib
 

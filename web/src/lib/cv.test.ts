@@ -99,6 +99,57 @@ for (const award of cv.awards) {
   text(award.title, 'awards[].title');
   text(award.detail, 'awards[].detail');
 }
+// `service[]` feeds /professional_activities/, which groups by `role` and hangs
+// a linked rank badge off `metric`. A missing role is a section with no heading;
+// a `metric` with no `rank_url` is a badge that claims a ranking and cannot show
+// where it is published.
+assert.ok(cv.service.length >= 15, `service[] lost entries: ${cv.service.length}`);
+for (const entry of cv.service) {
+  text(entry.role, 'service[].role');
+  text(entry.venue, 'service[].venue');
+  if (entry.metric) {
+    text(entry.metric, `service[].metric (${entry.venue})`);
+    assert.match(
+      entry.rank_url ?? '',
+      /^https:\/\//,
+      `service[] "${entry.venue}" states a metric but no rank_url for the badge to link to`,
+    );
+  }
+  // An entry states a term (`dates`) or the editions it served (`years[]`) or
+  // neither — several standing reviewer roles have no date at all, and the page
+  // says so rather than inventing one. What it may not do is state both.
+  assert.ok(
+    !(entry.dates && entry.years?.length),
+    `service[] "${entry.venue}" states both dates and years[]; the page shows one column`,
+  );
+  for (const edition of entry.years ?? []) {
+    assert.ok(
+      Number.isInteger(edition.year) && edition.year > 2000,
+      `service[] "${entry.venue}": implausible edition year ${edition.year}`,
+    );
+  }
+}
+// Decision: ICLR is one role recorded as Program Committee, not a per-year split
+// between "Reviewer" and "Programme Committee".
+const iclr = cv.service.filter((entry: Record<string, any>) => /\(ICLR\)/.test(entry.venue));
+assert.equal(iclr.length, 1, `ICLR must be one service entry, found ${iclr.length}`);
+assert.equal(iclr[0].role, 'Program Committee', `ICLR role is "${iclr[0].role}"`);
+// Frontiers: appointed Mar 2024, announced 2025-03-03. Both are true and the
+// page prints the first; a "fix" that collapses them loses one of the two facts.
+const frontiers = cv.service.find((entry: Record<string, any>) => /^Frontiers/.test(entry.venue))!;
+assert.equal(frontiers.dates, 'Mar 2024–Present', `Frontiers dates are "${frontiers.dates}"`);
+assert.ok(frontiers.announced.startsWith('2025-03-03'), 'Frontiers lost its announcement date');
+
+// `projects[]` feeds /projects/, including the funding figures the printed CV
+// deliberately omits — the reason they are in this file at all.
+assert.equal(cv.projects.length, 8, `expected 8 research projects, got ${cv.projects.length}`);
+for (const project of cv.projects) {
+  text(project.title, 'projects[].title');
+  text(project.detail, 'projects[].detail');
+  text(project.dates, 'projects[].dates');
+  text(project.funding, `projects[].funding (${project.title})`);
+}
+
 for (const language of cv.languages) {
   text(language.name, 'languages[].name');
   text(language.level, 'languages[].level');
@@ -173,6 +224,21 @@ const rendered = [
     row.dates,
     ...(row.items ?? []),
   ]),
+  ...cv.service.flatMap((row: Record<string, any>) => [
+    row.role,
+    row.venue,
+    row.section,
+    row.metric,
+    row.dates,
+    ...(row.items ?? []),
+  ]),
+  ...cv.projects.flatMap((row: Record<string, any>) => [
+    row.title,
+    row.detail,
+    row.dates,
+    row.funding,
+    ...(row.items ?? []),
+  ]),
   ...cv.languages.flatMap((row: Record<string, any>) => [row.name, row.level]),
   ...cv.archive.leadership.flatMap((row: Record<string, any>) => [
     row.role,
@@ -197,5 +263,6 @@ console.log(
   `ok — ${cv.appointments.length} appointments, ${cv.education.length} degrees, ` +
     `${blocks.length} teaching blocks / ${courses.length} courses, ` +
     `${cv.supervision.breakdown.length} supervision rows, ${cv.awards.length} awards, ` +
+    `${cv.service.length} service roles, ${cv.projects.length} projects, ` +
     `${cv.languages.length} languages, ${cv.archive.leadership.length} leadership roles`,
 );
