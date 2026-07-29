@@ -20,7 +20,8 @@
 //
 // A top-level key holding `sections:` instead of entries is a bibliography
 // grouping (`publications:`, `talks:`): each becomes \defbibfilter definitions
-// plus \cv<Key>Key and \cv<Key>Sections. It knows no BibTeX entry type either.
+// plus \cv<Key>Key, \cv<Key>Sections and \cv<Key>Count. It knows no BibTeX entry
+// type either.
 // =============================================================================
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
@@ -287,6 +288,44 @@ const bibPrefix = (section) =>
 const afterEarlier = (own, earlier) => [own, ...earlier.map((predicate) => `not ( ${predicate} )`)].join(" and ");
 
 /**
+ * How many entries `content/<key>.bib` holds, as \cv<Key>Count for cv.tex.
+ *
+ * Only zero-or-not matters, and it matters a lot: biber IGNORES a data source
+ * with no entries ("Data source ... is empty, ignoring"), and a \refsection
+ * over a file biber dropped leaves every label number in the WHOLE document at
+ * 0 - [J0] [C0] [C0] - with no error and exit 0. cv.tex skips such a refsection
+ * rather than print a silently mis-numbered bibliography. Adopters start with
+ * these files empty, so this is the cold-start path, not an edge case.
+ */
+function bibEntryCount(source) {
+  const count = (text) => (text.match(/^[^%\n]*@(?!(?:comment|preamble|string)\s*[{(])\w+\s*[{(]/gim) ?? []).length;
+  const directive = /^[^%\n]*@(?:comment|preamble|string)\s*([{(])/gim;
+  let stripped = "";
+  let end = 0;
+  for (let match; (match = directive.exec(source)); directive.lastIndex = end) {
+    stripped += source.slice(end, match.index);
+    const [open, close] = match[1] === "{" ? ["{", "}"] : ["(", ")"];
+    let depth = 1;
+    let inQuotes = false;
+    let escaped = false;
+    for (end = directive.lastIndex; end < source.length && depth; end++) {
+      if (source[end] === '"' && !escaped) inQuotes = !inQuotes;
+      if (!inQuotes) depth += source[end] === open ? 1 : source[end] === close ? -1 : 0;
+      escaped = source[end] === "\\" ? !escaped : false;
+    }
+    if (depth) return count(source);
+  }
+  stripped += source.slice(end);
+  return count(stripped);
+}
+
+function bibFileEntryCount(key) {
+  const path = join(ROOT, "content", `${key}.bib`);
+  if (!existsSync(path)) return 0;
+  return bibEntryCount(readFileSync(path, "utf8"));
+}
+
+/**
  * One declared bibliography, as the filters it needs and the two macros cv.tex
  * calls: the key printed beside the section header, and the sections themselves.
  *
@@ -436,7 +475,7 @@ function render(cv) {
   for (const [key, value] of Object.entries(cv)) {
     if (key === "profile") continue;
     if (Array.isArray(value?.sections)) {
-      blocks.push(...bibSections(key, value));
+      blocks.push(`\\newcommand{\\cv${macroName(key)}Count}{${bibFileEntryCount(key)}}`, ...bibSections(key, value));
       continue;
     }
     const rows = Array.isArray(value) ? value : value?.entries;
@@ -488,6 +527,20 @@ function main() {
   console.log(`wrote ${rel(OUT_PUBLIC)}`);
 }
 
-export { renderInline, where, editions, affiliationBlock, profilesLine, macroName, tableHeader, entry, bibFilter, bibPrefix, bibSections };
+export {
+  renderInline,
+  where,
+  editions,
+  affiliationBlock,
+  profilesLine,
+  macroName,
+  tableHeader,
+  entry,
+  bibFilter,
+  bibPrefix,
+  bibSections,
+  bibEntryCount,
+  render,
+};
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();

@@ -169,6 +169,19 @@
   \expandafter\providecommand\csname cv#1Inline\endcsname{}%
 }
 
+% The same, for a bibliography section: `publications:`/`talks:` in cv.yaml
+% generate \cv<Name>Key, \cv<Name>Sections and \cv<Name>Count (the number of
+% entries in the matching .bib) instead of the five above. An adopter who has
+% declared neither - which is everyone on day one - would otherwise meet a raw
+% "Undefined control sequence" that stops xelatex at its interactive prompt.
+% Empty is the documented behaviour: the heading prints over an empty
+% bibliography and README.md tells them to delete the block.
+\newcommand{\cvdeclarebib}[1]{%
+  \expandafter\providecommand\csname cv#1Count\endcsname{0}%
+  \expandafter\providecommand\csname cv#1Key\endcsname{}%
+  \expandafter\providecommand\csname cv#1Sections\endcsname{}%
+}
+
 % Print one section of content/cv.yaml. #1 is the heading, #2 the section's
 % macro name (`Awards` for the `awards:` key). A section the file does not have
 % prints nothing at all - no heading, no gap - so this line can stay.
@@ -342,7 +355,9 @@
 % `talks:` and read by the website too. build-cv-data.mjs turns each declared
 % section into its \defbibfilter and its \printbibliography, and gives this file
 % \cvPublicationsKey / \cvPublicationsSections and \cvTalksKey /
-% \cvTalksSections. Adding, reordering or renaming a section is a cv.yaml edit.
+% \cvTalksSections, plus \cvPublicationsCount / \cvTalksCount - how many entries
+% the .bib holds, which guards the \refsection below.
+% Adding, reordering or renaming a section is a cv.yaml edit.
 
 % --------------------------------
 % CONTENT (generated from content/cv.yaml)
@@ -441,15 +456,19 @@
 }
 \fi
 
+\cvdeclarebib{Talks}
 \section{\textbf{Talks \& Presentations} \hfill \textcolor{darkblue}{\scriptsize \cvTalksKey}}
 
+\ifnum\cvTalksCount>0
 \begin{refsection}[../content/talks.bib]
 \nocite{*}
 
 \cvTalksSections
 
 \end{refsection}
+\fi
 
+\cvdeclarebib{Publications}
 \section{\textbf{Publications} \hfill \textcolor{darkblue}{\scriptsize \cvPublicationsKey}}
 
 \IfFileExists{scholar.png}{%
@@ -461,6 +480,7 @@
 
 \newpage
 
+\ifnum\cvPublicationsCount>0
 \begin{refsection}[../content/publications.bib]
 \nocite{*}
 
@@ -471,6 +491,7 @@
 \cvPublicationsSections
 
 \end{refsection}
+\fi
 
 \vspace{5mm}
 {\footnotesize
