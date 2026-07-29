@@ -16,11 +16,11 @@ failure this file exists to prevent.
 The records these pages are built from moved into `content/` after the cutover (`cv/cv.yaml` →
 `content/cv.yaml`, `_bibliography/papers.bib` → `content/publications.bib`, `cv/pres.bib` →
 `content/talks.bib`, `_pages/about.md` → `content/cv.yaml`'s `profile.bio.long`,
-`web/src/content/blog/` → `content/posts/`). No page address changed: the post ids keep their
+`web/src/content/blog/` → `content/posts/`). No post address changed: the post ids keep their
 year directory, which is why `content/posts/` has one. The two former `/img/` media addresses
 are deliberately dropped and recorded under Assets.
 
-## Core pages — all resolve
+## Core pages — resolve or redirect
 
 | URL                                        | Now                                                      |
 | ------------------------------------------ | -------------------------------------------------------- |

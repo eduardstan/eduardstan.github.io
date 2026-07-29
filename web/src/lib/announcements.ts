@@ -409,8 +409,8 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
  *
  * `underReview` is read off the entry's own record in `record.ts`, not off the
  * `short` name of the section it lands in: renaming that label is a display
- * change, and it must not put five unannounced manuscripts on the front page
- * dated to the year they are aimed at.
+ * change, and it must not put unannounced manuscripts on the front page dated
+ * to the year they are aimed at.
  */
 function publicationStamp(entry: Publication): string | undefined {
   const announced = entry.fields.announced?.trim();
