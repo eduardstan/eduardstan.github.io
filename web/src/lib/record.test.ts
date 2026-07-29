@@ -12,7 +12,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { about, activities, bibliography, talks, SOURCES } from './record.ts';
+import { about, bibliography, talks, SOURCES } from './record.ts';
 import { announcements, formatStamp } from './announcements.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -269,9 +269,9 @@ assert.equal(
 );
 assert.equal(pres.years.first, 2017, `earliest talk year is ${pres.years.first}`);
 
-// About and activities. Prettier runs over the source markdown and spells
-// emphasis `_like this_`, so both markers have to render — and neither may fire
-// on an underscore inside a word.
+// About. Prettier runs over the source markdown and spells emphasis
+// `_like this_`, so both markers have to render — and neither may fire on an
+// underscore inside a word.
 const bio = about();
 assert.ok(bio.paragraphs.length >= 3, 'about section did not parse');
 assert.ok(
@@ -283,21 +283,19 @@ assert.ok(
   'no emphasis rendered from the about page',
 );
 assert.ok(!/[*_]/.test(bio.firstPerson), 'markdown markers left in the first-person line');
-const sections = activities().sections;
-assert.ok(sections.length >= 3, 'activities sections did not parse');
-const ranks = sections.flatMap((section) => section.entries.flatMap((entry) => entry.rank ?? []));
-assert.ok(ranks.length > 0, 'no ranks parsed from the activities page');
-// `A\*` is how the source writes the CORE rank A*; the backslash is markup.
-assert.ok(ranks.includes('A*'), 'markdown backslash escape left in a rank');
-assert.ok(
-  !sections.some((section) =>
-    section.entries.some((entry) => /[\\*_]/.test(entry.name + (entry.rankNote ?? ''))),
-  ),
-  'markdown markers left in an activity name or rank note',
+// `_pages/professional_activities.md` is no longer read by anything. It is a
+// hand-written third copy of `cv/cv.yaml`'s `service[]` that had drifted from
+// it, and both the home page and /professional_activities/ now read the YAML
+// through one grouping. Re-adding a reader for it re-opens that gap.
+const reader = readFileSync(fileURLToPath(new URL('./record.ts', import.meta.url)), 'utf8');
+assert.doesNotMatch(
+  reader,
+  /professional_activities/,
+  'record.ts reads _pages/professional_activities.md again — the stale third copy of service[]',
 );
+assert.ok(!('activities' in SOURCES), 'the retired activities source is back in SOURCES');
 
 console.log(
   `ok — ${bib.entries.length} entries, ${pres.entries.length} talks, ` +
-    `${feed.items.length} announcements, ${feed.undated.length} undated facts, ` +
-    `${sections.length} activity sections`,
+    `${feed.items.length} announcements, ${feed.undated.length} undated facts`,
 );

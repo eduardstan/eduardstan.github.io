@@ -46,7 +46,6 @@ const ROOT = repositoryRoot();
 export const SOURCES = {
   bibliography: '_bibliography/papers.bib',
   about: '_pages/about.md',
-  activities: '_pages/professional_activities.md',
   talks: 'cv/pres.bib',
   posts: '_posts',
   config: '_config.yml',
@@ -744,68 +743,4 @@ export function profile(): Profile {
     affiliation: blockScalar(aboutRaw, 'subtitle'),
     addressSource: `${SOURCES.about} (front matter)`,
   };
-}
-
-// ---------------------------------------------------------- activities -----
-
-export interface ActivityEntry {
-  name: string;
-  /** CORE rank or Scimago quartile, as linked in the source. */
-  rank?: string;
-  rankNote?: string;
-  roles: string[];
-}
-
-export interface ActivitySection {
-  title: string;
-  entries: ActivityEntry[];
-}
-
-export interface Activities {
-  source: string;
-  sections: ActivitySection[];
-}
-
-let activitiesCache: Activities | undefined;
-
-/**
- * `_pages/professional_activities.md` is a nested markdown list: `## Section`,
- * then `- **Name** ([Rank](url))`, then indented `  - **Role** (years)`.
- */
-export function activities(): Activities {
-  if (activitiesCache) return activitiesCache;
-  const sections: ActivitySection[] = [];
-  for (const line of read(SOURCES.activities).split('\n')) {
-    const heading = /^##\s+(.+?)\s*$/.exec(line);
-    if (heading) {
-      sections.push({ title: heading[1], entries: [] });
-      continue;
-    }
-    const section = sections[sections.length - 1];
-    if (!section) continue;
-    const role = /^\s+-\s+(.+?)\s*$/.exec(line);
-    if (role) {
-      section.entries[section.entries.length - 1]?.roles.push(stripMarkdown(role[1]));
-      continue;
-    }
-    const entry = /^-\s+(.+?)\s*$/.exec(line);
-    if (!entry) continue;
-    const ranked = /^\*\*(.+?)\*\*\s*\(\[(.+?)\]\((.+?)\)\)\s*$/.exec(entry[1]);
-    if (ranked) {
-      const [rank, ...note] = stripMarkdown(ranked[2]).split(/\s+in\s+/);
-      section.entries.push({
-        name: stripMarkdown(ranked[1]),
-        rank,
-        rankNote: note.join(' in ').trim() || undefined,
-        roles: [],
-      });
-    } else {
-      section.entries.push({ name: stripMarkdown(entry[1]), roles: [] });
-    }
-  }
-  activitiesCache = {
-    source: SOURCES.activities,
-    sections: sections.filter((section) => section.entries.length > 0),
-  };
-  return activitiesCache;
 }

@@ -40,13 +40,13 @@ Jekyll output risks colliding with that route.
   rather than from `import.meta.url`, because Astro relocates the bundle during `astro build`.
   The Ledger design requires every displayed count and source line to be derived there rather than
   written by hand — see "Notable configuration" in `web/README.md`.
-- **`_pages/professional_activities.md` is a third copy of `cv.yaml`'s `service[]` and has already
-  drifted** — it dates the Frontiers editorship to 2025 where `cv.yaml` has the confirmed
-  `Mar 2024–Present`, and it names the ICLR role "Reviewer" where `cv.yaml` records one Programme
-  Committee role. `web/`'s `/professional_activities/` route reads `cv.yaml`; the **home page still
-  reads the markdown file** through `activities()`, so the two disagree on screen. Point
-  `web/src/pages/index.astro` at `cv.service` before deleting that file, or the home-page build
-  breaks with it. Never edit the markdown copy to fix a fact: fix `cv.yaml`.
+- **`_pages/professional_activities.md` is a stale third copy of `cv.yaml`'s `service[]` and
+  nothing in `web/` reads it.** It dates the Frontiers editorship to 2025 where `cv.yaml` has the
+  confirmed `Mar 2024–Present`, names the ICLR role "Reviewer", and omits two roles entirely. The
+  home page and `/professional_activities/` both read `service[]` through `serviceGroups()` in
+  `web/src/lib/cv.ts`, so they cannot disagree; `web/src/lib/record.test.ts` fails if a reader for
+  the markdown file comes back. It still renders on the live Jekyll site, so its deletion belongs to
+  cutover. Never edit it to fix a fact — fix `cv.yaml`.
 - The CV and both sites share `_bibliography/papers.bib`. The Astro rebuild displays every entry,
   including under-review manuscripts and software artifacts; `web/README.md` owns that index's
   filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`

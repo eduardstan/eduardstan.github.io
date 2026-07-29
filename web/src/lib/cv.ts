@@ -129,3 +129,39 @@ export const keysOf = (rows: object[]) =>
   [...new Set(rows.flatMap((row) => Object.keys(row)))].join(', ');
 
 export const cv = parse(raw) as CV;
+
+export interface ServiceGroup {
+  role: string;
+  entries: ServiceEntry[];
+}
+
+/**
+ * `service[]` grouped by its own `role` field, roles in the order they first
+ * appear in the file.
+ *
+ * Shared by `/professional_activities/` and the home page's service column so
+ * the two cannot group the same list differently — the whole reason this reader
+ * exists is that those two pages used to take these facts from two files.
+ */
+export function serviceGroups(): ServiceGroup[] {
+  const groups: ServiceGroup[] = [];
+  for (const entry of cv.service) {
+    const group = groups.find((candidate) => candidate.role === entry.role);
+    if (group) group.entries.push(entry);
+    else groups.push({ role: entry.role, entries: [entry] });
+  }
+  return groups;
+}
+
+/**
+ * Whether a role is an editorship, matched on the file's own word for it.
+ *
+ * The home page's "editorial boards" figure is this predicate applied to
+ * `service[]`, not a number written anywhere. It is a text rule over the `role`
+ * field rather than a list of venues, so a new editorship counts itself.
+ */
+export const isEditorial = (role: string) => /\beditor\b/i.test(role);
+
+/** The dates column an entry states: a term, or the editions it served. */
+export const serviceWhen = (entry: ServiceEntry) =>
+  entry.dates ?? (entry.years ?? []).map((year) => year.year).join(', ');

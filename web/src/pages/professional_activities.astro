@@ -16,16 +16,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import Record from '../components/Record.astro';
 import SectionHead from '../components/SectionHead.astro';
-import { cv, CV_SOURCE, keysOf, type ServiceEntry } from '../lib/cv';
+import { cv, CV_SOURCE, keysOf, serviceGroups, type ServiceEntry } from '../lib/cv';
 import { inline } from '../lib/inline';
 
-/** `service[]` grouped by `role`, roles in first-appearance order. */
-const groups: { role: string; entries: ServiceEntry[] }[] = [];
-for (const entry of cv.service) {
-  const group = groups.find((candidate) => candidate.role === entry.role);
-  if (group) group.entries.push(entry);
-  else groups.push({ role: entry.role, entries: [entry] });
-}
+// The same grouping the home page's service column uses, so the two pages
+// cannot disagree about a list they both read from `service[]`.
+const groups = serviceGroups();
 
 /** The editions an entry records, as the years the file lists. */
 const editions = (entry: ServiceEntry) => (entry.years ?? []).map((year) => year.year).join(', ');

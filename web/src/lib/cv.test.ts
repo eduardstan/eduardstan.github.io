@@ -140,6 +140,36 @@ const frontiers = cv.service.find((entry: Record<string, any>) => /^Frontiers/.t
 assert.equal(frontiers.dates, 'Mar 2024–Present', `Frontiers dates are "${frontiers.dates}"`);
 assert.ok(frontiers.announced.startsWith('2025-03-03'), 'Frontiers lost its announcement date');
 
+// The home page and /professional_activities/ both render `service[]` through
+// `serviceGroups()` in cv.ts. The grouping is asserted here against the same
+// YAML, so a change that makes one page's grouping lose entries fails the build
+// rather than making the two pages disagree again — which is exactly what
+// happened while the home page read `_pages/professional_activities.md`.
+const groups: { role: string; entries: any[] }[] = [];
+for (const entry of cv.service) {
+  const group = groups.find((candidate) => candidate.role === entry.role);
+  if (group) group.entries.push(entry);
+  else groups.push({ role: entry.role, entries: [entry] });
+}
+assert.equal(
+  groups.reduce((total, group) => total + group.entries.length, 0),
+  cv.service.length,
+  'grouping service[] by role dropped entries',
+);
+assert.equal(
+  new Set(groups.map((group) => group.role)).size,
+  groups.length,
+  'duplicate role group',
+);
+// The home page's headline figure. `/\beditor\b/i` over the role field is the
+// whole rule, so it must select the editorships and nothing else.
+const editorial = cv.service.filter((entry: Record<string, any>) => /\beditor\b/i.test(entry.role));
+assert.equal(editorial.length, 2, `expected 2 editorial boards, got ${editorial.length}`);
+assert.ok(
+  editorial.every((entry: Record<string, any>) => entry.role === 'Associate Editor'),
+  'the editorial rule selected a role that is not an editorship',
+);
+
 // `projects[]` feeds /projects/, including the funding figures the printed CV
 // deliberately omits — the reason they are in this file at all.
 assert.equal(cv.projects.length, 8, `expected 8 research projects, got ${cv.projects.length}`);

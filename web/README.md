@@ -121,12 +121,17 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
 - **Abstracts are per-entry and unconditional.** The reveal renders `entry.abstract` when
   the entry has one and says so when it does not, so adding an `abstract` field to a BibTeX
   entry is the only action needed for it to appear. There is no flag and no list to update.
-- **The CV-fed pages.** `/cv/`, `/professional_activities/` and `/projects/` all read
-  `cv/cv.yaml`, so the CV, the service list and the funded projects have one source between
-  them. `/professional_activities/` groups `service[]` by its own `role` field, in the order
-  those roles first appear in the file, and hangs a rank badge off `metric` linked to the
-  `rank_url` beside it; it does **not** read `_pages/professional_activities.md`, which is a
-  third transcription of the same list, has already drifted, and is retired at cutover.
+- **The CV-fed pages.** `/cv/`, `/professional_activities/`, `/projects/` and the home page's
+  service column all read `cv/cv.yaml`, so the CV, the service list and the funded projects
+  have one source between them. `serviceGroups()` in `src/lib/cv.ts` groups `service[]` by its
+  own `role` field, in the order those roles first appear in the file, and **both** the home
+  page and `/professional_activities/` call it — they render the same list through the same
+  grouping and cannot disagree. Each row hangs a rank badge off `metric`, linked to the
+  `rank_url` beside it. The home page's "editorial boards" figure is `isEditorial()`, a
+  `/\beditor\b/i` match on the role field, so a new editorship counts itself.
+  Nothing reads `_pages/professional_activities.md` any more: it was a hand-written third
+  transcription that had drifted from the CV, and `record.test.ts` fails if a reader for it
+  comes back.
   `/projects/` renders `projects[]` **including the `funding` figures** — that file's own
   comment says the amounts are kept out of the printed CV so the website can use them, and
   no total is summed from them, because a programme total and a grant to one group are not
@@ -194,10 +199,5 @@ blog holds the two migrated posts. `/cv/` does not yet offer the PDF: publishing
 to the cutover, which also owns every deletion in the Jekyll tree (`_news/`, `_pages/cv.md`,
 `_pages/professional_activities.md`, `assets/json/resume.json`, `_data/cv.yml`, `_drafts/`).
 
-**One inconsistency is deliberately left standing.** The home page's service column still
-reads `_pages/professional_activities.md` through `activities()`, so it shows the Frontiers
-associate editorship as 2025 while `/professional_activities/` shows the captain-confirmed
-`Mar 2024–Present` from `cv/cv.yaml`. Changing it would alter the home page, which this
-task was scoped not to touch. Pointing `src/pages/index.astro` at `cv.service` closes the
-gap and lets `activities()` and its source file go — and until that happens, deleting
-`_pages/professional_activities.md` at cutover breaks the home-page build.
+`_pages/professional_activities.md` is now dead to this site — no reader, no `SOURCES` entry
+— so cutover can delete it with the rest of the Jekyll tree without breaking a build.
