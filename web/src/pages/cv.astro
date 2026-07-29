@@ -16,7 +16,17 @@ import PageHead from '../components/PageHead.astro';
 import Record from '../components/Record.astro';
 import SectionHead from '../components/SectionHead.astro';
 import { cv, CV_SOURCE, keysOf } from '../lib/cv';
+import { hasSource } from '../lib/record';
 import { inline } from '../lib/inline';
+
+/**
+ * The printed CV, built from `cv/cv.tex` by the deploy workflow and dropped
+ * into `public/` just before `astro build`. It is never committed — no binary
+ * enters git history — so it is absent from a plain local build and the offer
+ * to download it is made only when the file is really there.
+ */
+const CV_PDF = 'web/public/assets/cv.pdf';
+const pdf = hasSource(CV_PDF);
 
 const teaching = Object.entries(cv.teaching);
 const courses = teaching.flatMap(([, block]) => block.courses);
@@ -67,6 +77,14 @@ const description =
         href="/publications/">their own index</a
       >, read from the bibliography.
     </p>
+    {
+      pdf && (
+        <p class="blurb">
+          <a href="/assets/cv.pdf">Download the printed CV (PDF)</a> — typeset from {CV_SOURCE} by{' '}
+          <b>cv/cv.tex</b> when this page was built, so it states the same facts.
+        </p>
+      )
+    }
   </PageHead>
 
   <SectionHead source={`${CV_SOURCE} · short_bio`}>Short bio</SectionHead>

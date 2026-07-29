@@ -27,3 +27,6 @@ cv/*.synctex.gz
 cv/*.toc
 cv/*.xdv
 cv/build/
+
+# The CV PDF is built by the deploy workflow, never committed.
+web/public/assets/cv.pdf
