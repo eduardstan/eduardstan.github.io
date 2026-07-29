@@ -4,22 +4,21 @@ This file is the project's committed home for project-intrinsic agent knowledge:
 
 ## One site lives in this repo
 
-The Astro site in **`web/`** is the published site. `.github/workflows/deploy.yml` builds it
-and publishes `web/dist` to the `gh-pages` branch; GitHub Pages serves `gh-pages`. The
-Jekyll/al-folio site that used to live in the repository root was removed at the July 2026
-cutover — `docs/url-parity.md` records what every URL it published does now.
+The Astro site in **`web/`** is the published site. `.github/workflows/deploy.yml` builds and
+publishes it to the `gh-pages` branch; GitHub Pages serves `gh-pages`. The Jekyll/al-folio site
+that used to live in the repository root was removed at the cutover —
+`docs/url-parity.md` records what every URL it published does now.
 
-**Pushing to `master` publishes within minutes.** `deploy.yml` has no path filters, on purpose:
-the site reads the repository's own records at build time, so almost any file can change what
-is published. Do not add filters back.
+**Pushing to `master` publishes.** `.github/workflows/deploy.yml` has no path filters, on
+purpose: the site reads the repository's own records at build time, so almost any file can
+change what is published. Do not add filters back.
 
 ## `content/` is the interface
 
-**Every adopter-owned record and media asset is in `content/`** — `cv.yaml`,
-`publications.bib`, `talks.bib`, `posts/`, `media/`. `content/README.md` is the documentation
-for that interface, including the two authored-layout exceptions an adopter must review, and is
-written for a stranger adopting the repository, not for us. `web/src/lib/record.ts`'s `SOURCES`
-is the whole list of records the site reads; `record.test.ts` fails if an entry of it ever points
+**Every adopter-owned record and media asset is in `content/`**; `content/README.md` documents
+that interface and the authored-layout exceptions an adopter must review. It is written for a
+stranger adopting the repository, not for us. `web/src/lib/record.ts`'s `SOURCES` is the whole
+list of records the site reads; `web/src/lib/record.test.ts` fails if an entry of it ever points
 outside `content/`.
 
 `content/cv.yaml` is also the **repo-root landmark** `repositoryRoot()` walks up for, chosen
@@ -29,17 +28,18 @@ pipeline and `cv/cv.tex` is layout only.
 **One entry shape, and a top-level list is a section by construction.** `title` is the only
 required field; `org`, `place`, `dates`, `detail`, `url`, `items`, `announced` and the optional
 extras (`metric`, `rank_url`, `years`, `funding`, `count`, `rows`) are the rest.
-`scripts/build-cv-data.mjs` names no section: every list becomes six `\cv<Section>*` macros and
-`cv/cv.tex` prints the ones it has a `\cvpart` line for. Adding a section to the YAML must
-never require editing the generator.
+`scripts/build-cv-data.mjs` names no section: every list becomes a generated macro family and
+`cv/cv.tex` prints the ones it has a `\cvpart` line for. Adding a section to the YAML must never
+require editing the generator.
 
 **Publication and talk grouping is declared too.** `content/README.md` owns the `sections:`
 interface. The generator translates both declarations for the PDF; the publication declaration
 also drives the site's Type column and "by type" order, while `/talks/` continues to display each
 talk's own `keywords` and `note` without relabelling it. **No grouping opinion or BibTeX entry type
-may be reintroduced in `cv/cv.tex` or the website's publication source.** `record.test.ts`
-evaluates the generated publication filters against every bibliography entry and proves
-first-match-wins agrees with the site, including around `printed: false` sections.
+may be reintroduced in `cv/cv.tex` or the website's publication source.**
+`web/src/lib/record.test.ts` evaluates the generated publication filters against every
+bibliography entry and proves first-match-wins agrees with the site, including around
+`printed: false` sections.
 
 Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commit.
 
@@ -48,17 +48,18 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
 - `.github/workflows/prettier.yml` runs `npx prettier . --check` over the **whole repo** with the
   root `.prettierrc` and no per-project dependencies installed, which constrains what a nested
   `.prettierrc` may declare — see "Notable configuration" in `web/README.md`.
-- Astro 7's default Markdown processor (Sätteri) is **not** remark/rehype compatible, so `web/`
+- Astro's default Markdown processor (Sätteri) is **not** remark/rehype compatible, so `web/`
   opts back into the unified processor — see "Notable configuration" in `web/README.md`.
-- **`.nojekyll` in `web/public/` is load-bearing.** GitHub Pages serves this repository with
+- **`web/public/.nojekyll` is load-bearing.** GitHub Pages serves this repository with
   `build_type: legacy`, so it runs its own Jekyll pass over `gh-pages` and strips `_`-prefixed
-  directories — including Astro's `_astro/`. Without that file the site publishes with no CSS
-  and no JavaScript. `deploy.yml` asserts it is in `dist` before publishing.
+  directories — including Astro's asset directory. Without that file the site publishes with no
+  CSS and no JavaScript. `.github/workflows/deploy.yml` asserts it is in the build output before
+  publishing.
 - `web/` reads `content/` at build time through `web/src/lib/record.ts` and
-  `web/src/lib/cv.ts`. `cv.yaml` feeds `/cv/`, the home page (`profile`, the feed),
+  `web/src/lib/cv.ts`. `content/cv.yaml` feeds `/cv/`, the home page (`profile`, the feed),
   `/professional_activities/` (`service[]`), `/projects/` (`projects[]`, funding figures
   included), `/lately/` and the `/rss.xml`/`/feed.xml` feed; `content/talks.bib` feeds `/talks/`
-  and those announcement surfaces. `record.ts` finds the root by walking up for
+  and those announcement surfaces. `web/src/lib/record.ts` finds the root by walking up for
   `content/cv.yaml` rather than from `import.meta.url`, because Astro relocates the bundle during
   `astro build`. The Ledger design requires every displayed count and source line to be derived
   there rather than written by hand — see "Notable configuration" in `web/README.md`.
@@ -68,44 +69,45 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
   BibTeX name forms; reading the second as the first silently renames authors. `VENUE_FIELDS`
   reads `journaltitle` as well as `journal`: that is what a Better BibTeX BibLaTeX export writes.
 - DBLP's `@misc` artifacts carry an unfilled `note = {Accessed on YYYY-MM-DD.}`. Both sides keep it
-  out of the rendered venue: `VENUE_FIELDS` tries `publisher` before `note`, and `cv.tex`'s
+  out of the rendered venue: `VENUE_FIELDS` tries `publisher` before `note`, and `cv/cv.tex`'s
   `\DeclareSourcemap` nulls a `note` matching that exact placeholder, so a declared
   `types: [misc]` section renders.
 - `web/src/lib/cv.ts` reads `content/cv.yaml` through Vite's `?raw` import, not `node:fs`. Do
   **not** rewrite it as `readFileSync(new URL('../../../content/cv.yaml', import.meta.url))`:
   that builds and then fails at prerender with `ENOENT`, for the same relocation reason as the
   bullet above. `?raw` inlines the file at build time, so there is no path to resolve. Because
-  of that, `cv.ts` cannot be imported by anything that also runs under plain `node`:
-  the shape and the pure functions live in `web/src/lib/cv-schema.ts`, which `announcements.ts`
-  and `consistency.ts` import while reading the file themselves through `record.ts`.
-- **`content/media/` is staged into `web/public/media/`** by the `stage-media` npm script,
+  of that, `web/src/lib/cv.ts` cannot be imported by anything that also runs under plain `node`:
+  the shape and the pure functions live in `web/src/lib/cv-schema.ts`, which
+  `web/src/lib/announcements.ts` and `web/src/lib/consistency.ts` import while reading the file
+  themselves through `web/src/lib/record.ts`.
+- **`content/media/` is staged into the Astro public directory** by the `stage-media` npm script,
   which npm runs before `dev`, `build` and `preview`. Astro's `publicDir` can only be one
   directory and `web/public/` holds the fonts and the load-bearing `.nojekyll`. `.gitignore`
   covers the destination.
-- `web/src/lib/legacy-urls.ts` is the one hand-written list on the site: the addresses the
+- `web/src/lib/legacy-urls.ts` is the hand-written list on the site: the addresses the
   Jekyll site published that this one does not generate. It is a historical fact, not a record
   to derive from, and `docs/url-parity.md` explains every entry. Removing one turns a live URL
   into a silent 404.
 - Text spliced into a generated announcement must go through that module's `md()` escaper: the
-  bibliography really contains `OVERLAY@AI*IA 2019` and DOIs ending `…-7_26`, which would otherwise
-  be read as markdown emphasis. `content/talks.bib` is LaTeX like `publications.bib` is, so its
-  fields need `deLatex()` first.
-- **The cold-start path through `cv.tex` is guarded, and both guards must stay.** A macro the
-  layout names but `cv.yaml` does not produce is an `Undefined control sequence` that stops
+  bibliographies contain punctuation that Markdown would otherwise read as emphasis.
+  `content/talks.bib` is LaTeX like `content/publications.bib` is, so its fields need `deLatex()`
+  first.
+- **The cold-start path through `cv/cv.tex` is guarded, and its guards must stay.** A macro the
+  layout names but `content/cv.yaml` does not produce is an `Undefined control sequence` that stops
   xelatex at its **interactive `?` prompt** — a hang, not a failure. `\cvdeclare` (ordinary
   sections) and `\cvdeclarebib` (`publications:`/`talks:`) default every such macro; the test in
-  `scripts/build-cv-data.test.mjs` proves cv.tex defines every `\cv<Name>` it names for the
+  `scripts/build-cv-data.test.mjs` proves `cv/cv.tex` defines every `\cv<Name>` it names for the
   smallest file `content/README.md` documents. And **an entry-less `.bib` inside a `\refsection`
   silently renumbers the whole document to `[J0] [C0]`** with exit 0 — biber ignores an empty data
-  source — so the generator emits `\cv<Key>Count` from the file's entry count and `cv.tex` skips
-  the refsection at 0. An adopter starts with both `.bib` files empty, so this is the first path
-  anyone walks.
+  source — so the generator emits `\cv<Key>Count` from the file's entry count and `cv/cv.tex`
+  skips the refsection at 0. An adopter starts with the bibliography files empty, so this is the
+  first path anyone walks.
 - **The printed CV has a baseline gate, not a byte-identical generated file.**
   `data/cv-baseline/` holds the extracted text and the page count of the CV as published;
-  `data/cv-baseline/README.md` gives the three commands. A change to `cv.yaml`, the generator or
-  `cv.tex` must pass that baseline gate, or record the difference there with its reason.
-  `pdftotext -layout` re-quantises a whole page, so a diff that looks like harmless horizontal
-  shifts on unrelated lines is usually a moved page break.
+  `data/cv-baseline/README.md` owns the verification commands and expected artifacts. A change to
+  `content/cv.yaml`, the generator or `cv/cv.tex` must satisfy that documented baseline or record
+  the difference there with its reason. `pdftotext -layout` re-quantises a whole page, so a diff
+  that looks like harmless horizontal shifts on unrelated lines is usually a moved page break.
 
 ## The consistency gate
 
@@ -113,7 +115,7 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
 **fails `astro build`** (never `astro dev`) when two hand-typed records of one fact
 contradict. Joins are by being the same entry — never by matching prose; the design proved
 name matching fails in both directions on this repository's data. `web/README.md` owns the
-contract. Two things to know before touching it:
+contract. Important constraints before touching it:
 
 - **The Frontiers pair is correct, not a bug.** Appointed Mar 2024, announced 2025-03-03.
   The gate fires on it and `content/cv.yaml` carries a declared `except:` for it. Do not "fix"
@@ -123,9 +125,9 @@ contract. Two things to know before touching it:
   would keep reporting "0 contradictions" over a shrinking number of comparisons after a rename.
   Prove any change to it both ways — inject a contradiction, confirm the build refuses naming
   both sides; revert, confirm it passes.
-- Checks joining against the old `_pages/professional_activities.md` or `_news/` were designed
-  and deliberately **not** built. Both files are gone; do not recreate a second copy of a fact
-  in order to compare it against the first.
+- Checks joining against the old professional-activities page or news directory were designed and
+  deliberately **not** built. Both are gone; do not recreate a second copy of a fact in order to
+  compare it against the first.
 
 ## Announcements
 
@@ -133,26 +135,26 @@ In `web/`, every announcement is derived from the fact it announces; there is no
 content. A fact is announced on the date it already carries — a talk's ISO `date`, a post's
 front-matter `date`, an award's month, a paper's `year`. An `announced:` key is written **only**
 where the announcement demonstrably happened on a date the fact does not otherwise state
-(harvested from the old `_news/` before it was deleted); it is optional and additive everywhere, and
-`scripts/build-cv-data.mjs` ignores it, so adding one leaves `cv/generated/cv-data.tex`
-byte-identical — check with `--check`.
+(harvested from the old news directory before it was deleted); it is optional and additive
+everywhere, and `scripts/build-cv-data.mjs` ignores it, so adding one leaves
+`cv/generated/cv-data.tex` byte-identical — check with `--check`.
 
 **The wording is one table.** `TEMPLATES` at the top of `web/src/lib/announcements.ts` holds one
 canonical sentence per kind and is the only place a sentence literal may live. Grammar: what it
 was, then where; the kind stays on the mono apparatus line and is not repeated in the prose, and
 the venue is the short name. A missing slot must drop its own separator. **A template is selected
 by what the record structurally is, never by a display label** — `Submitted` is chosen from
-`underReview`, not from a section's `short` — and `record.test.ts` refuses a declared `short` that
-collides with a template name. Announcement bodies and rows reuse `.feed`; keep their styling
-there.
+`underReview`, not from a section's `short` — and `web/src/lib/record.test.ts` refuses a declared
+`short` that collides with a template name. Announcement bodies and rows reuse `.feed`; keep their
+styling there.
 
 **A manuscript under review does not announce without an explicit `announced:`.** Its `year` is
 the year it is aimed at, not a date anything happened on; the year fallback put every such
 manuscript above real items on the front page. Give one a submission date and it announces as
 "submitted to {venue}". It is on `/publications/` either way — the bibliography is not filtered.
-The rule keys on `Publication.underReview`, derived in `record.ts` from the entry's own
-`underreview` keyword — never on the `short` name of the section it displays under, which is an
-editable label an adopter may rename or translate.
+The rule keys on `Publication.underReview`, derived in `web/src/lib/record.ts` from the entry's
+own `underreview` keyword — never on the `short` name of the section it displays under, which is
+an editable label an adopter may rename or translate.
 
 Dates are shown at the precision their source states and no finer: an item whose source records
 only a year renders as a year. Never widen a date to a day the record does not support. A fact
@@ -160,16 +162,16 @@ with no defensible date is listed in the feed's `undated` array and shown in the
 not given an invented one.
 
 **The register is `/lately/`, and one query feeds everything.** `announcements()` is called by
-the home page's six-item column, by `/lately/`, and by `/rss.xml`; nothing filters or re-derives
+the home page's announcement column, by `/lately/`, and by `/rss.xml`; nothing filters or re-derives
 the stream on its own. `/lately/` breaks it by year, shows each item's exact record — the BibTeX
-key, or the `cv.yaml` list and entry title — under the inspect switch, and counts the undated
+key, or the `content/cv.yaml` list and entry title — under the inspect switch, and counts the undated
 facts there too. Filtering by kind is one hidden radio per kind and one **generated**
 general-sibling rule per kind, written on the page from the kinds the stream holds: the inspect
 switch's trick, so it works with JavaScript off. Never hand-write the kind list, and keep the
 rows on `.feed`/`.sec` — no CSS was added for them and none should be.
 
-The 22 hand-written `_news/` files are gone, and so is the `/news/` route. Their permalinks and
-the old index redirect to `/lately/` — see `web/src/lib/legacy-urls.ts` and `docs/url-parity.md`.
+The hand-written news files are gone, and so is the `/news/` route. Their permalinks and the old
+index redirect to `/lately/` — see `web/src/lib/legacy-urls.ts` and `docs/url-parity.md`.
 Do not reintroduce a news directory: an announcement is generated from the fact it announces, and
 a second place to write one is the drift this design closed.
 
@@ -182,21 +184,20 @@ a second place to write one is the drift this design closed.
 - **The bibliography is sacred and the site mirrors it.** There is no site-side publication
   filtering: manuscripts under review render publicly. Do not reintroduce a render-time filter.
 - The Frontiers dates — appointed **Mar 2024**, announced **2025-03-03** — are both true and
-  both recorded in `cv.yaml`. They are not a bug to reconcile.
-- The al-folio template content (`_projects/`, `_drafts/`, the Einstein pages) was deleted at
-  cutover, not migrated. `/projects/` now renders `content/cv.yaml`'s real `projects[]`.
-- `archive:` is gone, and so are its two orphan strings (`service_notes`, the alternative GDPR
-  sentence). A junk drawer in a file whose premise is "one place per fact" is the disease with a
-  lid on it. `archive.leadership` is now the ordinary top-level section `leadership:`, which the
-  site renders and `cv/cv.tex` does not print — that is the answer to "keep a section off the
-  PDF but on the site".
+  both recorded in `content/cv.yaml`. They are not a bug to reconcile.
+- The al-folio template project, draft and Einstein content was deleted at cutover, not migrated.
+  `/projects/` now renders `content/cv.yaml`'s real `projects[]`.
+- `archive:` is gone, and so are its orphan strings. A junk drawer in a file whose premise is
+  "one place per fact" is the disease with a lid on it. `archive.leadership` is now the ordinary
+  top-level section `leadership:`, which the site renders and `cv/cv.tex` does not print — that is
+  the answer to "keep a section off the PDF but on the site".
 - **`LICENSE` stays exactly as it is** — MIT, "Copyright (c) 2022 Maruan Al-Shedivat".
   al-folio's attribution is preserved even though none of its code remains. Changing it is a
-  captain decision.
+  repository-owner decision.
 
 ## This repository is public
 
-The captain's mobile number must not be committed or included in the CV. The personal Gmail
+The site owner's mobile number must not be committed or included in the CV. The personal Gmail
 address is approved for publication.
 
 ## CV pipeline
@@ -214,28 +215,28 @@ The CV's facts live in exactly one place and both the PDF and the site are gener
   `cv/generated/cv-data.tex` (committed, public).
 - `node scripts/build-cv-data.mjs --check` fails when the committed generated
   file is stale; CI runs it, so never hand-edit `cv/generated/`.
-- The PDF is **built at deploy and never committed** — `deploy.yml` typesets it and stages it
-  at `web/public/assets/cv.pdf`, which `.gitignore` covers, so `/cv/` can offer a current
-  download without a binary entering git history. `cv.yml` builds the same document as a
-  reviewable artifact. Both pin `texlive_version: "2024"`; `cv.yml` says why.
+- The PDF is **built at deploy and never committed** —
+  `.github/workflows/deploy.yml` typesets and stages it at the download location, which
+  `.gitignore` covers, so `/cv/` can offer a current download without a binary entering git
+  history. `.github/workflows/cv.yml` builds the same document as a reviewable artifact; the
+  workflow files own the TeX Live pin and its rationale.
 - Build with **xelatex** - `latexmk -xelatex -cd cv/cv.tex`. pdflatex fails:
   `academicons` needs TU encoding.
-- The prose markup allowed in `cv.yaml` (`**bold**`, `_italic_`, `[text](url)`,
+- The prose markup allowed in `content/cv.yaml` (`**bold**`, `_italic_`, `[text](url)`,
   and the typographic Unicode characters) is documented at the top of that file.
-- A long `detail:` runs off the two-column entry line and silently truncates the dates
-  (`2010 – 20`). It is one short line by contract; long text goes in `items:`. Documented in
-  `content/README.md` rather than fixed, because making the line wrap changes the design.
+- A long `detail:` runs off the entry line and silently truncates the dates. `content/README.md`
+  owns that field's length and overflow contract; changing the wrapping changes the design.
 - `content/publications.bib` may carry rendering fields (`abstract`,
-  `pdf`, `html`, `selected`, ...) for the website. `cv.tex` strips them via
+  `pdf`, `html`, `selected`, ...) for the website. `cv/cv.tex` strips them via
   `\DeclareSourcemap` when present, because abstracts can contain raw `%` that
   would break the LaTeX pass. Do not "fix" the .bib to suit LaTeX.
-- `cv.tex` leaves one `\small{` group deliberately unclosed after the Short Bio,
+- `cv/cv.tex` leaves one `\small{` group deliberately unclosed after the Short Bio,
   exactly as the original hand-written CV did. Closing it reflows the whole
   document. There is a comment marking it.
 
 ## Maintaining this file
 
 Keep this file for knowledge useful to almost every future agent session in this project.
-Do not repeat what the codebase already shows; point to the authoritative file or command instead.
-Prefer rewriting or pruning existing entries over appending new ones.
-When updating this file, preserve this bar for all agents and keep entries concise.
+No value that lives in another file may be restated here; point to the authoritative file or
+command instead. Prefer rewriting or pruning existing entries over appending new ones. When
+updating this file, preserve this bar for all agents and keep entries concise.

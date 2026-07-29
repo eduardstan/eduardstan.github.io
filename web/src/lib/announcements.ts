@@ -137,7 +137,7 @@ export const TEMPLATES: Record<string, (s: Slots) => (string | undefined)[]> = {
  * The name is a key of `TEMPLATES` above, chosen by the caller from what the
  * record structurally is — `Talk`, `Writing`, `Submitted`. Where a caller
  * passes a display label through instead, an unrecognised one is not an error:
- * it takes `default`, which is the sentence every group the captain's `short`
+ * it takes `default`, which is the sentence every group the site owner's `short`
  * names does not have wording of its own already gets.
  */
 export function say(name: string, slots: Slots): string {

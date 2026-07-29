@@ -40,7 +40,7 @@ const STRANDS: Omit<Strand, 'absent'>[] = [
   },
   {
     title: 'Agentic AI',
-    // Captain-approved wording, 2026-07-28. He rejected the earlier draft that
+    // Site-owner-approved wording, 2026-07-28. He rejected the earlier draft that
     // called this strand "continuous with" the 2020 multi-agent synthesis
     // project, because the CV does not draw that link. Do not reintroduce that
     // framing here or anywhere else on the site.
