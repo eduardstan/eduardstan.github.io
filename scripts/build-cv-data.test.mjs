@@ -2,7 +2,19 @@
 // Run: node --test scripts/build-cv-data.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { affiliationBlock, editions, entry, macroName, profilesLine, renderInline, tableHeader, where } from "./build-cv-data.mjs";
+import {
+  affiliationBlock,
+  bibFilter,
+  bibPrefix,
+  bibSections,
+  editions,
+  entry,
+  macroName,
+  profilesLine,
+  renderInline,
+  tableHeader,
+  where,
+} from "./build-cv-data.mjs";
 
 test("an underscore inside a word stays literal and does not open a span", () => {
   // The probe that exposed the bug: a_b used to pair with the opener of
@@ -138,4 +150,140 @@ test("an empty or absent rows list emits no course table", () => {
   const withEmptyRows = entry({ title: "Lecturer", rows: [] });
   assert.equal(withEmptyRows, withoutRows);
   assert.doesNotMatch(withEmptyRows, /\\cvcourses/);
+});
+
+// -----------------------------------------------------------------------------
+// Bibliography sections. A section is a title plus a filter: which BibTeX entry
+// type belongs under which heading is declared in content/cv.yaml, never here
+// and never in cv/cv.tex.
+// -----------------------------------------------------------------------------
+
+test("a section's filter is any of types, all of keywords, none of the excluded", () => {
+  assert.equal(bibFilter({ types: ["article"] }, "x"), "type=article");
+  assert.equal(bibFilter({ types: ["incollection", "book"] }, "x"), "( type=incollection or type=book )");
+  assert.equal(bibFilter({ types: ["inproceedings"], exclude_keywords: ["workshop"] }, "x"), "type=inproceedings and not keyword=workshop");
+  assert.equal(bibFilter({ keywords: ["invited"] }, "x"), "keyword=invited");
+});
+
+test("every BibTeX entry type is expressible, including the ones nobody wrote a filter for", () => {
+  // The point of the redesign: an adopter whose career is datasets or patents
+  // declares a section and it works, with no LaTeX edit.
+  assert.equal(bibFilter({ types: ["dataset", "patent"] }, "x"), "( type=dataset or type=patent )");
+  assert.equal(bibFilter({ types: ["misc"] }, "x"), "type=misc");
+});
+
+test("a section with no filter raises rather than printing the whole bibliography", () => {
+  assert.throws(() => bibFilter({ title: "Everything" }, "publications.sections[0]"), /at least one of/);
+});
+
+test("a filter token that is not a bare word raises before it reaches biblatex", () => {
+  assert.throws(() => bibFilter({ types: ["in proceedings"] }, "x"), /not a usable BibTeX entry type/);
+});
+
+test("an entry type written in upper case raises instead of matching nothing anywhere", () => {
+  // biber lowercases every entry type before testing a filter, and so does the
+  // website's reader, so `type=Article` would select nothing on either side.
+  assert.throws(() => bibFilter({ types: ["Article"] }, "x"), /must be written in lower case/);
+});
+
+test("the numbering letter defaults to the short name's first letter", () => {
+  assert.equal(bibPrefix({ short: "Journal" }), "J");
+  assert.equal(bibPrefix({ short: "Under review" }), "U");
+  assert.equal(bibPrefix({ short: "Chapters", prefix: "B" }), "B");
+});
+
+test("declared sections become the key line and the printed sections, in file order", () => {
+  const [filters, key, body] = bibSections("publications", {
+    sections: [
+      { title: "Journal articles", short: "Journal", types: ["article"] },
+      { title: "Books & chapters", short: "Books", types: ["incollection"] },
+    ],
+  });
+  assert.equal(
+    filters,
+    "\\defbibfilter{Publications1}{type=article}\n" + "\\defbibfilter{Publications2}{type=incollection and not ( type=article )}"
+  );
+  assert.match(key, /J=Journal, B=Books/);
+  assert.match(body, /labelprefix=J[\s\S]*title=\{Journal articles\}, filter=Publications1/);
+  // The heading is escaped on the way into LaTeX like every other prose field.
+  assert.match(body, /title=\{Books \\& chapters\}, filter=Publications2/);
+});
+
+test("a section marked `printed: false` is named for the website and never printed", () => {
+  const [filters, key, body] = bibSections("publications", {
+    sections: [
+      { title: "Journal articles", short: "Journal", types: ["article"] },
+      { title: "Software & artifacts", short: "Software", types: ["misc"], printed: false },
+    ],
+  });
+  assert.doesNotMatch(filters, /\\defbibfilter\{Publications2\}/);
+  assert.doesNotMatch(key, /Software/);
+  assert.doesNotMatch(body, /Software/);
+});
+
+test("a printed section's filter excludes every predicate declared before it", () => {
+  // biblatex tests each filter on its own, so two filters that both accept an
+  // entry both print it - while the website labels it with the FIRST section it
+  // matches. Subtracting the earlier predicates is what makes the two agree.
+  const [filters] = bibSections("publications", {
+    sections: [
+      { title: "Journal articles", short: "Journal", types: ["article"] },
+      { title: "Conference papers", short: "Conference", types: ["inproceedings"], exclude_keywords: ["workshop"] },
+      { title: "Workshop papers", short: "Workshop", types: ["inproceedings"], keywords: ["workshop"] },
+    ],
+  });
+  assert.match(filters, /\{Publications1\}\{type=article\}/);
+  assert.match(filters, /\{Publications2\}\{type=inproceedings and not keyword=workshop and not \( type=article \)\}/);
+  assert.match(
+    filters,
+    /\{Publications3\}\{type=inproceedings and keyword=workshop and not \( type=article \) and not \( type=inproceedings and not keyword=workshop \)\}/
+  );
+});
+
+test("an unprinted section still claims its entries, so the printed ones below it exclude it", () => {
+  // `printed: false` names a group for the website. An entry the website files
+  // there must not be printed again by a section declared after it.
+  const [filters] = bibSections("publications", {
+    sections: [
+      { title: "Software & artifacts", short: "Software", types: ["misc"], printed: false },
+      { title: "Everything else", short: "Other work", exclude_keywords: ["hidden"] },
+    ],
+  });
+  assert.match(filters, /\{Publications2\}\{not keyword=hidden and not \( type=misc \)\}/);
+});
+
+test("an unprinted section is validated too, rather than relabelling the website in silence", () => {
+  // A criteria-less section matches every entry. Placed first, it would take
+  // the whole bibliography's Type column with it on the site while the PDF,
+  // which never prints it, looked untouched.
+  assert.throws(
+    () =>
+      bibSections("publications", {
+        sections: [
+          { title: "Everything", short: "Everything", printed: false },
+          { title: "Journal articles", short: "Journal", types: ["article"] },
+        ],
+      }),
+    /at least one of/
+  );
+  assert.throws(
+    () =>
+      bibSections("publications", {
+        sections: [{ title: "Nameless", types: ["misc"], printed: false }],
+      }),
+    /needs both a title and a short name/
+  );
+});
+
+test("two sections claiming the same numbering letter raise instead of colliding", () => {
+  assert.throws(
+    () =>
+      bibSections("publications", {
+        sections: [
+          { title: "Conference papers", short: "Conference", types: ["inproceedings"] },
+          { title: "Chapters", short: "Chapters", types: ["incollection"] },
+        ],
+      }),
+    /already used by "Conference"/
+  );
 });

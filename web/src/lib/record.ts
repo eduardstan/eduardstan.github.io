@@ -15,6 +15,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
+import { bibSectionFor, keywordList, type BibSection, type CV } from './cv-schema.ts';
 
 /**
  * Repository root — the directory holding `content/cv.yaml`, found by walking up
@@ -59,8 +60,10 @@ export const SOURCES = {
   // `announcements.ts` also runs under plain `node` in the self-check, where
   // that API does not exist.
   posts: 'content/posts',
-  // Read by `src/lib/cv.ts` through Vite's `?raw`, not by `read()` below: it is
-  // named here so there is one registry of where the site's facts come from.
+  // Read twice, on purpose: `src/lib/cv.ts` inlines it through Vite's `?raw`
+  // for the pages, and `cvRecord()` below reads it with `read()` for the
+  // publication declaration the bibliography is matched against — which also
+  // runs under plain `node`, where `?raw` does not exist.
   cv: 'content/cv.yaml',
 } as const;
 
@@ -163,6 +166,12 @@ export interface Publication {
   type: string;
   /** "Journal" / "Conference" / "Thesis" — the label shown in the Type column. */
   kind: string;
+  /**
+   * Whether the entry says it is under review. Read from the entry's own
+   * `keywords`, never from `kind`: `kind` is a display label a declaration may
+   * rename, and this decides whether the entry may be announced at all.
+   */
+  underReview: boolean;
   title: string;
   authors: string[];
   year: number;
@@ -188,36 +197,48 @@ export interface Publication {
   fields: Record<string, string>;
 }
 
-const KINDS: Record<string, string> = {
-  article: 'Journal',
-  inproceedings: 'Conference',
-  incollection: 'Chapter',
-  phdthesis: 'Thesis',
-  mastersthesis: 'Thesis',
-  book: 'Book',
-  techreport: 'Report',
-  online: 'Preprint',
-  // The `@misc` entries in this bibliography are released software packages
-  // filed under DROPS Artifacts. DBLP keys them `data/…`.
-  misc: 'Software',
-};
+let cvCache: CV | undefined;
+
+/** `content/cv.yaml`, parsed once. `cv.ts` reads the same file through `?raw`. */
+const cvRecord = (): CV => (cvCache ??= (parseYaml(read(SOURCES.cv)) as CV) ?? ({} as CV));
 
 /**
- * What to call an entry, following the CV rather than inventing a taxonomy.
+ * The declared groups of `content/publications.bib`, in print order.
  *
- * `cv/cv.tex` sorts the same bibliography with biblatex filters — `type=article`
- * is "Journal articles", `type=inproceedings and keyword=workshop` is "Workshop
- * papers", `type=online and keyword=underreview` is "Under review" — so the
- * entry type plus the keywords the CV already relies on decide the label here
- * too. Nothing is filtered out: the CV's Publications section omits some entry
- * types, but the bibliography is the record and every entry in it is shown.
+ * A repository with no `publications:` block declares no groups, and every
+ * entry is labelled "Other" rather than the build failing: the bibliography is
+ * still shown in full.
  */
-function kindOf(type: string, fields: Record<string, string>): string {
-  const keywords = (fields.keywords ?? '').toLowerCase();
-  if (type === 'online' && keywords.includes('underreview')) return 'Under review';
-  if (type === 'inproceedings' && keywords.includes('workshop')) return 'Workshop';
-  return KINDS[type] ?? 'Other';
+export const publicationSections = (): BibSection[] => cvRecord().publications?.sections ?? [];
+
+/**
+ * What to call an entry: the `short` name of the first section it matches in
+ * `content/cv.yaml`'s `publications:` declaration.
+ *
+ * There is no taxonomy in this file. Which entry type belongs under which name
+ * is a curated opinion, so it is declared once in the interface and read by
+ * both consumers — `cv/cv.tex` prints the same sections in the same order,
+ * translated by `scripts/build-cv-data.mjs`, and neither file names a BibTeX
+ * entry type. Nothing is filtered out here either: an entry matching no
+ * declared section is still shown, labelled "Other", which is the visible sign
+ * that the interface has no group for it yet.
+ */
+export function publicationKind(type: string, fields: Record<string, string>): string {
+  return bibSectionFor(publicationSections(), type, fields.keywords)?.short ?? 'Other';
 }
+
+/**
+ * The keyword an entry states its own under-review status with.
+ *
+ * A manuscript under review is a property of the RECORD, not of the name a
+ * declaration happens to give the group it lands in: `short: Under review` is a
+ * display label an adopter may rewrite in any language, and the rule that keeps
+ * an unannounced manuscript out of the news feed — its `year` is the year it is
+ * aimed at, not a date anything happened on — must survive that rename.
+ * `content/publications.bib` is where the entry says so, so that is where this
+ * reads it.
+ */
+const UNDER_REVIEW = 'underreview';
 
 /** Surname particles that must not be abbreviated away ("D. Della Monica"). */
 const PARTICLES = new Set(['della', 'delle', 'del', 'de', 'di', 'da', 'dos', 'van', 'von', 'la']);
@@ -446,7 +467,8 @@ function toPublication(
   return {
     key,
     type,
-    kind: kindOf(type, fields),
+    kind: publicationKind(type, fields),
+    underReview: keywordList(fields.keywords).includes(UNDER_REVIEW),
     title: deLatex(fields.title ?? ''),
     authors: (fields.author ?? '')
       .split(/\s+and\s+/)

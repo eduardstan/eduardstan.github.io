@@ -17,6 +17,10 @@
 // \cvFieldworkNote, \cvFieldwork, \cvFieldworkRows, \cvFieldworkHeader,
 // \cvFieldworkInline and \cvFieldworkCount without touching this file. See
 // cv/cv.tex for the contract.
+//
+// A top-level key holding `sections:` instead of entries is a bibliography
+// grouping (`publications:`, `talks:`): each becomes \defbibfilter definitions
+// plus \cv<Key>Key and \cv<Key>Sections. It knows no BibTeX entry type either.
 // =============================================================================
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
@@ -200,6 +204,143 @@ function macro(name, body) {
 }
 
 // -----------------------------------------------------------------------------
+// Bibliography sections
+//
+// A section is a title plus a filter. `publications:` and `talks:` in cv.yaml
+// declare them; this translates each one into the biblatex filter it means and
+// into the \printbibliography that prints it. No entry type is named here, so
+// an adopter whose career is books, datasets or patents declares a section and
+// it works - without editing cv/cv.tex.
+// -----------------------------------------------------------------------------
+
+/** A filter token goes into biblatex unbraced, so it must be a bare word. */
+const TOKEN = /^[A-Za-z0-9][A-Za-z0-9.-]*$/;
+
+function token(value, where) {
+  if (!TOKEN.test(String(value ?? ""))) {
+    throw new Error(
+      `${where}: "${value}" is not a usable BibTeX entry type or keyword.\n` +
+        "  It is written straight into a biblatex filter, so it must be a bare word."
+    );
+  }
+  return value;
+}
+
+/**
+ * An entry type, in the one case both consumers can see it in.
+ *
+ * biber lowercases every entry type before a filter is tested against it, and
+ * the website's BibTeX reader does the same, so `type=Article` selects nothing
+ * anywhere. Raising is the difference between an adopter reading this sentence
+ * and an adopter watching a declared section come out empty.
+ */
+function entryType(value, where) {
+  const type = token(value, where);
+  if (type !== String(type).toLowerCase()) {
+    throw new Error(
+      `${where}: "${type}" must be written in lower case.\n` +
+        "  biber lowercases every entry type before testing a filter against it, so a\n" +
+        "  section declaring an upper-case type would match nothing, in the PDF or on the site."
+    );
+  }
+  return type;
+}
+
+/**
+ * The biblatex filter one declared section means: any of `types`, all of
+ * `keywords`, none of `exclude_keywords`. That is the whole grammar.
+ */
+function bibFilter(section, where) {
+  const clauses = [];
+  const types = (section.types ?? []).map((t) => `type=${entryType(t, `${where}.types`)}`);
+  if (types.length === 1) clauses.push(types[0]);
+  else if (types.length) clauses.push(`( ${types.join(" or ")} )`);
+  for (const k of section.keywords ?? []) clauses.push(`keyword=${token(k, `${where}.keywords`)}`);
+  for (const k of section.exclude_keywords ?? []) clauses.push(`not keyword=${token(k, `${where}.exclude_keywords`)}`);
+  if (!clauses.length) {
+    throw new Error(
+      `${where}: a section needs at least one of types, keywords or exclude_keywords.\n` +
+        "  A section with no filter would print the whole bibliography under its own heading."
+    );
+  }
+  return clauses.join(" and ");
+}
+
+/** The numbering letter: declared, or the first letter of the short name. */
+const bibPrefix = (section) =>
+  section.prefix ??
+  String(section.short ?? "")
+    .slice(0, 1)
+    .toUpperCase();
+
+/**
+ * A printed section's filter: its own predicate, minus every predicate declared
+ * before it.
+ *
+ * biblatex evaluates each `\defbibfilter` on its own, so an entry that satisfies
+ * two of them is printed twice - while the website labels it with the FIRST
+ * section it matches. Subtracting the earlier predicates is what makes
+ * first-match-wins hold identically on both sides. Sections carrying
+ * `printed: false` are subtracted too: they claim the entry on the website, so
+ * a printed section below one of them must not claim it again.
+ */
+const afterEarlier = (own, earlier) => [own, ...earlier.map((predicate) => `not ( ${predicate} )`)].join(" and ");
+
+/**
+ * One declared bibliography, as the filters it needs and the two macros cv.tex
+ * calls: the key printed beside the section header, and the sections themselves.
+ *
+ * EVERY declaration is validated, then the printed ones are emitted. A section
+ * carrying `printed: false` is omitted from the PDF; for publications it remains
+ * a name on the website, exactly as `leadership:` is a section the site renders
+ * and the PDF does not. A criteria-less or nameless declaration is an error
+ * rather than a whole-bibliography match in either consumer.
+ */
+function bibSections(key, declaration) {
+  const name = macroName(key);
+  const all = declaration.sections ?? [];
+  const seen = new Map();
+  const earlier = [];
+  const printed = [];
+  const filters = [];
+  const bodies = [];
+  all.forEach((section, index) => {
+    const where = `${key}.sections[${index}]`;
+    if (!section.title || !section.short) {
+      throw new Error(`${where}: a section needs both a title and a short name.`);
+    }
+    const own = bibFilter(section, where);
+    if (section.printed === false) {
+      earlier.push(own);
+      return;
+    }
+    const prefix = bibPrefix(section);
+    if (seen.has(prefix)) {
+      throw new Error(
+        `${where}: numbering prefix "${prefix}" is already used by "${seen.get(prefix)}".\n` +
+          "  Give one of them a different short name, or set `prefix:` on it."
+      );
+    }
+    seen.set(prefix, section.short);
+    printed.push(section);
+    const filter = `${name}${index + 1}`;
+    filters.push(`\\defbibfilter{${filter}}{${afterEarlier(own, earlier)}}`);
+    bodies.push(
+      `\\begin{refcontext}[labelprefix=${escapeLatex(prefix)}]\n` +
+        `\\printbibliography[heading=bibsubheading, title={${arg(section.title)}}, ` +
+        `filter=${filter}, resetnumbers=true]\n` +
+        `\\end{refcontext}`
+    );
+    earlier.push(own);
+  });
+  return [
+    filters.join("\n"),
+    macro(`cv${name}Key`, printed.map((s) => `${escapeLatex(bibPrefix(s))}=${arg(s.short)}`).join(", ")),
+    macro(`cv${name}Sections`, bodies.join("\n\n")),
+  ].filter(Boolean);
+}
+
+// -----------------------------------------------------------------------------
 // The header block
 // -----------------------------------------------------------------------------
 
@@ -294,6 +435,10 @@ function render(cv) {
   // the generator has no idea what any of them mean.
   for (const [key, value] of Object.entries(cv)) {
     if (key === "profile") continue;
+    if (Array.isArray(value?.sections)) {
+      blocks.push(...bibSections(key, value));
+      continue;
+    }
     const rows = Array.isArray(value) ? value : value?.entries;
     if (!Array.isArray(rows)) continue;
     const note = Array.isArray(value) ? [] : [value.note ?? []].flat();
@@ -343,6 +488,6 @@ function main() {
   console.log(`wrote ${rel(OUT_PUBLIC)}`);
 }
 
-export { renderInline, where, editions, affiliationBlock, profilesLine, macroName, tableHeader, entry };
+export { renderInline, where, editions, affiliationBlock, profilesLine, macroName, tableHeader, entry, bibFilter, bibPrefix, bibSections };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();
