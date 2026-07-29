@@ -11,20 +11,14 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import Record from '../../components/Record.astro';
 import SectionHead from '../../components/SectionHead.astro';
-import { dateFormat, getPublishedPosts } from '../../lib/content';
+import { dateFormat, getPublishedPosts, postSource } from '../../lib/content';
+import { profile } from '../../lib/record';
 
 const posts = await getPublishedPosts();
-/**
- * The entry's file as a repository-relative path, which is what every other
- * source record on the site quotes. Astro reports `filePath` relative to the
- * Astro project root (`web/`), so the prefix is put back.
- */
-const sourceOf = (path: string | undefined) =>
-  `web/${(path ?? '').replace(/^(\.\.\/)+/, '')}`;
 const labelsOf = (post: (typeof posts)[number]) => [...post.data.categories, ...post.data.tags];
 const labels = [...new Set(posts.flatMap(labelsOf))];
 
-const description = `${posts.length} posts by Eduard I. Stan.`;
+const description = `${posts.length} posts by ${profile().name}.`;
 ---
 
 <BaseLayout title="Blog" description={description}>
@@ -36,7 +30,7 @@ const description = `${posts.length} posts by Eduard I. Stan.`;
     </p>
   </PageHead>
 
-  <SectionHead source="web/src/content/blog/">Posts</SectionHead>
+  <SectionHead source="content/posts/">Posts</SectionHead>
   <ul class="rows">
     {
       posts.map((post) => (
@@ -63,7 +57,7 @@ const description = `${posts.length} posts by Eduard I. Stan.`;
     {
       posts.map((post) => (
         <p>
-          <b>{sourceOf(post.filePath)}</b> — “{post.data.title}”, dated{' '}
+          <b>{postSource(post.filePath)}</b> — “{post.data.title}”, dated{' '}
           {post.data.date.toISOString().slice(0, 10)}
           {labelsOf(post).length > 0 && <>, filed under {labelsOf(post).join(', ')}</>}.
         </p>

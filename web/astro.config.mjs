@@ -1,4 +1,5 @@
 // @ts-check
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'astro/config';
 import { unified } from '@astrojs/markdown-remark';
 import mdx from '@astrojs/mdx';
@@ -6,8 +7,17 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { parse } from 'yaml';
 import { consistency, report } from './src/lib/consistency.ts';
 import { legacyRedirects } from './src/lib/legacy-urls.ts';
+
+const content = parse(readFileSync(new URL('../content/cv.yaml', import.meta.url), 'utf8'));
+const site = content?.profile?.site;
+if (!site) {
+  throw new Error(
+    'Missing `profile.site` in `content/cv.yaml`: set it to the origin where this site is published (see `content/README.md`).',
+  );
+}
 
 /**
  * The consistency gate, with teeth.
@@ -36,7 +46,7 @@ function consistencyGate() {
 
 // https://docs.astro.build/en/reference/configuration-reference/
 export default defineConfig({
-  site: 'https://eduardstan.github.io',
+  site,
   // Addresses the Jekyll site published and this one does not generate. See
   // `src/lib/legacy-urls.ts` for why they are written down rather than derived.
   redirects: legacyRedirects,

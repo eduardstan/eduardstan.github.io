@@ -31,12 +31,12 @@ const STRANDS: Omit<Strand, 'absent'>[] = [
   {
     title: 'Interpretable AI',
     body: 'Formal logic and symbolic AI used to make learned models inspectable: temporal decision trees and forests, rule extraction, and explanations that can be checked rather than taken on trust.',
-    evidence: ['_pages/about.md', '_bibliography/papers.bib'],
+    evidence: ['content/cv.yaml', 'content/publications.bib'],
   },
   {
     title: 'Temporal and logic methods',
     body: 'Modal and interval temporal logic as a learning language — tableau systems, fuzzy generalisations, model checking, and modal symbolic learning over time series, audio and sensor streams.',
-    evidence: ['_bibliography/papers.bib'],
+    evidence: ['content/publications.bib'],
   },
   {
     title: 'Agentic AI',
@@ -45,7 +45,7 @@ const STRANDS: Omit<Strand, 'absent'>[] = [
     // project, because the CV does not draw that link. Do not reintroduce that
     // framing here or anywhere else on the site.
     body: 'Systems that plan and act, not only predict. Taught rather than published so far: it runs through two Bicocca courses, and the nearest work in the record is on strategic reasoning and automated synthesis for multi-agent systems.',
-    evidence: ['cv/cv.yaml'],
+    evidence: ['content/cv.yaml'],
   },
 ];
 

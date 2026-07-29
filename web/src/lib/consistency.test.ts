@@ -43,7 +43,7 @@ assert.ok(frontiers.excused!.because.length > 20, 'an excuse with no reason is a
 // Both sides, with a line to go to. An error message that makes the reader hunt
 // is an error message that gets the gate switched off.
 assert.equal(frontiers.sides.length, 2);
-for (const side of frontiers.sides) assert.match(side.source, /^cv\/cv\.yaml:\d+$/);
+for (const side of frontiers.sides) assert.match(side.source, /^content\/cv\.yaml:\d+$/);
 
 // Exceptions expire. Read the same data on a day past the `until` and the
 // finding comes back as a contradiction, with the expiry named.

@@ -1,6 +1,6 @@
 name: Build CV
 
-# Builds the PDF CV from cv/cv.yaml + cv/cv.tex and uploads it as an artifact.
+# Builds the PDF CV from content/cv.yaml + cv/cv.tex and uploads it as an artifact.
 #
 # This workflow deliberately does NOT deploy or publish the PDF: deploy.yml builds
 # the same document and stages it for the Astro site. This workflow only provides
@@ -13,16 +13,20 @@ on:
       - main
     paths:
       - "cv/**"
-      - "_bibliography/papers.bib"
+      - "content/**"
       - "scripts/build-cv-data.mjs"
       - "scripts/build-cv-data.test.mjs"
+      - "scripts/check-cv-baseline.sh"
+      - "data/cv-baseline/**"
       - ".github/workflows/cv.yml"
   pull_request:
     paths:
       - "cv/**"
-      - "_bibliography/papers.bib"
+      - "content/**"
       - "scripts/build-cv-data.mjs"
       - "scripts/build-cv-data.test.mjs"
+      - "scripts/check-cv-baseline.sh"
+      - "data/cv-baseline/**"
       - ".github/workflows/cv.yml"
   workflow_dispatch:
 
@@ -53,6 +57,11 @@ jobs:
       - name: Check generated cv-data.tex is up to date
         run: node scripts/build-cv-data.mjs --check
 
+      - name: Install PDF inspection tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes poppler-utils
+
       # xelatex is required: the CV uses academicons, which needs TU encoding.
       # texlive_version is pinned to 2024: the "latest"/2025 images ship
       # academicons v1.9.6-2, which switched to a fontspec name lookup for
@@ -68,6 +77,9 @@ jobs:
           working_directory: cv
           latexmk_use_xelatex: true
           texlive_version: "2024"
+
+      - name: Check the printed CV baseline
+        run: bash scripts/check-cv-baseline.sh
 
       - name: Upload the PDF
         uses: actions/upload-artifact@v4

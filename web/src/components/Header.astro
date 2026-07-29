@@ -20,11 +20,14 @@ const links = [
 const normalise = (path: string) => (path.endsWith('/') ? path : `${path}/`);
 const current = normalise(Astro.url.pathname);
 const isCurrent = (href: string) => current.startsWith(normalise(href));
-const { name } = profile();
+// The brand is derived like everything else: the name and the broadest
+// affiliation the CV states. Nothing here is written about a person.
+const { name, affiliation } = profile();
+const where = affiliation.at(-1);
 ---
 
 <header class="bar" data-pagefind-ignore>
-  <a class="label who" href="/">{name} / Milano-Bicocca</a>
+  <a class="label who" href="/">{name}{where && ` / ${where}`}</a>
   <nav aria-label="Main" class="label">
     {
       links.map((link) => (

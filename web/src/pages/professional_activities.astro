@@ -1,50 +1,50 @@
 ---
 /**
- * Editorial, committee and reviewing service, rendered from `cv/cv.yaml`'s
+ * Editorial, committee and reviewing service, rendered from `content/cv.yaml`'s
  * `service[]` — the same list the printed CV is generated from.
  *
- * The Jekyll site kept its own copy of these facts in
- * `_pages/professional_activities.md`. It was a third transcription of one list,
- * it had drifted from the file the CV is built from, and it is gone.
- * `service[]` is the record.
+ * The Jekyll site kept its own copy of these facts in a hand-written page. It
+ * was a third transcription of one list, it had drifted from the file the CV is
+ * built from, and it is gone. `service[]` is the record.
  *
- * Entries are grouped by `role` in the order the roles first appear in the file,
- * so the grouping is the file's own and not an ordering invented here. Nothing
- * is filtered: every entry in `service[]` is on this page.
+ * Entries are grouped by `title` in the order the roles first appear in the
+ * file, so the grouping is the file's own and not an ordering invented here.
+ * Nothing is filtered: every entry in `service[]` is on this page.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import Record from '../components/Record.astro';
 import SectionHead from '../components/SectionHead.astro';
-import { cv, CV_SOURCE, keysOf, serviceGroups, type ServiceEntry } from '../lib/cv';
+import { CV_SOURCE, editionYear, keysOf, service, serviceGroups, type Entry } from '../lib/cv';
 import { inline } from '../lib/inline';
 
 // The same grouping the home page's service column uses, so the two pages
 // cannot disagree about a list they both read from `service[]`.
+const roles = service();
 const groups = serviceGroups();
 
 /** The editions an entry records, as the years the file lists. */
-const editions = (entry: ServiceEntry) => (entry.years ?? []).map((year) => year.year).join(', ');
+const editions = (entry: Entry) => (entry.years ?? []).map(editionYear).join(', ');
 
 /** Entries with no term and no editions, so nothing to print in the date column. */
-const noTerm = cv.service.filter((entry) => !entry.dates && !entry.years?.length);
+const noTerm = roles.filter((entry) => !entry.dates && !entry.years?.length);
 /** Of those, the ones whose only date at all is the day the invitation landed. */
 const announcedOnly = noTerm.filter((entry) => entry.announced);
 /** And the ones the file gives no date of any kind. */
 const dateless = noTerm.filter((entry) => !entry.announced);
-const ranked = cv.service.filter((entry) => entry.metric);
-const linkedRanks = cv.service.filter((entry) => entry.rank_url);
+const ranked = roles.filter((entry) => entry.metric);
+const linkedRanks = roles.filter((entry) => entry.rank_url);
 
 const description =
   `Editorial boards, conference committees and journal reviewing — ` +
-  `${cv.service.length} roles at ${new Set(cv.service.map((entry) => entry.venue)).size} venues, ` +
+  `${roles.length} roles at ${new Set(roles.map((entry) => entry.org)).size} venues, ` +
   `read from ${CV_SOURCE} at build time.`;
 ---
 
 <BaseLayout title="Professional activities" description={description}>
   <PageHead title="Professional activities">
     <p class="blurb">
-      <b>{cv.service.length} service roles</b>, grouped by role and read from <b>{CV_SOURCE}</b> when
+      <b>{roles.length} service roles</b>, grouped by role and read from <b>{CV_SOURCE}</b> when
       this page was built — the same file the printed CV is generated from. Where the file records a
       ranking it also records where that ranking is published, so every badge below links to the CORE
       portal or SCImago entry behind it. Turn <b>inspect sources</b> on, in the bar above, to see what
@@ -63,9 +63,9 @@ const description =
             <li>
               <span class="k">
                 {entry.url ? (
-                  <a href={entry.url} set:html={inline(entry.venue)} />
+                  <a href={entry.url} set:html={inline(entry.org)} />
                 ) : (
-                  <Fragment set:html={inline(entry.venue)} />
+                  <Fragment set:html={inline(entry.org)} />
                 )}
                 {entry.metric &&
                   (entry.rank_url ? (
@@ -73,7 +73,7 @@ const description =
                   ) : (
                     <span class="rank" set:html={inline(entry.metric)} />
                   ))}
-                {entry.section && <span class="sub" set:html={inline(entry.section)} />}
+                {entry.detail && <span class="sub" set:html={inline(entry.detail)} />}
               </span>
               <span class="v">
                 {entry.items && (
@@ -93,7 +93,7 @@ const description =
         <Record>
           <p>
             <b>{CV_SOURCE}</b> — the {group.entries.length} <b>service[]</b>{' '}
-            {group.entries.length === 1 ? 'entry' : 'entries'} whose <b>role</b> is “{group.role}”,
+            {group.entries.length === 1 ? 'entry' : 'entries'} whose <b>title</b> is “{group.role}”,
             in file order. Keys read: {keysOf(group.entries)}.
             {group.entries.some((entry) => entry.years?.length) && (
               <>
@@ -114,24 +114,24 @@ const description =
 
   <Record>
     <p>
-      <b>{CV_SOURCE}</b> — <b>service[]</b>, {cv.service.length} entries grouped into {groups.length}
+      <b>{CV_SOURCE}</b> — <b>service[]</b>, {roles.length} entries grouped into {groups.length}
       {' '}roles ({groups.map((group) => `${group.role}: ${group.entries.length}`).join(', ')}). The
-      grouping is by the <b>role</b> field and the order is the order those roles first appear in the
+      grouping is by the <b>title</b> field and the order is the order those roles first appear in the
       file; no entry is filtered out and none is relabelled.
     </p>
     <p>
-      {ranked.length} of {cv.service.length} entries carry a <b>metric</b>, and {linkedRanks.length}
+      {ranked.length} of {roles.length} entries carry a <b>metric</b>, and {linkedRanks.length}
       {' '}carry the <b>rank_url</b> the badge links to. The badge text is the <b>metric</b> field verbatim
       — “{[...new Set(ranked.map((entry) => entry.metric))].join('”, “')}” — not a rank computed here.
     </p>
     <p>
       {noTerm.length} entries state neither <b>dates</b> nor <b>years[]</b>, so the column on the right
       is empty for them. {announcedOnly.length} of those carry an <b>announced</b> day ({
-        announcedOnly.map((entry) => entry.venue).join('; ')
+        announcedOnly.map((entry) => entry.org).join('; ')
       }), which is the date the <a href="/news/">news feed</a> announces the invitation on — the day it
       was accepted, not a term of service, so it is not printed here as one. The remaining {
         dateless.length
-      } carry no date of any kind ({dateless.map((entry) => entry.venue).join('; ')}), and are shown
+      } carry no date of any kind ({dateless.map((entry) => entry.org).join('; ')}), and are shown
       undated rather than given a year the file does not state.
     </p>
   </Record>

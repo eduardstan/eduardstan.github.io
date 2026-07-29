@@ -5,15 +5,27 @@
  *
  * `src/lib/cv.ts` itself cannot be imported here: it reads the YAML through
  * Vite's `?raw`, which only exists inside a Vite/Astro build. So the shape it
- * declares is asserted against the real `cv/cv.yaml` instead — which is the
+ * declares is asserted against the real `content/cv.yaml` instead — which is the
  * failure being guarded against anyway ("the file changed and the page now
- * renders blanks"), and the reader's own two-line body is checked as text.
+ * renders blanks"), and the reader's own two-line body is checked as text. The
+ * pure half of the module lives in `cv-schema.ts` and IS imported, because
+ * everything that reads the file under plain node shares it.
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { inline } from './inline.ts';
+import {
+  editionYear,
+  entriesOf,
+  groupByTitle,
+  isEditorial,
+  noteOf,
+  sections,
+  type CV,
+  type Entry,
+} from './cv-schema.ts';
 import { SOURCES } from './record.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -25,94 +37,151 @@ const root = fileURLToPath(new URL('../../../', import.meta.url));
 // dist/.prerender/ and the relative path follows the bundle. This has already
 // cost one build cycle; the guard is cheaper than the next one.
 const reader = readFileSync(fileURLToPath(new URL('./cv.ts', import.meta.url)), 'utf8');
-assert.match(reader, /cv\/cv\.yaml\?raw/, 'cv.ts must read the YAML through Vite `?raw`');
+assert.match(reader, /content\/cv\.yaml\?raw/, 'cv.ts must read the YAML through Vite `?raw`');
 assert.doesNotMatch(
   reader,
   /readFileSync\(|new URL\(/,
   'cv.ts must not resolve cv.yaml from import.meta.url — it fails at prerender',
 );
-assert.equal(SOURCES.cv, 'cv/cv.yaml', 'the CV source is registered in SOURCES');
+assert.equal(SOURCES.cv, 'content/cv.yaml', 'the CV source is registered in SOURCES');
 
 // --------------------------------------------------------------- the data ---
 
-const cv = parse(readFileSync(root + SOURCES.cv, 'utf8'));
+const cv = parse(readFileSync(root + SOURCES.cv, 'utf8')) as CV;
 
-// Every field /cv/ renders. A missing one is a silently blank section.
 const text = (value: unknown, what: string) =>
   assert.ok(
     typeof value === 'string' && value.trim().length > 0,
     `${what}: not a non-empty string`,
   );
 
-text(cv.research_focus, 'research_focus');
-text(cv.short_bio, 'short_bio');
+// -------------------------------------------------------------- profile -----
+// Everything the site's masthead, footer and front page are built from, and the
+// four fields the printed CV's header block is built from. A missing one is a
+// silently blank line at the top of both.
+const { profile } = cv;
+text(profile.name, 'profile.name');
+text(profile.headline, 'profile.headline');
+text(profile.place, 'profile.place');
+text(profile.email, 'profile.email');
+text(profile.bio?.short, 'profile.bio.short');
+text(profile.bio?.long, 'profile.bio.long');
+text(profile.focus, 'profile.focus');
+text(profile.footer, 'profile.footer');
+text(profile.portrait, 'profile.portrait');
 
-for (const appointment of cv.appointments) {
-  text(appointment.role, 'appointments[].role');
-  text(appointment.organisation, 'appointments[].organisation');
-  text(appointment.dates, 'appointments[].dates');
-}
-for (const degree of cv.education) {
-  text(degree.degree, 'education[].degree');
-  text(degree.institution, 'education[].institution');
-  text(degree.dates, 'education[].dates');
+// `affiliation` is a LIST because a cross-appointment is a list. The printed
+// header sets the primary one and nothing here assumes a single employer.
+assert.ok(Array.isArray(profile.affiliation), 'profile.affiliation must be a list');
+assert.ok(profile.affiliation!.length > 0, 'profile.affiliation is empty');
+for (const entry of profile.affiliation!) text(entry.label, 'profile.affiliation[].label');
+
+// `links` holds IDs, not URLs. The four address templates live once in
+// `record.ts` and once in `scripts/build-cv-data.mjs`; a URL here would be a
+// third copy and would render as its own label in the footer.
+for (const [kind, id] of Object.entries(profile.links ?? {})) {
+  text(id, `profile.links.${kind}`);
+  assert.doesNotMatch(id!, /^https?:\/\//, `profile.links.${kind} is a URL, not an ID`);
 }
 
-const blocks = Object.entries(cv.teaching) as [string, Record<string, any>][];
-assert.ok(blocks.length >= 3, 'teaching lost a block');
-const courses = blocks.flatMap(([, block]) => block.courses);
-for (const [key, block] of blocks) {
-  text(block.organisation, `teaching.${key}.organisation`);
-  text(block.role, `teaching.${key}.role`);
-  text(block.dates, `teaching.${key}.dates`);
-  assert.ok(block.courses?.length > 0, `teaching.${key}: no courses`);
+// -------------------------------------------------------------- sections ----
+// Every top-level list is a section by construction, in both readers. The
+// generator names none of them and neither does this: what is asserted is that
+// the sections the website has routes for are present and shaped.
+const named = sections(cv).map(([key]) => key);
+for (const key of [
+  'appointments',
+  'education',
+  'teaching',
+  'supervision',
+  'awards',
+  'service',
+  'projects',
+  'languages',
+  'leadership',
+])
+  assert.ok(named.includes(key), `content/cv.yaml lost the ${key} section`);
+
+// One entry shape, one required field, everywhere.
+for (const [key, section] of sections(cv)) {
+  for (const entry of entriesOf(section)) {
+    text(entry.title, `${key}[].title`);
+  }
 }
-// /cv/ separates the current contact-hours total from the all-blocks one by
-// this test; with no block running to Present it would print a current load of 0.
+
+const appointments = entriesOf(cv.appointments);
+const education = entriesOf(cv.education);
+const teaching = entriesOf(cv.teaching);
+const supervision = entriesOf(cv.supervision);
+const awards = entriesOf(cv.awards);
+const service = entriesOf(cv.service);
+const projects = entriesOf(cv.projects);
+const languages = entriesOf(cv.languages);
+const leadership = entriesOf(cv.leadership);
+
+for (const entry of [...appointments, ...education]) {
+  text(entry.org, 'appointments/education[].org');
+  text(entry.dates, 'appointments/education[].dates');
+}
+
+// A `rows:` table is the entry's own keys, in the order they are written, and
+// that order IS the column order of the same table in the printed CV. Reordering
+// two keys reorders two columns, silently, so the key set is asserted here.
+const courses = teaching.flatMap((block) => block.rows ?? []);
+assert.ok(teaching.length >= 3, 'teaching lost an entry');
+for (const block of teaching) {
+  text(block.org, 'teaching[].org');
+  text(block.dates, 'teaching[].dates');
+  assert.ok((block.rows ?? []).length > 0, `teaching "${block.org}": no rows`);
+  for (const row of block.rows ?? [])
+    assert.deepEqual(
+      Object.keys(row),
+      ['course', 'programme', 'topics', 'hours'],
+      `teaching "${block.org}": row keys are the printed table's columns, in this order`,
+    );
+}
+// /cv/ separates the current contact-hours total from the all-posts one by this
+// test; with no post running to Present it would print a current load of 0.
 assert.ok(
-  blocks.some(([, block]) => /present\s*$/i.test(block.dates)),
-  'no teaching block dates run to Present',
+  teaching.some((block) => /present\s*$/i.test(block.dates ?? '')),
+  'no teaching post dates run to Present',
 );
-for (const course of courses) {
-  text(course.course, 'course.course');
-  text(course.programme, 'course.programme');
-  text(course.topics, 'course.topics');
-  // The page sums the leading number of this field into a contact-hours total,
-  // so a field that stops starting with a number would print NaN.
+for (const row of courses) {
+  // The page sums the leading number of this column into a contact-hours total,
+  // so a value that stopped starting with a number would print NaN.
   assert.ok(
-    Number.isFinite(parseInt(course.hours, 10)),
-    `${course.course}: hours "${course.hours}" does not start with a number`,
+    Number.isFinite(parseInt(row.hours, 10)),
+    `${row.course}: hours "${row.hours}" does not start with a number`,
   );
 }
 
-text(cv.supervision.summary, 'supervision.summary');
-text(cv.supervision.topic_coverage, 'supervision.topic_coverage');
-for (const row of cv.supervision.breakdown) {
-  text(row.level, 'supervision.breakdown[].level');
-  text(row.notes, 'supervision.breakdown[].notes');
+// A section written as a map: a `note` above its `entries`.
+assert.equal(noteOf(cv.supervision).length, 2, 'supervision lost a note paragraph');
+for (const row of supervision) {
+  text(row.detail, 'supervision.entries[].detail');
   // "1" is quoted in the file precisely so it stays a string; "10+" is not a
   // number at all. Either way the page prints it verbatim.
-  text(String(row.count), 'supervision.breakdown[].count');
+  text(String(row.count), 'supervision.entries[].count');
+  assert.deepEqual(
+    Object.keys(row),
+    ['title', 'count', 'detail'],
+    "supervision entry keys are the printed table's columns, in this order",
+  );
 }
 
-for (const award of cv.awards) {
-  text(award.title, 'awards[].title');
-  text(award.detail, 'awards[].detail');
-}
-// `service[]` feeds /professional_activities/, which groups by `role` and hangs
-// a linked rank badge off `metric`. A missing role is a section with no heading;
-// a `metric` with no `rank_url` is a badge that claims a ranking and cannot show
-// where it is published.
-assert.ok(cv.service.length >= 15, `service[] lost entries: ${cv.service.length}`);
-for (const entry of cv.service) {
-  text(entry.role, 'service[].role');
-  text(entry.venue, 'service[].venue');
+for (const award of awards) text(award.detail, 'awards[].detail');
+
+// `service[]` feeds /professional_activities/, which groups by `title` and hangs
+// a linked rank badge off `metric`. A `metric` with no `rank_url` is a badge that
+// claims a ranking and cannot show where it is published.
+assert.ok(service.length >= 15, `service[] lost entries: ${service.length}`);
+for (const entry of service) {
+  text(entry.org, 'service[].org');
   if (entry.metric) {
-    text(entry.metric, `service[].metric (${entry.venue})`);
     assert.match(
       entry.rank_url ?? '',
       /^https:\/\//,
-      `service[] "${entry.venue}" states a metric but no rank_url for the badge to link to`,
+      `service[] "${entry.org}" states a metric but no rank_url for the badge to link to`,
     );
   }
   // An entry states a term (`dates`) or the editions it served (`years[]`) or
@@ -120,74 +189,69 @@ for (const entry of cv.service) {
   // says so rather than inventing one. What it may not do is state both.
   assert.ok(
     !(entry.dates && entry.years?.length),
-    `service[] "${entry.venue}" states both dates and years[]; the page shows one column`,
+    `service[] "${entry.org}" states both dates and years[]; the page shows one column`,
   );
+  // An edition is a bare year, or a map when it carries an announcement date.
+  // The common case does not pay for the rare one.
   for (const edition of entry.years ?? []) {
+    const year = editionYear(edition);
     assert.ok(
-      Number.isInteger(edition.year) && edition.year > 2000,
-      `service[] "${entry.venue}": implausible edition year ${edition.year}`,
+      Number.isInteger(year) && year > 2000,
+      `service[] "${entry.org}": implausible edition year ${year}`,
     );
+    if (typeof edition === 'object')
+      assert.ok(
+        edition.announced,
+        `service[] "${entry.org}" ${year}: a map with no announced date`,
+      );
   }
 }
 // Decision: ICLR is one role recorded as Program Committee, not a per-year split
 // between "Reviewer" and "Programme Committee".
-const iclr = cv.service.filter((entry: Record<string, any>) => /\(ICLR\)/.test(entry.venue));
+const iclr = service.filter((entry) => /\(ICLR\)/.test(entry.org ?? ''));
 assert.equal(iclr.length, 1, `ICLR must be one service entry, found ${iclr.length}`);
-assert.equal(iclr[0].role, 'Program Committee', `ICLR role is "${iclr[0].role}"`);
+assert.equal(iclr[0].title, 'Program Committee', `ICLR role is "${iclr[0].title}"`);
 // Frontiers: appointed Mar 2024, announced 2025-03-03. Both are true and the
 // page prints the first; a "fix" that collapses them loses one of the two facts.
-const frontiers = cv.service.find((entry: Record<string, any>) => /^Frontiers/.test(entry.venue))!;
+const frontiers = service.find((entry) => /^Frontiers/.test(entry.org ?? ''))!;
 assert.equal(frontiers.dates, 'Mar 2024–Present', `Frontiers dates are "${frontiers.dates}"`);
-assert.ok(frontiers.announced.startsWith('2025-03-03'), 'Frontiers lost its announcement date');
+assert.ok(frontiers.announced!.startsWith('2025-03-03'), 'Frontiers lost its announcement date');
 
 // The home page and /professional_activities/ both render `service[]` through
-// `serviceGroups()` in cv.ts. The grouping is asserted here against the same
-// YAML, so a change that makes one page's grouping lose entries fails the build
-// rather than making the two pages disagree again — which is exactly what
-// happened while the home page read `_pages/professional_activities.md`.
-const groups: { role: string; entries: any[] }[] = [];
-for (const entry of cv.service) {
-  const group = groups.find((candidate) => candidate.role === entry.role);
-  if (group) group.entries.push(entry);
-  else groups.push({ role: entry.role, entries: [entry] });
-}
+// `groupByTitle()`. The grouping is asserted here against the same YAML, so a
+// change that makes one page's grouping lose entries fails the build rather than
+// making the two pages disagree again.
+const groups = groupByTitle(service);
 assert.equal(
   groups.reduce((total, group) => total + group.entries.length, 0),
-  cv.service.length,
-  'grouping service[] by role dropped entries',
+  service.length,
+  'grouping service[] by title dropped entries',
 );
 assert.equal(
   new Set(groups.map((group) => group.role)).size,
   groups.length,
   'duplicate role group',
 );
-// The home page's headline figure. `/\beditor\b/i` over the role field is the
+// The home page's headline figure. `/\beditor\b/i` over the title field is the
 // whole rule, so it must select the editorships and nothing else.
-const editorial = cv.service.filter((entry: Record<string, any>) => /\beditor\b/i.test(entry.role));
+const editorial = service.filter((entry) => isEditorial(entry.title));
 assert.equal(editorial.length, 2, `expected 2 editorial boards, got ${editorial.length}`);
 assert.ok(
-  editorial.every((entry: Record<string, any>) => entry.role === 'Associate Editor'),
+  editorial.every((entry) => entry.title === 'Associate Editor'),
   'the editorial rule selected a role that is not an editorship',
 );
 
 // `projects[]` feeds /projects/, including the funding figures the printed CV
 // deliberately omits — the reason they are in this file at all.
-assert.equal(cv.projects.length, 8, `expected 8 research projects, got ${cv.projects.length}`);
-for (const project of cv.projects) {
-  text(project.title, 'projects[].title');
+assert.equal(projects.length, 8, `expected 8 research projects, got ${projects.length}`);
+for (const project of projects) {
   text(project.detail, 'projects[].detail');
   text(project.dates, 'projects[].dates');
   text(project.funding, `projects[].funding (${project.title})`);
 }
 
-for (const language of cv.languages) {
-  text(language.name, 'languages[].name');
-  text(language.level, 'languages[].level');
-}
-for (const role of cv.archive.leadership) {
-  text(role.role, 'archive.leadership[].role');
-  text(role.detail, 'archive.leadership[].detail');
-}
+for (const language of languages) text(language.detail, 'languages[].detail');
+for (const role of leadership) text(role.detail, 'leadership[].detail');
 
 // --------------------------------------------------------------- the markup ---
 
@@ -211,71 +275,28 @@ assert.equal(inline('[x](https://a/"onerror=b)'), '<a href="https://a/&quot;oner
 
 // The real prose: both markers render, and no delimiter survives into the page.
 assert.ok(
-  inline(cv.short_bio).includes('<b>') && inline(cv.short_bio).includes('<i>'),
-  'short_bio lost its emphasis',
+  inline(profile.bio!.short!).includes('<b>') && inline(profile.bio!.short!).includes('<i>'),
+  'profile.bio.short lost its emphasis',
 );
 
 // Every string the page prints — the same field set the LaTeX generator routes
 // through `renderInline` — goes through `inline()`, so markup added to any of
-// them must render rather than print its delimiters.
+// them must render rather than print its delimiters. Because there is one entry
+// shape, this is now every value of every entry of every section, with no list
+// of field names to fall behind the file.
+const stringsOf = (entry: Entry): unknown[] => [
+  ...Object.values(entry).filter((value) => typeof value === 'string'),
+  ...(entry.items ?? []),
+  ...(entry.rows ?? []).flatMap((row) => Object.values(row)),
+];
 const rendered = [
-  cv.research_focus,
-  cv.short_bio,
-  cv.supervision.summary,
-  cv.supervision.topic_coverage,
-  ...cv.appointments.flatMap((row: Record<string, any>) => [
-    row.role,
-    row.organisation,
-    row.dates,
-    row.location,
-    ...(row.items ?? []),
-  ]),
-  ...cv.education.flatMap((row: Record<string, any>) => [
-    row.degree,
-    row.institution,
-    row.dates,
-    row.location,
-  ]),
-  ...blocks.flatMap(([, block]) => [block.organisation, block.role, block.location, block.dates]),
-  ...courses.flatMap((course: Record<string, any>) => [
-    course.course,
-    course.programme,
-    course.topics,
-    course.hours,
-  ]),
-  ...cv.supervision.breakdown.flatMap((row: Record<string, any>) => [
-    row.level,
-    row.notes,
-    String(row.count),
-  ]),
-  ...cv.awards.flatMap((row: Record<string, any>) => [
-    row.title,
-    row.detail,
-    row.dates,
-    ...(row.items ?? []),
-  ]),
-  ...cv.service.flatMap((row: Record<string, any>) => [
-    row.role,
-    row.venue,
-    row.section,
-    row.metric,
-    row.dates,
-    ...(row.items ?? []),
-  ]),
-  ...cv.projects.flatMap((row: Record<string, any>) => [
-    row.title,
-    row.detail,
-    row.dates,
-    row.funding,
-    ...(row.items ?? []),
-  ]),
-  ...cv.languages.flatMap((row: Record<string, any>) => [row.name, row.level]),
-  ...cv.archive.leadership.flatMap((row: Record<string, any>) => [
-    row.role,
-    row.detail,
-    row.dates,
-    row.location,
-    ...(row.items ?? []),
+  profile.bio!.short,
+  profile.bio!.long,
+  profile.focus,
+  profile.footer,
+  ...sections(cv).flatMap(([, section]) => [
+    ...noteOf(section),
+    ...entriesOf(section).flatMap(stringsOf),
   ]),
 ]
   .filter((value): value is string => typeof value === 'string')
@@ -290,9 +311,9 @@ for (const html of rendered) {
 }
 
 console.log(
-  `ok — ${cv.appointments.length} appointments, ${cv.education.length} degrees, ` +
-    `${blocks.length} teaching blocks / ${courses.length} courses, ` +
-    `${cv.supervision.breakdown.length} supervision rows, ${cv.awards.length} awards, ` +
-    `${cv.service.length} service roles, ${cv.projects.length} projects, ` +
-    `${cv.languages.length} languages, ${cv.archive.leadership.length} leadership roles`,
+  `ok — ${sections(cv).length} sections: ${appointments.length} appointments, ` +
+    `${education.length} degrees, ${teaching.length} teaching posts / ${courses.length} courses, ` +
+    `${supervision.length} supervision rows, ${awards.length} awards, ` +
+    `${service.length} service roles, ${projects.length} projects, ` +
+    `${languages.length} languages, ${leadership.length} leadership roles`,
 );

@@ -1,13 +1,15 @@
 import rss from '@astrojs/rss';
 import type { APIRoute } from 'astro';
 import { getPublishedPosts } from '../lib/content';
+import { profile } from '../lib/record';
 
 export const GET: APIRoute = async (context) => {
   const posts = await getPublishedPosts();
+  const { name } = profile();
 
   return rss({
-    title: 'Eduard I. Stan',
-    description: 'Posts by Eduard I. Stan.',
+    title: name,
+    description: `Posts by ${name}.`,
     // `context.site` comes from the `site` option in astro.config.mjs.
     site: context.site!,
     items: posts.map((post) => ({

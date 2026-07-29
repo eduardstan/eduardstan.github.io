@@ -13,20 +13,27 @@ Three dispositions, and nothing is left without one:
 A dropped URL is a decision. A URL that is neither listed nor deliberately dropped is the
 failure this file exists to prevent.
 
+The records these pages are built from moved into `content/` after the cutover (`cv/cv.yaml` →
+`content/cv.yaml`, `_bibliography/papers.bib` → `content/publications.bib`, `cv/pres.bib` →
+`content/talks.bib`, `_pages/about.md` → `content/cv.yaml`'s `profile.bio.long`,
+`web/src/content/blog/` → `content/posts/`). No page address changed: the post ids keep their
+year directory, which is why `content/posts/` has one. The two former `/img/` media addresses
+are deliberately dropped and recorded under Assets.
+
 ## Core pages — all resolve
 
-| URL                                        | Now                                                      |
-| ------------------------------------------ | -------------------------------------------------------- |
-| `/`                                        | resolves — home, from `_pages/about.md` and `cv/cv.yaml` |
-| `/publications/`                           | resolves — 44 entries from `_bibliography/papers.bib`    |
-| `/cv/`                                     | resolves — from `cv/cv.yaml`, with the printed PDF       |
-| `/professional_activities/`                | resolves — from `cv.yaml`'s `service[]`                  |
-| `/news/`                                   | resolves — the generated announcement feed               |
-| `/blog/`                                   | resolves — the two posts                                 |
-| `/404.html`                                | resolves — Astro emits `404.html`; Pages serves it       |
-| `/robots.txt`                              | resolves — rewritten, points at `/sitemap-index.xml`     |
-| `/blog/2024/xai2-manifesto/`               | resolves — same address as before                        |
-| `/blog/2025/latex-mistakes-and-solutions/` | resolves — same address as before                        |
+| URL                                        | Now                                                     |
+| ------------------------------------------ | ------------------------------------------------------- |
+| `/`                                        | resolves — home, from `content/cv.yaml`                 |
+| `/publications/`                           | resolves — 44 entries from `content/publications.bib`   |
+| `/cv/`                                     | resolves — from `content/cv.yaml`, with the printed PDF |
+| `/professional_activities/`                | resolves — from `content/cv.yaml`'s `service[]`         |
+| `/news/`                                   | resolves — the generated announcement feed              |
+| `/blog/`                                   | resolves — the two posts                                |
+| `/404.html`                                | resolves — Astro emits `404.html`; Pages serves it      |
+| `/robots.txt`                              | resolves — rewritten, points at `/sitemap-index.xml`    |
+| `/blog/2024/xai2-manifesto/`               | resolves — same address as before                       |
+| `/blog/2025/latex-mistakes-and-solutions/` | resolves — same address as before                       |
 
 `/talks/`, `/projects/`, `/search/` and the `/publications/{year-asc,type,title}/` orderings
 are new; they take nothing away.
@@ -101,19 +108,22 @@ site rendered the same sentence twice. Redirecting it loses nothing that was tru
 | `/repositories/`                       | listed `torvalds`, `alshedivat`, `jekyll/jekyll` — someone else's repositories |
 | `/_pages/dropdown/`                    | in the old sitemap but already a 404 on the live site                          |
 
-`/projects/` itself is **not** dropped: it resolves, now rendering `cv/cv.yaml`'s
+`/projects/` itself is **not** dropped: it resolves, now rendering `content/cv.yaml`'s
 `projects[]` — the captain's real funded projects.
 
 ## Assets
 
-| URL                                                                                                                                                                                                      | Now                                                                                                                                           |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/assets/pdf/publications/**` (7 PDFs)                                                                                                                                                                   | **resolve** — moved to `web/public/assets/pdf/publications/`, same addresses. They are the captain's own papers and nothing regenerates them. |
-| `/assets/img/eduard.jpg` (+ webp sizes)                                                                                                                                                                  | **dropped** — the same portrait is served at `/img/portrait.jpg`                                                                              |
-| `/assets/img/xai2-manifesto.png`                                                                                                                                                                         | **dropped** — the post's image moved with the post, to `/img/xai2-manifesto.png`                                                              |
-| `/assets/pdf/example_pdf.pdf`                                                                                                                                                                            | **dropped** — al-folio's demo PDF, which the old `/cv/` offered as a download. `/cv/` now offers the real CV.                                 |
-| `/requirements.txt`                                                                                                                                                                                      | **dropped** — a build file that leaked into the published site                                                                                |
-| `/assets/{plotly,video,audio,jupyter,html,bibliography}/**`, `/assets/img/{1..12}.jpg`, `/assets/img/prof_pic*.{jpg,png}`, `/assets/img/publication_preview/*.gif`, `/assets/{css,js,fonts,webfonts}/**` | **dropped** — theme assets and demo content, referenced only by the template pages and drafts that went with them                             |
+| URL                                                                                                                                                                                                      | Now                                                                                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/assets/pdf/publications/**` (7 PDFs)                                                                                                                                                                   | **resolve** — moved to `web/public/assets/pdf/publications/`, same addresses. They are the captain's own papers and nothing regenerates them.                                             |
+| `/assets/img/eduard.jpg` (+ webp sizes)                                                                                                                                                                  | **dropped** — the same portrait is served at `/media/portrait.jpg`                                                                                                                        |
+| `/assets/img/xai2-manifesto.png`                                                                                                                                                                         | **dropped** — the post's image moved with the post, to `/media/xai2-manifesto.png`                                                                                                        |
+| `/img/portrait.jpg`                                                                                                                                                                                      | **dropped** — adopter-owned media moved into `content/media/` and is served at `/media/portrait.jpg`; only this site's pages referenced the old address, and they now use `/media/`       |
+| `/img/xai2-manifesto.png`                                                                                                                                                                                | **dropped** — adopter-owned media moved into `content/media/` and is served at `/media/xai2-manifesto.png`; only this site's pages referenced the old address, and they now use `/media/` |
+| `/favicon.svg`                                                                                                                                                                                           | **dropped** — the adopter-owned favicon moved into `content/media/` and is served at `/media/favicon.svg`; this site's icon link now uses that address                                    |
+| `/assets/pdf/example_pdf.pdf`                                                                                                                                                                            | **dropped** — al-folio's demo PDF, which the old `/cv/` offered as a download. `/cv/` now offers the real CV.                                                                             |
+| `/requirements.txt`                                                                                                                                                                                      | **dropped** — a build file that leaked into the published site                                                                                                                            |
+| `/assets/{plotly,video,audio,jupyter,html,bibliography}/**`, `/assets/img/{1..12}.jpg`, `/assets/img/prof_pic*.{jpg,png}`, `/assets/img/publication_preview/*.gif`, `/assets/{css,js,fonts,webfonts}/**` | **dropped** — theme assets and demo content, referenced only by the template pages and drafts that went with them                                                                         |
 
 ## How to re-check this
 

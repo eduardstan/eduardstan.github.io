@@ -2,16 +2,16 @@
 /**
  * One post.
  *
- * The route is `/blog/<id>/` and the entries live under `src/content/blog/<year>/`,
+ * The route is `/blog/<id>/` and the entries live under `content/posts/<year>/`,
  * so a post's address is `/blog/2024/xai2-manifesto/` — the same address
- * al-folio gives it, which is what `src/lib/announcements.ts` links the feed to.
+ * al-folio gave it, which is what `src/lib/announcements.ts` links the feed to.
  * Renaming those directories changes published URLs.
  */
 import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Record from '../../components/Record.astro';
-import { dateFormat, getPublishedPosts } from '../../lib/content';
+import { dateFormat, getPublishedPosts, postSource } from '../../lib/content';
 
 export const getStaticPaths = (async () => {
   const posts = await getPublishedPosts();
@@ -20,9 +20,7 @@ export const getStaticPaths = (async () => {
 
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
-// Repository-relative, like every other source record on the site: Astro
-// reports `filePath` relative to the Astro project root (`web/`).
-const source = `web/${(post.filePath ?? '').replace(/^(\.\.\/)+/, '')}`;
+const source = postSource(post.filePath);
 const labels = [...post.data.categories, ...post.data.tags];
 ---
 
