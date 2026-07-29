@@ -8,7 +8,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -22,18 +22,27 @@ const syntheticName = 'Alex Newcomer';
 const syntheticDomain = 'alex-newcomer.example';
 const captainSurname = 'Stan';
 const captainDomain = 'eduardstan.github.io';
-const skipped = new Set([
-  '.git',
-  'node_modules',
-  'web/node_modules',
-  'web/dist',
-  'web/.astro',
-  'web/public/media',
-]);
 
-function shouldCopy(source) {
-  const path = relative(root, source).replaceAll('\\', '/');
-  return ![...skipped].some((entry) => path === entry || path.startsWith(`${entry}/`));
+function copyTrackedFiles() {
+  const result = spawnSync('git', ['ls-files', '-z'], {
+    cwd: root,
+    encoding: 'utf8',
+  });
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    if (result.stderr) process.stderr.write(result.stderr);
+    throw new Error(`git ls-files exited with status ${result.status}`);
+  }
+  const paths = result.stdout.split('\0').filter(Boolean);
+  let copied = 0;
+  for (const path of paths) {
+    if (path.startsWith('content/')) continue;
+    const destination = join(copy, path);
+    mkdirSync(dirname(destination), { recursive: true });
+    cpSync(join(root, path), destination, { recursive: true });
+    copied += 1;
+  }
+  return copied;
 }
 
 function run(command, args, options = {}) {
@@ -85,9 +94,15 @@ try {
   process.stdout.write(
     'Cold-start adopter check: this second build proves the template works for someone other than the captain.\n',
   );
-  cpSync(root, copy, { recursive: true, filter: shouldCopy });
+  const trackedCount = copyTrackedFiles();
+  process.stdout.write(
+    `Materialized ${trackedCount} tracked paths; ignored and untracked build outputs were not copied.\n`,
+  );
+  const stagedCv = join(copy, 'web/public/assets/cv.pdf');
+  if (existsSync(stagedCv)) {
+    throw new Error('the tracked-only fixture copied the captain’s staged CV');
+  }
   const content = join(copy, 'content');
-  rmSync(content, { recursive: true, force: true });
   mkdirSync(join(content, 'media'), { recursive: true });
   mkdirSync(join(content, 'posts'), { recursive: true });
   writeFileSync(
@@ -125,6 +140,9 @@ appointments: []
   }
   symlinkSync(dependencies, join(copy, 'web/node_modules'), 'dir');
   run('npm', ['run', 'build'], { cwd: join(copy, 'web'), stdio: 'inherit' });
+  if (existsSync(join(copy, 'web/dist/assets/cv.pdf'))) {
+    throw new Error('the synthetic adopter build published the captain’s staged CV');
+  }
 
   grep(syntheticName, true);
   grep(syntheticDomain, true);

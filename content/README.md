@@ -306,9 +306,10 @@ Everything about *you* is in this directory. Two pieces of prose on the site are
 
 ## Prove a clean handoff
 
-Make the replacement in a throwaway copy of the repository, never in the copy you are preparing
-to publish. Replace `content/` with the smallest example above, empty `publications.bib` and
-`talks.bib`, and your own portrait and favicon, then run `cd web && npm run build`.
+Make the replacement in a clean throwaway checkout of the repository, never in the copy you are
+preparing to publish and never in a filesystem copy carrying ignored build outputs. Replace
+`content/` with the smallest example above, empty `publications.bib` and `talks.bib`, and your own
+portrait and favicon, then run `cd web && npm run build`.
 
 Search the rendered documents in `web/dist/` in both directions: your new name and site domain
 must appear, while the previous owner's name and domain must not. For example:
