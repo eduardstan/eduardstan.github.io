@@ -87,7 +87,7 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
 
 - **Design — Ledger.** A broadsheet: masthead, dateline, three columns, hairline rules,
   monochrome plus one signal blue reserved for machine-readable things. Three faces, three
-  roles: Archivo Black (display), Inter (text), Go Mono (apparatus, and the visual marker
+  roles: Archivo Black (display), Ledger Serif (text), Go Mono (apparatus, and the visual marker
   that something is data rather than prose). All subset and self-hosted from `public/fonts/`;
   no CDN and no network font request.
 - **The inspect switch.** One native checkbox in `BaseLayout.astro`, one general-sibling CSS
