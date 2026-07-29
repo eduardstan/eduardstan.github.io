@@ -24,7 +24,7 @@ Explainable Artificial Intelligence has become a vital area of research as AI sy
 <summary>Click here for details on the areas, describing their open problems and possible solutions.</summary>
 
 <figure>
-  <img src="/img/xai2-manifesto.png" alt="The nine high-level challenge areas of the XAI 2.0 manifesto" />
+  <img src="/media/xai2-manifesto.png" alt="The nine high-level challenge areas of the XAI 2.0 manifesto" />
   <figcaption>XAI 2.0 manifesto: High-level challenges.</figcaption>
 </figure>
 

@@ -30,3 +30,6 @@ cv/build/
 
 # The CV PDF is built by the deploy workflow, never committed.
 web/public/assets/cv.pdf
+
+# Staged from content/media before every astro build; content/ is the source.
+web/public/media/

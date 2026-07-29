@@ -13,10 +13,25 @@ cutover — `docs/url-parity.md` records what every URL it published does now.
 the site reads the repository's own records at build time, so almost any file can change what
 is published. Do not add filters back.
 
-Three root paths survived the cutover because `web/` reads them, not because Jekyll did:
-`_config.yml` (identity and footer accounts, and the landmark `repositoryRoot()` walks up for),
-`_pages/about.md` (biography and affiliation lines) and `_bibliography/`. `cv/` and `scripts/`
-are the CV pipeline. Deleting or renaming any of them breaks the build.
+## `content/` is the interface
+
+**Every adopter-owned record and media asset is in `content/`** — `cv.yaml`,
+`publications.bib`, `talks.bib`, `posts/`, `media/`. `content/README.md` is the documentation
+for that interface, including the two authored-layout exceptions an adopter must review, and is
+written for a stranger adopting the repository, not for us. `web/src/lib/record.ts`'s `SOURCES`
+is the whole list of records the site reads; `record.test.ts` fails if an entry of it ever points
+outside `content/`.
+
+`content/cv.yaml` is also the **repo-root landmark** `repositoryRoot()` walks up for, chosen
+because it is the one file the site cannot run without. `cv/` and `scripts/` are the CV
+pipeline and `cv/cv.tex` is layout only.
+
+**One entry shape, and a top-level list is a section by construction.** `title` is the only
+required field; `org`, `place`, `dates`, `detail`, `url`, `items`, `announced` and the optional
+extras (`metric`, `rank_url`, `years`, `funding`, `count`, `rows`) are the rest.
+`scripts/build-cv-data.mjs` names no section: every list becomes six `\cv<Section>*` macros and
+`cv/cv.tex` prints the ones it has a `\cvpart` line for. Adding a section to the YAML must
+never require editing the generator.
 
 Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commit.
 
@@ -31,33 +46,50 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
   `build_type: legacy`, so it runs its own Jekyll pass over `gh-pages` and strips `_`-prefixed
   directories — including Astro's `_astro/`. Without that file the site publishes with no CSS
   and no JavaScript. `deploy.yml` asserts it is in `dist` before publishing.
-- `web/` reads the repository root's records (`_bibliography/`, `_pages/about.md`, `cv/`,
-  `_config.yml`) at build time through `web/src/lib/record.ts` and `web/src/lib/cv.ts`.
-  `cv.yaml` feeds three routes, not one: `/cv/`, `/professional_activities/` (`service[]`) and
-  `/projects/` (`projects[]`, funding figures included), and `cv/pres.bib` feeds `/talks/`.
-  `record.ts` finds the root by walking up for `_config.yml` rather than from `import.meta.url`,
-  because Astro relocates the bundle during `astro build`. The Ledger design requires every
-  displayed count and source line to be derived there rather than written by hand — see
-  "Notable configuration" in `web/README.md`.
-- The CV and the site share `_bibliography/papers.bib`. The site displays every entry,
+- `web/` reads `content/` at build time through `web/src/lib/record.ts` and
+  `web/src/lib/cv.ts`. `cv.yaml` feeds four routes, not one: `/cv/`, the home page (`profile`,
+  the feed), `/professional_activities/` (`service[]`) and `/projects/` (`projects[]`, funding
+  figures included); `content/talks.bib` feeds `/talks/`. `record.ts` finds the root by walking
+  up for `content/cv.yaml` rather than from `import.meta.url`, because Astro relocates the
+  bundle during `astro build`. The Ledger design requires every displayed count and source line
+  to be derived there rather than written by hand — see "Notable configuration" in
+  `web/README.md`.
+- The CV and the site share `content/publications.bib`. The site displays every entry,
   including under-review manuscripts and software artifacts; `web/README.md` owns that index's
   filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`
-  BibTeX name forms; reading the second as the first silently renames authors.
-- `web/src/lib/cv.ts` reads `cv/cv.yaml` through Vite's `?raw` import, not `node:fs`. Do **not**
-  rewrite it as `readFileSync(new URL('../../../cv/cv.yaml', import.meta.url))`: that builds and
-  then fails at prerender with `ENOENT`, for the same relocation reason as the bullet above.
-  `?raw` inlines the file at build time, so there is no path to resolve; use `record.ts`'s
-  walk-up-for-`_config.yml` only where a whole directory has to be read — or, as
-  `announcements.ts` does, where the module also has to run under plain `node` in a self-check,
-  which `?raw` cannot.
+  BibTeX name forms; reading the second as the first silently renames authors. `VENUE_FIELDS`
+  reads `journaltitle` as well as `journal`: that is what a Better BibTeX BibLaTeX export writes.
+- **Latent, not fixed:** DBLP's `@misc` artifacts carry an unfilled `note = {Accessed on
+YYYY-MM-DD.}`. The website already works around it — `VENUE_FIELDS` tries `publisher` before
+  `note` for exactly this reason — but `cv/cv.tex` has no equivalent, so the placeholder would
+  print verbatim if `@misc` were ever added to its `other` filter. It is not today. Fixing the
+  printed side is a separate task.
+- `web/src/lib/cv.ts` reads `content/cv.yaml` through Vite's `?raw` import, not `node:fs`. Do
+  **not** rewrite it as `readFileSync(new URL('../../../content/cv.yaml', import.meta.url))`:
+  that builds and then fails at prerender with `ENOENT`, for the same relocation reason as the
+  bullet above. `?raw` inlines the file at build time, so there is no path to resolve. Because
+  of that, `cv.ts` cannot be imported by anything that also runs under plain `node`:
+  the shape and the pure functions live in `web/src/lib/cv-schema.ts`, which `announcements.ts`
+  and `consistency.ts` import while reading the file themselves through `record.ts`.
+- **`content/media/` is staged into `web/public/media/`** by the `stage-media` npm script,
+  which npm runs before `dev`, `build` and `preview`. Astro's `publicDir` can only be one
+  directory and `web/public/` holds the fonts and the load-bearing `.nojekyll`. `.gitignore`
+  covers the destination.
 - `web/src/lib/legacy-urls.ts` is the one hand-written list on the site: the addresses the
   Jekyll site published that this one does not generate. It is a historical fact, not a record
   to derive from, and `docs/url-parity.md` explains every entry. Removing one turns a live URL
   into a silent 404.
 - Text spliced into a generated announcement must go through that module's `md()` escaper: the
   bibliography really contains `OVERLAY@AI*IA 2019` and DOIs ending `…-7_26`, which would otherwise
-  be read as markdown emphasis. `cv/pres.bib` is LaTeX like `papers.bib` is, so its fields need
-  `deLatex()` first.
+  be read as markdown emphasis. `content/talks.bib` is LaTeX like `publications.bib` is, so its
+  fields need `deLatex()` first.
+- **The printed CV has a baseline gate, not a byte-identical generated file.**
+  `data/cv-baseline/` holds the extracted text and the page count of the CV as published;
+  `data/cv-baseline/README.md` gives the three commands. A change to `cv.yaml`, the generator or
+  `cv.tex` must leave `pdftotext -layout cv/cv.pdf -` identical to `cv-baseline.txt` at 8 pages,
+  or record the difference there with its reason. `pdftotext -layout` re-quantises a whole page,
+  so a diff that looks like harmless horizontal shifts on unrelated lines is usually a moved page
+  break.
 
 ## The consistency gate
 
@@ -68,8 +100,13 @@ name matching fails in both directions on this repository's data. `web/README.md
 contract. Two things to know before touching it:
 
 - **The Frontiers pair is correct, not a bug.** Appointed Mar 2024, announced 2025-03-03.
-  The gate fires on it and `cv/cv.yaml` carries a declared `except:` for it. Do not "fix"
+  The gate fires on it and `content/cv.yaml` carries a declared `except:` for it. Do not "fix"
   either date; renew or re-argue the exception instead.
+- **The gate names no section.** It walks every top-level list of `content/cv.yaml` and every
+  entry carrying `announced`. That is the point: a gate that named `appointments` and `service`
+  would keep reporting "0 contradictions" over a shrinking number of comparisons after a rename.
+  Prove any change to it both ways — inject a contradiction, confirm the build refuses naming
+  both sides; revert, confirm it passes.
 - Checks joining against the old `_pages/professional_activities.md` or `_news/` were designed
   and deliberately **not** built. Both files are gone; do not recreate a second copy of a fact
   in order to compare it against the first.
@@ -83,6 +120,17 @@ where the announcement demonstrably happened on a date the fact does not otherwi
 (harvested from the old `_news/` before it was deleted); it is optional and additive everywhere, and
 `scripts/build-cv-data.mjs` ignores it, so adding one leaves `cv/generated/cv-data.tex`
 byte-identical — check with `--check`.
+
+**The wording is one table.** `TEMPLATES` at the top of `web/src/lib/announcements.ts` holds one
+canonical sentence per kind and is the only place a sentence literal may live. Grammar: what it
+was, then where; the kind stays on the mono apparatus line and is not repeated in the prose, and
+the venue is the short name. A missing slot must drop its own separator. Zero CSS was added for
+the feed and none should be.
+
+**A manuscript under review does not announce without an explicit `announced:`.** Its `year` is
+the year it is aimed at, not a date anything happened on; the year fallback put five of them
+above every real item on the front page. Give one a submission date and it announces as
+"submitted to {venue}". It is on `/publications/` either way — the bibliography is not filtered.
 
 Dates are shown at the precision their source states and no finer: an item whose source records
 only a year renders as a year. Never widen a date to a day the record does not support. A fact
@@ -105,7 +153,12 @@ drift this design closed.
 - The Frontiers dates — appointed **Mar 2024**, announced **2025-03-03** — are both true and
   both recorded in `cv.yaml`. They are not a bug to reconcile.
 - The al-folio template content (`_projects/`, `_drafts/`, the Einstein pages) was deleted at
-  cutover, not migrated. `/projects/` now renders `cv/cv.yaml`'s real `projects[]`.
+  cutover, not migrated. `/projects/` now renders `content/cv.yaml`'s real `projects[]`.
+- `archive:` is gone, and so are its two orphan strings (`service_notes`, the alternative GDPR
+  sentence). A junk drawer in a file whose premise is "one place per fact" is the disease with a
+  lid on it. `archive.leadership` is now the ordinary top-level section `leadership:`, which the
+  site renders and `cv/cv.tex` does not print — that is the answer to "keep a section off the
+  PDF but on the site".
 - **`LICENSE` stays exactly as it is** — MIT, "Copyright (c) 2022 Maruan Al-Shedivat".
   al-folio's attribution is preserved even though none of its code remains. Changing it is a
   captain decision.
@@ -121,12 +174,12 @@ The CV's facts live in exactly one place and both the PDF and the site are gener
 
 | File                       | Owns                                             |
 | -------------------------- | ------------------------------------------------ |
-| `cv/cv.yaml`               | all CV facts - the single source of truth        |
-| `_bibliography/papers.bib` | all publications, canonical for CV _and_ website |
-| `cv/pres.bib`              | talks and presentations                          |
+| `content/cv.yaml`          | all CV facts - the single source of truth        |
+| `content/publications.bib` | all publications, canonical for CV _and_ website |
+| `content/talks.bib`        | talks and presentations                          |
 | `cv/cv.tex`                | layout and styling only                          |
 
-- `node scripts/build-cv-data.mjs` renders `cv/cv.yaml` into
+- `node scripts/build-cv-data.mjs` renders `content/cv.yaml` into
   `cv/generated/cv-data.tex` (committed, public).
 - `node scripts/build-cv-data.mjs --check` fails when the committed generated
   file is stale; CI runs it, so never hand-edit `cv/generated/`.
@@ -138,7 +191,10 @@ The CV's facts live in exactly one place and both the PDF and the site are gener
   `academicons` needs TU encoding.
 - The prose markup allowed in `cv.yaml` (`**bold**`, `_italic_`, `[text](url)`,
   and the typographic Unicode characters) is documented at the top of that file.
-- `_bibliography/papers.bib` may carry al-folio rendering fields (`abstract`,
+- A long `detail:` runs off the two-column entry line and silently truncates the dates
+  (`2010 – 20`). It is one short line by contract; long text goes in `items:`. Documented in
+  `content/README.md` rather than fixed, because making the line wrap changes the design.
+- `content/publications.bib` may carry rendering fields (`abstract`,
   `pdf`, `html`, `selected`, ...) for the website. `cv.tex` strips them via
   `\DeclareSourcemap` when present, because abstracts can contain raw `%` that
   would break the LaTeX pass. Do not "fix" the .bib to suit LaTeX.

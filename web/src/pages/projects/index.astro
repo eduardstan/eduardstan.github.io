@@ -1,6 +1,6 @@
 ---
 /**
- * Funded research projects, rendered from `cv/cv.yaml`'s `projects[]`.
+ * Funded research projects, rendered from `content/cv.yaml`'s `projects[]`.
  *
  * The `funding` figures are the reason this page reads the YAML rather than a
  * content collection: the comment above `projects:` in that file records that
@@ -15,12 +15,14 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import Record from '../../components/Record.astro';
 import SectionHead from '../../components/SectionHead.astro';
-import { cv, CV_SOURCE, keysOf } from '../../lib/cv';
+import { cv, CV_SOURCE, entriesOf, keysOf } from '../../lib/cv';
 import { inline } from '../../lib/inline';
+import { profile } from '../../lib/record';
 
-const projects = cv.projects;
+const projects = entriesOf(cv.projects);
 const funded = projects.filter((project) => project.funding);
 const running = projects.filter((project) => /present\s*$/i.test(project.dates ?? ''));
+const github = profile().links.find((link) => link.kind === 'github')?.href;
 
 const description =
   `${projects.length} funded research projects, ${running.length} running, ` +
@@ -49,7 +51,7 @@ const description =
             ) : (
               <Fragment set:html={inline(project.title)} />
             )}
-            <span class="sub" set:html={inline(project.detail)} />
+            {project.detail && <span class="sub" set:html={inline(project.detail)} />}
           </span>
           <span class="v">
             {project.items && (
@@ -81,9 +83,14 @@ const description =
       adding them would state something the file does not.
     </p>
     <p>
-      This page renders the whole of <b>projects[]</b>. It is not a software portfolio: the code
-      behind the work is on <a href="https://github.com/eduardstan">GitHub</a> and the papers are in
-      the <a href="/publications/">publications index</a>.
+      This page renders the whole of <b>projects[]</b>. It is not a software portfolio:{' '}
+      {
+        github && (
+          <>
+            the code behind the work is on <a href={github}>GitHub</a> and{' '}
+          </>
+        )
+      }the papers are in the <a href="/publications/">publications index</a>.
     </p>
   </Record>
 </BaseLayout>

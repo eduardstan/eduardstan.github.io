@@ -1,6 +1,6 @@
 ---
 /**
- * Talks and presentations, read from `cv/pres.bib` — the file biblatex renders
+ * Talks and presentations, read from `content/talks.bib` — the file biblatex renders
  * into the printed CV's presentations section.
  *
  * Same shared-source pattern as `/publications/`: one file, read at build by
@@ -63,7 +63,7 @@ const description =
   <Record>
     <p>
       <b>{source}</b> — {entries.length} <code>@unpublished</code> entries, parsed by the same BibTeX
-      reader as <b>_bibliography/papers.bib</b> and sorted by their own <b>date</b> field, newest first.
+      reader as <b>content/publications.bib</b> and sorted by their own <b>date</b> field, newest first.
       Each row is one entry: <b>title</b>, then <b>note</b> and <b>keywords</b>, then <b>eventtitle</b>
       and <b>venue</b>, then <b>date</b>.
     </p>

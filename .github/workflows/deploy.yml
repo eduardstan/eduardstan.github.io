@@ -4,8 +4,7 @@ name: Deploy site
 # which GitHub Pages serves at https://eduardstan.github.io/.
 #
 # There are no path filters. The site reads the repository's own records at
-# build time — cv/cv.yaml, the bibliography, cv/pres.bib, _pages/about.md,
-# _config.yml, the blog collection — so almost any file can change what is
+# build time — everything under content/ — so almost any file can change what is
 # published, and a filter list that has to stay in step with
 # `web/src/lib/record.ts`'s SOURCES is one more thing to get wrong. Rebuilding
 # on every push costs a few minutes and cannot silently skip a change.
@@ -55,8 +54,13 @@ jobs:
       - name: Check generated CV data 🔎
         run: node scripts/build-cv-data.mjs --check
 
+      - name: Install PDF inspection tools 🔎
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes poppler-utils
+
       # The printed CV is typeset from the committed generated form of the same
-      # cv/cv.yaml the /cv/ page renders. It is never committed — no binary
+      # content/cv.yaml the /cv/ page renders. It is never committed — no binary
       # enters git history — so it is built here and dropped into web/public/
       # before astro build picks it up. The texlive pin and the xelatex
       # requirement are explained in cv.yml, which builds the same document on
@@ -68,6 +72,9 @@ jobs:
           working_directory: cv
           latexmk_use_xelatex: true
           texlive_version: "2024"
+
+      - name: Check the printed CV baseline 🔎
+        run: bash scripts/check-cv-baseline.sh
 
       - name: Stage the CV PDF 📄
         run: |
@@ -87,6 +94,9 @@ jobs:
       - name: Self-check 🧪
         run: npm test
         working-directory: web
+
+      - name: Prove adopter cold start 🧊
+        run: node scripts/check-adopter-build.mjs
 
       - name: Build 🔧
         run: npm run build

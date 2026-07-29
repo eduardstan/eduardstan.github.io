@@ -9,6 +9,8 @@ export async function getPublishedPosts() {
   return posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 }
 
+export const postSource = (path: string | undefined) => (path ?? '').replace(/^(\.\.\/)+/, '');
+
 /** Shared date rendering for every listing, post page and feed entry. */
 export const dateFormat = new Intl.DateTimeFormat('en', {
   dateStyle: 'medium',

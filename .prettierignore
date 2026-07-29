@@ -1,3 +1,8 @@
 web/dist/**
 web/node_modules/**
 web/.astro/**
+.claude/**
+
+# content/ is the adopter's own data and documentation, laid out for humans.
+# Prettier reflows the YAML examples in content/README.md into nonsense.
+content/**

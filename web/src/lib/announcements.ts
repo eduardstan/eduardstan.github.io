@@ -4,10 +4,10 @@
  * There is no news content in this repository. Every item below is generated
  * from a fact it already holds:
  *
- *   `cv/cv.yaml`               appointments, service roles and editions, awards
- *   `_bibliography/papers.bib` publications, preprints, released software
- *   `cv/pres.bib`              invited talks, oral and poster presentations
- *   `web/src/content/blog/`     writing
+ *   `content/cv.yaml`          every section — appointments, service, awards, …
+ *   `content/publications.bib` publications, preprints, released software
+ *   `content/talks.bib`        invited talks, oral and poster presentations
+ *   `content/posts/`           writing
  *
  * A fact is announced on the date it carries. Most carry one already: a talk has
  * an ISO `date`, a post has a front-matter `date`, an award has a month, a paper
@@ -17,10 +17,11 @@
  * Nothing here invents a date. A fact whose finest available date is a year is
  * placed at the start of that year and **shown as a year**, so the feed never
  * claims a precision its sources do not have. `Announcement.precision` carries
- * that distinction to the page.
+ * that distinction to the page. A fact with no defensible date at all is not
+ * guessed at: it is listed, with the reason, in `undated`.
  */
 import { parse } from 'yaml';
-import type { CV } from './cv.ts';
+import { entriesOf, isEditorial, sections, type CV } from './cv-schema.ts';
 import {
   bibliography,
   deLatex,
@@ -34,11 +35,11 @@ import {
 } from './record.ts';
 
 /**
- * The CV, read through `record.ts`'s walk-up-for-`_config.yml` root rather than
- * through `cv.ts`. `cv.ts` reads the same file through Vite's `?raw`, which only
- * exists inside an Astro build — importing it here would make this module, and
- * the feed's self-check, unrunnable under plain node. The type is imported, so
- * the two readers cannot disagree about the shape.
+ * The CV, read through `record.ts`'s walk-up-for-`content/cv.yaml` root rather
+ * than through `cv.ts`. `cv.ts` reads the same file through Vite's `?raw`, which
+ * only exists inside an Astro build — importing it here would make this module,
+ * and the feed's self-check, unrunnable under plain node. The types are
+ * imported, so the two readers cannot disagree about the shape.
  */
 const cv = parse(readSource(SOURCES.cv)) as CV;
 
@@ -50,7 +51,7 @@ export interface Announcement {
   /** The first instant of the period `stamp` names — the sort key, not a claim. */
   at: Date;
   precision: Precision;
-  /** "Journal", "Service", "Talk", … — what kind of fact this is. */
+  /** "Journal", "Service", "Invited talk", … — what kind of fact this is. */
   kind: string;
   /** Body as inline HTML. */
   html: string;
@@ -65,6 +66,66 @@ export interface Undated {
   why: string;
   source: string;
 }
+
+// ------------------------------------------------------- the templates -----
+//
+// ONE CANONICAL TEMPLATE PER KIND, AND THIS IS THE WHOLE TABLE. If you are
+// reusing this site, this is the first thing you will want to edit.
+//
+// The grammar is **what it was, then where**. The kind is NOT in the sentence:
+// it is already on the mono apparatus line beside the date (`date · kind`), so
+// repeating it in prose says the same thing twice. The venue carries the link
+// for anything whose URL identifies a place; a publication's only URL is its
+// DOI, which identifies the paper, so there the title carries it.
+//
+// Each template returns the segments of one sentence. They are joined with
+// `, ` after the empty ones are dropped, so a fact missing a slot loses that
+// slot AND its separator — never a dangling comma, never an empty parenthesis.
+// `what` and `where` already carry their emphasis and their link.
+
+interface Slots {
+  /** What it was: a role, a title, a paper. */
+  what: string;
+  /** Where it was: an institution, a venue, an event — linked where it links. */
+  where?: string;
+  /** One more qualifier: a journal section, a city. */
+  detail?: string;
+  /** The edition of a recurring role. */
+  year?: string;
+}
+
+const TEMPLATES: Record<string, (s: Slots) => (string | undefined)[]> = {
+  //  kind on the mono line     the sentence, one segment per comma
+  Appointment: (s) => [`**${s.what}**`, s.where],
+  Editorial: (s) => [`**${s.what}**`, s.where, s.detail],
+  Service: (s) => [`**${s.what}**`, [s.where, s.year].filter(Boolean).join(' ') || undefined],
+  Award: (s) => [`**${s.what}**`, s.where ?? s.detail],
+  Talk: (s) => [`_${s.what}_`, s.where],
+  'Under review': (s) => [`**${s.what}**`, s.where && `submitted to ${s.where}`],
+  Writing: (s) => [`**${s.what}**`],
+  // Every other kind — the bibliography's Journal, Conference, Workshop,
+  // Chapter, Book, Software, …, and any CV section an adopter invents. An entry
+  // that states only `detail` (a project, an award) reads off it, which is the
+  // same fallback the printed CV's second line makes.
+  default: (s) => [`**${s.what}**`, s.where ?? s.detail],
+};
+
+/** The sentence for a kind, or the default one. One full stop, never two. */
+export function say(kind: string, slots: Slots): string {
+  const template = TEMPLATES[kind] ?? TEMPLATES.default;
+  const line = template(slots).filter(Boolean).join(', ');
+  return line.endsWith('.') ? line : `${line}.`;
+}
+
+/**
+ * The short name of a venue: the acronym it puts in brackets, where it has one.
+ *
+ * `International Joint Conference on Artificial Intelligence (IJCAI)` is how a
+ * CV names a conference and `IJCAI 2026` is how a sentence does. A bracket
+ * holding several words is a lab or a group, not an acronym — `University of
+ * Milano-Bicocca (Intelligent Sensing Laboratory—ISLab)` stays as written.
+ */
+export const shortVenue = (name: string) => /\(([^\s()]{2,12})\)/.exec(name)?.[1] ?? name;
 
 // ------------------------------------------------------------- dates -------
 
@@ -119,9 +180,6 @@ function item(stamp: string, kind: string, markdown: string, source: string): An
   };
 }
 
-/** One full stop, not two: abbreviated venues already end in one ("Inf. Comput."). */
-const sentence = (value: string) => (value.endsWith('.') ? value : `${value}.`);
-
 /** `[text](url)` when the fact links somewhere, plain text when it does not. */
 const link = (text: string, url?: string) => (url ? `[${text}](${url})` : text);
 
@@ -133,88 +191,84 @@ const collapse = (value: string) =>
     .trim();
 
 /**
- * A fact spliced into one of the markdown templates below, with the characters
- * that would otherwise be read as markup escaped the way the repository's own
- * markdown escapes them (`A\*` for the CORE rank). The bibliography really does
- * contain `OVERLAY@AI*IA 2019` and DOIs ending `…-7_26`, so without this a venue
- * name silently turns into emphasis. `inlineHtml` and `stripMarkdown` both
- * remove the backslashes again, so nothing reaches the page escaped.
+ * A fact spliced into one of the templates above, with the characters that would
+ * otherwise be read as markup escaped the way the repository's own markdown
+ * escapes them (`A\*` for the CORE rank). The bibliography really does contain
+ * `OVERLAY@AI*IA 2019` and DOIs ending `…-7_26`, so without this a venue name
+ * silently turns into emphasis. `inlineHtml` and `stripMarkdown` both remove the
+ * backslashes again, so nothing reaches the page escaped.
  *
  * Prose the CV already writes in this markup — an award's `detail`, a service
- * `section` — is passed through as written; only machine-read fields are escaped.
+ * `detail` — is passed through as written; only machine-read fields are escaped.
  */
-const md = (value: string) => collapse(value).replace(/([\\*_[\]])/g, '\\$1');
+const md = (value: string | undefined) =>
+  value ? collapse(value).replace(/([\\*_[\]])/g, '\\$1') : '';
 
 // ---------------------------------------------------------- the sources ----
 
-function fromCv(into: Announcement[], undated: Undated[]): void {
-  for (const post of cv.appointments) {
-    if (!post.announced) continue;
-    into.push(
-      item(
-        post.announced,
-        'Appointment',
-        sentence(
-          `Started a new position as **${md(post.role)}** at ${link(
-            md(post.organisation),
-            post.url,
-          )}`,
-        ),
-        SOURCES.cv,
-      ),
-    );
-  }
+/**
+ * `appointments` → `Appointment`, `awards` → `Award`, `teaching` → `Teaching`.
+ * The kind of a CV fact is the name of the section it is in, and this module
+ * names no section: an adopter's `fieldwork:` announces as `Fieldwork`.
+ */
+const singular = (key: string) => {
+  const word = key.replace(/[^A-Za-z0-9]+/g, ' ').trim();
+  const stem = /(?:ss|is|us)$/.test(word) ? word : word.replace(/s$/, '');
+  return stem.charAt(0).toUpperCase() + stem.slice(1);
+};
 
-  for (const entry of cv.service ?? []) {
-    const where = link(md(entry.venue), entry.url) + (entry.section ? `, ${entry.section}` : '');
-    if (entry.announced) {
-      into.push(
-        item(
-          entry.announced,
-          'Service',
-          `Invited and accepted to serve as **${md(entry.role)}** for ${where}.`,
-          SOURCES.cv,
-        ),
-      );
-    }
-    for (const edition of entry.years ?? []) {
-      if (!edition.announced) {
+function fromCv(into: Announcement[], undated: Undated[]): void {
+  for (const [key, section] of sections(cv)) {
+    const entries = entriesOf(section);
+    // An entry with nothing to date it is only a gap where the section's facts
+    // announce at all. `languages:` and `supervision:` are states, not events,
+    // and listing every one of their rows as "undated" would be noise.
+    const announces = entries.some(
+      (entry) =>
+        entry.announced ??
+        monthStamp(entry.dates) ??
+        (entry.years ?? []).some((edition) => typeof edition === 'object' && edition.announced),
+    );
+
+    for (const entry of entries) {
+      // An editorship is an editorship whichever section it sits in; the mono
+      // line gets the right word for free from the rule the home page already
+      // counts with.
+      const kind = isEditorial(entry.title) ? 'Editorial' : singular(key);
+      const what = md(entry.title);
+      const where = link(md(shortVenue(entry.org ?? '')), entry.url) || undefined;
+      const detail = entry.detail;
+      const subject = `${stripMarkdown(entry.title)}${
+        entry.org ? `, ${stripMarkdown(entry.org)}` : ''
+      }`;
+
+      const stamp = entry.announced ?? monthStamp(entry.dates);
+      if (stamp) into.push(item(stamp, kind, say(kind, { what, where, detail }), SOURCES.cv));
+
+      for (const edition of entry.years ?? []) {
+        const year = typeof edition === 'number' ? edition : edition.year;
+        const announced = typeof edition === 'number' ? undefined : edition.announced;
+        if (!announced) {
+          undated.push({
+            what: `${subject} ${year}`,
+            why: 'the edition records a year but no announcement date, and the CV states no finer date for it',
+            source: SOURCES.cv,
+          });
+          continue;
+        }
+        into.push(
+          item(announced, kind, say(kind, { what, where, detail, year: String(year) }), SOURCES.cv),
+        );
+      }
+
+      if (announces && !stamp && !entry.years?.length && !entry.dates) {
         undated.push({
-          what: `${entry.role}, ${stripMarkdown(entry.venue)} ${edition.year}`,
-          why: 'the edition records a year but no announcement date, and the CV states no finer date for it',
+          what: subject,
+          why: 'the entry records no announcement date, no term and no editions',
           source: SOURCES.cv,
         });
-        continue;
       }
-      into.push(
-        item(
-          edition.announced,
-          'Service',
-          `Invited and accepted to serve as **${md(entry.role)}** for ${where} ${edition.year}.`,
-          SOURCES.cv,
-        ),
-      );
     }
-    if (!entry.announced && !entry.years) {
-      undated.push({
-        what: `${entry.role}, ${stripMarkdown(entry.venue)}`,
-        why: 'the entry records no announcement date and no editions',
-        source: SOURCES.cv,
-      });
-    }
-  }
-
-  for (const award of cv.awards) {
-    const stamp = monthStamp(award.dates);
-    if (!stamp) {
-      undated.push({
-        what: stripMarkdown(award.title),
-        why: `\`dates: ${award.dates}\` is not a month the feed can read`,
-        source: SOURCES.cv,
-      });
-      continue;
-    }
-    into.push(item(stamp, 'Award', sentence(`**${award.title}** — ${award.detail}`), SOURCES.cv));
   }
 }
 
@@ -222,10 +276,18 @@ function fromCv(into: Announcement[], undated: Undated[]): void {
  * A publication's announcement date, finest first: the `announced` field when
  * the announcement happened on a day the entry does not otherwise state, then
  * `month`+`year`, then `year` alone.
+ *
+ * A manuscript **under review** is the one exception, and it is the rule rather
+ * than a special case: its `year` is the year it is aimed at, not a year in
+ * which anything happened, so there is no date to announce it on. Give it an
+ * `announced:` — the day it was submitted — and it announces like anything else.
+ * Without one it stays fully visible on `/publications/` and is named in
+ * `undated` below.
  */
 function publicationStamp(entry: Publication): string | undefined {
   const announced = entry.fields.announced?.trim();
   if (announced && precisionOf(announced)) return announced;
+  if (entry.kind === 'Under review') return undefined;
   const year = entry.fields.year?.trim();
   if (!/^\d{4}$/.test(year ?? '')) return undefined;
   const month = MONTHS.indexOf((entry.fields.month ?? '').trim().slice(0, 3).toLowerCase());
@@ -235,21 +297,27 @@ function publicationStamp(entry: Publication): string | undefined {
 function fromBibliography(into: Announcement[], undated: Undated[]): void {
   for (const entry of bibliography().entries) {
     const stamp = publicationStamp(entry);
+    const source = `${SOURCES.bibliography} (${entry.key})`;
     if (!stamp) {
       undated.push({
         what: entry.title,
-        why: 'the entry states no year',
-        source: `${SOURCES.bibliography} (${entry.key})`,
+        why:
+          entry.kind === 'Under review'
+            ? 'a manuscript under review states the year it is aimed at, not a date anything happened on; add `announced` with the submission date to announce it'
+            : 'the entry states no year',
+        source,
       });
       continue;
     }
-    const title = link(`**${md(entry.title)}**`, entry.link?.href);
     into.push(
       item(
         stamp,
         entry.kind,
-        sentence(entry.venue ? `${title} — ${md(entry.venue)}` : title),
-        `${SOURCES.bibliography} (${entry.key})`,
+        say(entry.kind, {
+          what: link(md(entry.title), entry.link?.href),
+          where: md(entry.venue) || undefined,
+        }),
+        source,
       ),
     );
   }
@@ -264,18 +332,20 @@ function fromTalks(into: Announcement[], undated: Undated[]): void {
       continue;
     }
     // `note` is the talk's own word for what it was ("Invited talk", "Oral
-    // presentation", "Poster presentation"); the feed does not relabel it.
-    // pres.bib is LaTeX like the bibliography is — `Krak{\'{o}}w`, `{HS3}` — so
+    // presentation", "Poster presentation"), and it belongs on the apparatus
+    // line rather than in the sentence. The feed does not relabel it.
+    // talks.bib is LaTeX like the bibliography is — `Krak{\'{o}}w`, `{HS3}` — so
     // its fields go through the same de-LaTeX pass before being escaped as
     // markdown.
     const field = (name: string) => md(deLatex(talk.fields[name] ?? ''));
-    const what = field('note') || 'Talk';
-    const where = [field('eventtitle'), field('venue')].filter(Boolean).join(', ');
     into.push(
       item(
         stamp,
-        'Talk',
-        sentence(`**${what}**: _${field('title')}_${where ? ` — ${where}` : ''}`),
+        field('note') || 'Talk',
+        say('Talk', {
+          what: field('title'),
+          where: [field('eventtitle'), field('venue')].filter(Boolean).join(', ') || undefined,
+        }),
         source,
       ),
     );
@@ -300,14 +370,8 @@ function fromPosts(into: Announcement[], undated: Undated[]): void {
       continue;
     }
     const id = path.slice(`${SOURCES.posts}/`.length).replace(/\.(?:md|mdx)$/, '');
-    const description = field('description');
     into.push(
-      item(
-        stamp,
-        'Writing',
-        `New post: [${md(title)}${description ? ` — ${md(description)}` : ''}](/blog/${id}/)`,
-        path,
-      ),
+      item(stamp, 'Writing', say('Writing', { what: link(md(title), `/blog/${id}/`) }), path),
     );
   }
 }

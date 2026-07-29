@@ -15,7 +15,7 @@
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Record from '../../components/Record.astro';
-import { bibliography, SOURCES, yearSpan, type Publication } from '../../lib/record';
+import { bibliography, profile, SOURCES, yearSpan, type Publication } from '../../lib/record';
 
 /**
  * The order the CV prints them in — journals, conferences, workshops, under
@@ -90,7 +90,8 @@ const columns = [
 const href = (sort: string) => (sort === 'year' ? '/publications/' : `/publications/${sort}/`);
 const marker = (column: string) => (SORTS[active].column === column ? ` ${SORTS[active].marker}` : '');
 
-const isHim = (author: string) => author === 'I. E. Stan';
+const owner = profile().bibliographyName;
+const isOwner = (author: string) => author === owner;
 const pad = (index: number) => String(index + 1).padStart(2, '0');
 const span = yearSpan(bib.years);
 const description = `${bib.entries.length} entries${span && `, ${span}`}, read from ${SOURCES.bibliography} at build time.`;
@@ -162,7 +163,7 @@ const description = `${bib.entries.length} entries${span && `, ${span}`}, read f
                   {entry.authors.map((author, position) => (
                     <>
                       {position > 0 && ', '}
-                      {isHim(author) ? <b>{author}</b> : author}
+                      {isOwner(author) ? <b>{author}</b> : author}
                     </>
                   ))}
                 </p>

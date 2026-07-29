@@ -33,18 +33,44 @@
  * comparisons" is decorative.
  */
 import { parse } from 'yaml';
-import type { CV, Exception, ServiceEntry } from './cv.ts';
+import {
+  editionAnnounced,
+  editionYear,
+  entriesOf,
+  sections,
+  type CV,
+  type Entry,
+  type Exception,
+} from './cv-schema.ts';
 import { bibliography, readSource, SOURCES } from './record.ts';
 
 /**
  * The CV read the way `announcements.ts` reads it — through `record.ts`'s
- * walk-up-for-`_config.yml` root rather than through `cv.ts`'s `?raw` import,
- * because this module also runs under plain `node` in the self-check and inside
- * the Astro config's own module graph, neither of which is a Vite page build.
- * The type is shared, so the two readers cannot disagree about the shape.
+ * walk-up-for-`content/cv.yaml` root rather than through `cv.ts`'s `?raw`
+ * import, because this module also runs under plain `node` in the self-check and
+ * inside the Astro config's own module graph, neither of which is a Vite page
+ * build. The types are shared, so the two readers cannot disagree about the
+ * shape.
  */
 const cvRaw = readSource(SOURCES.cv);
 const cv = parse(cvRaw) as CV;
+
+/**
+ * Every entry of every section, labelled by where it sits in the file.
+ *
+ * The gate names no section. It used to name `appointments` and `service`, and
+ * a rename in either would have made it quietly compare fewer records while
+ * still reporting "0 contradictions" — the worst failure a gate can have. Walking
+ * the sections instead covers `leadership:` and anything an adopter invents, and
+ * is shorter than the version that named two of them.
+ */
+const everyEntry = (): { subject: string; entry: Entry }[] =>
+  sections(cv).flatMap(([key, section]) =>
+    entriesOf(section).map((entry, index) => ({
+      subject: `${key}[${index}] "${entry.org ?? entry.title}"`,
+      entry,
+    })),
+  );
 
 // ---------------------------------------------------------------- checks ----
 
@@ -59,7 +85,7 @@ export interface Check {
  * The whole roster. One check, and that is not an accident: every other check
  * the design proposed joined against a source this site no longer reads.
  * `_pages/professional_activities.md` and `_news/` were both second copies of
- * facts the records already hold, and both are gone; the checks that compared
+ * facts the records already held, and both are gone; the checks that compared
  * against them would have to re-open exactly the second-copy problem this
  * rebuild closed.
  *
@@ -215,33 +241,27 @@ function pairsFromCv(uncomparable: Uncomparable[]): Pair[] {
     });
   };
 
-  cv.appointments.forEach((post, index) => {
-    if (post.announced)
-      add(
-        `appointments[${index}] "${post.organisation}"`,
-        post.dates,
-        post.announced,
-        post.except ?? [],
-      );
-  });
-
-  cv.service.forEach((entry: ServiceEntry, index) => {
-    const subject = `service[${index}] "${entry.venue}"`;
+  for (const { subject, entry } of everyEntry()) {
     const except = entry.except ?? [];
     if (entry.announced) add(subject, entry.dates, entry.announced, except);
     for (const edition of entry.years ?? []) {
-      if (!edition.announced) continue;
+      const announced = editionAnnounced(edition);
+      if (!announced) continue;
+      const year = editionYear(edition);
       add(
-        `${subject} ${edition.year}`,
+        `${subject} ${year}`,
         undefined,
-        edition.announced,
+        announced,
         except,
         'year',
-        String(edition.year),
-        at(`year: ${edition.year}`),
+        String(year),
+        // The file writes an edition either as `- 2026` or as `- year: 2026`,
+        // so the locator has to match both. A pattern that only matched the
+        // second would keep working and point at the wrong line.
+        at(new RegExp(`^\\s*-\\s*(?:year:\\s*)?${year}\\s*$`)),
       );
     }
-  });
+  }
 
   return pairs;
 }
@@ -387,16 +407,9 @@ export function consistency(today = new Date().toISOString().slice(0, 10)): Gate
   // Every declared exception is itself checked: unknown id, blank reason,
   // missing or passed expiry all fail the build; one that excuses nothing is
   // shown, because someone fixed the data and left the excuse behind.
-  const declared: { subject: string; except: Exception[] }[] = [
-    ...cv.appointments.map((post, index) => ({
-      subject: `appointments[${index}] "${post.organisation}"`,
-      except: post.except ?? [],
-    })),
-    ...cv.service.map((entry, index) => ({
-      subject: `service[${index}] "${entry.venue}"`,
-      except: entry.except ?? [],
-    })),
-  ];
+  const declared: { subject: string; except: Exception[] }[] = everyEntry()
+    .filter(({ entry }) => entry.except?.length)
+    .map(({ subject, entry }) => ({ subject, except: entry.except! }));
   for (const { subject, except } of declared) {
     for (const exception of except) {
       const problem = exceptionProblem(exception, subject, today);

@@ -1,5 +1,5 @@
 /**
- * The portable prose grammar `cv/cv.yaml` uses: `**bold**`, `_italic_`,
+ * The portable prose grammar `content/cv.yaml` uses: `**bold**`, `_italic_`,
  * `[text](url)`. Without this the asterisks print on the page.
  *
  * The pattern is the one at `scripts/build-cv-data.mjs`'s `MARKUP`, so the two
