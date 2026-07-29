@@ -2,7 +2,7 @@
 // Run: node --test scripts/build-cv-data.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { affiliationBlock, editions, macroName, profilesLine, renderInline, tableHeader, where } from "./build-cv-data.mjs";
+import { affiliationBlock, editions, entry, macroName, profilesLine, renderInline, tableHeader, where } from "./build-cv-data.mjs";
 
 test("an underscore inside a word stays literal and does not open a span", () => {
   // The probe that exposed the bug: a_b used to pair with the opener of
@@ -131,4 +131,11 @@ test("a table's header is its own row keys, so renaming a key renames a column",
   // The friction log's F12: an NZ adopter writes `points:` and the column says
   // "Points" without a LaTeX edit.
   assert.equal(tableHeader([{ course: "Databases", points: "18 points" }]), "\\textbf{Course} & \\textbf{Points} \\\\");
+});
+
+test("an empty or absent rows list emits no course table", () => {
+  const withoutRows = entry({ title: "Lecturer" });
+  const withEmptyRows = entry({ title: "Lecturer", rows: [] });
+  assert.equal(withEmptyRows, withoutRows);
+  assert.doesNotMatch(withEmptyRows, /\\cvcourses/);
 });

@@ -76,13 +76,17 @@ const withheld = feed.items.length - shown.length;
            sentence in his own voice, both taken from the repository rather than
            written for the occasion. */
       }
-      <figure class="person">
-        <img
-          src={portrait}
-          width="500"
-          height="500"
-          alt={`${name}, photographed against a plain background`}
-        />
+      <figure class:list={['person', { 'no-portrait': !portrait }]}>
+        {
+          portrait && (
+            <img
+              src={portrait}
+              width="500"
+              height="500"
+              alt={`${name}, photographed against a plain background`}
+            />
+          )
+        }
         <div>
           <blockquote>{bio.firstPerson}</blockquote>
           <figcaption class="label">{name} · {affiliation[0]}</figcaption>

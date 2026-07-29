@@ -182,7 +182,7 @@ const tableHeader = (rows) =>
 /** One `\cventry`, plus its bullets and its table where it has them. */
 function entry(item) {
   const head = `\\cventry\n  {${arg(item.title)}}\n  {${arg(where(item))}}\n` + `  {${arg(item.dates)}}\n  {${arg(item.place)}}`;
-  const table = item.rows ? `\\cvcourses{${tableHeader(item.rows)}}{\n${tableRows(item.rows)}}` : "";
+  const table = item.rows?.length ? `\\cvcourses{${tableHeader(item.rows)}}{\n${tableRows(item.rows)}}` : "";
   return [head, itemList(item.items), table].filter(Boolean).join("\n");
 }
 
@@ -342,6 +342,6 @@ function main() {
   console.log(`wrote ${rel(OUT_PUBLIC)}`);
 }
 
-export { renderInline, where, editions, affiliationBlock, profilesLine, macroName, tableHeader };
+export { renderInline, where, editions, affiliationBlock, profilesLine, macroName, tableHeader, entry };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();
