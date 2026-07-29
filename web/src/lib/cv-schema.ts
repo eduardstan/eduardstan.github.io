@@ -95,6 +95,65 @@ export const entriesOf = (section: Section | undefined): Entry[] =>
 export const noteOf = (section: Section | undefined): string[] =>
   Array.isArray(section) || !section?.note ? [] : [section.note].flat();
 
+/**
+ * One group of bibliography entries: a title plus a filter. Not a query
+ * language.
+ *
+ * `publications:` and `talks:` in `content/cv.yaml` declare these, and both
+ * consumers read the same declaration — `scripts/build-cv-data.mjs` turns each
+ * into the biblatex filter and `\printbibliography` the PDF needs, and the site
+ * matches entries against it here. Neither file names a BibTeX entry type in
+ * its own source, so every type is expressible and none is unrenderable because
+ * nobody wrote a filter for it.
+ */
+export interface BibSection {
+  /** The heading the printed CV gives the group. */
+  title: string;
+  /** Its short name — the site's Type column, and the CV's section-header key. */
+  short: string;
+  /** BibTeX entry types, any of which matches. Omitted means any type. */
+  types?: string[];
+  /** Keywords, all of which must be present. */
+  keywords?: string[];
+  /** Keywords, none of which may be present. */
+  exclude_keywords?: string[];
+  /** The entry-numbering letter in the PDF. Defaults to `short`'s first letter. */
+  prefix?: string;
+  /** `false` names the group here without printing a section for it in the PDF. */
+  printed?: boolean;
+}
+
+/** A top-level key holding sections rather than entries. */
+export interface BibSections {
+  sections: BibSection[];
+}
+
+/** The keywords a BibTeX `keywords` field lists, lowercased. DBLP uses `;`. */
+const keywordList = (field = ''): string[] =>
+  field
+    .toLowerCase()
+    .split(/[,;]/)
+    .map((keyword) => keyword.trim())
+    .filter(Boolean);
+
+/** Whether one entry belongs to one declared section. */
+export function matchesBibSection(section: BibSection, type: string, keywords = ''): boolean {
+  const present = keywordList(keywords);
+  const lower = (value: string) => value.toLowerCase();
+  if (section.types?.length && !section.types.map(lower).includes(type.toLowerCase())) return false;
+  if (!(section.keywords ?? []).every((keyword) => present.includes(lower(keyword)))) return false;
+  if ((section.exclude_keywords ?? []).some((keyword) => present.includes(lower(keyword))))
+    return false;
+  return true;
+}
+
+/** The first declared section an entry belongs to — print order is match order. */
+export const bibSectionFor = (
+  sections: readonly BibSection[],
+  type: string,
+  keywords = '',
+): BibSection | undefined => sections.find((section) => matchesBibSection(section, type, keywords));
+
 export interface Profile {
   name: string;
   site?: string;
@@ -122,8 +181,12 @@ export interface Profile {
  * index signature is the shape, not a gap in the typing. The keys listed below
  * are the ones the website has a route for.
  */
-export interface CV extends Record<string, Section | Profile | undefined> {
+export interface CV extends Record<string, Section | Profile | BibSections | undefined> {
   profile: Profile;
+  /** How `content/publications.bib` is grouped. Not a section: it has no entries. */
+  publications?: BibSections;
+  /** The same, for `content/talks.bib`. */
+  talks?: BibSections;
   appointments?: Section;
   education?: Section;
   teaching?: Section;

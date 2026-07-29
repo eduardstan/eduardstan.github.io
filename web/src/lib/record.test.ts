@@ -12,7 +12,15 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { about, bibliography, profile, stripMarkdown, talks, SOURCES } from './record.ts';
+import {
+  about,
+  bibliography,
+  profile,
+  publicationSections,
+  stripMarkdown,
+  talks,
+  SOURCES,
+} from './record.ts';
 import { announcements, formatStamp, say, shortVenue } from './announcements.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -47,6 +55,31 @@ for (const key of ['DBLP:data/11/MilellaPSS25', 'DBLP:data/11/MilellaPSS25a']) {
   assert.equal(software.venue, 'DROPS Artifacts', `${key}: incorrect venue`);
   assert.notEqual(software.venue, software.fields.note, `${key}: placeholder note used as venue`);
 }
+
+// One declaration, two consumers. `publications:` in content/cv.yaml says how
+// the bibliography is grouped; this file labels the Type column from it and
+// `scripts/build-cv-data.mjs` translates the same list into the filters and
+// headings the PDF prints. The failure this guards is the two drifting apart —
+// which is the whole reason the grouping left cv/cv.tex.
+const declared = publicationSections();
+assert.ok(declared.length, `${SOURCES.cv}: no publication sections declared`);
+for (const entry of bib.entries) {
+  assert.ok(
+    declared.some((section) => section.short === entry.kind),
+    `${entry.key}: "${entry.kind}" is not a section declared in ${SOURCES.cv}`,
+  );
+}
+const generated = readFileSync(root + 'cv/generated/cv-data.tex', 'utf8');
+const printedHeadings = [
+  ...generated.matchAll(
+    /\\printbibliography\[heading=bibsubheading, title=\{(.+?)\}, filter=publications/g,
+  ),
+].map((match) => match[1].replace(/\\&/g, '&'));
+assert.deepEqual(
+  printedHeadings,
+  declared.filter((section) => section.printed !== false).map((section) => section.title),
+  'the printed CV and this file disagree about the publication sections',
+);
 
 // The citation assembled for the collapsed row. The cases that matter are the
 // sparse ones: everything below volume, pages and publisher is optional in this

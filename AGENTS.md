@@ -33,6 +33,16 @@ extras (`metric`, `rank_url`, `years`, `funding`, `count`, `rows`) are the rest.
 `cv/cv.tex` prints the ones it has a `\cvpart` line for. Adding a section to the YAML must
 never require editing the generator.
 
+**Publication and talk grouping is declared too.** `publications:` and `talks:` are the two
+top-level keys holding `sections:` rather than entries — a section is a `title` plus a filter
+(`types` any, `keywords` all, `exclude_keywords` none), and that is the whole grammar. The
+generator translates each into its `\defbibfilter` and `\printbibliography` plus `\cv<Key>Key` /
+`\cv<Key>Sections`; `web/src/lib/record.ts` matches entries against the same list for the Type
+column and the "by type" order. **No BibTeX entry type is named in `cv/cv.tex` or in the website's
+source, and none may be reintroduced there** — that hard-coding is what this replaced. `printed:
+false` names a group for the site without a PDF section (how `@misc` is "Software" today); adding
+one to the printed CV is a captain decision, because it moves the baseline.
+
 Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commit.
 
 ## Sharp edges
@@ -59,11 +69,9 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
   filtering and labelling contract. The bibliography uses both `First Last` and `Last, First`
   BibTeX name forms; reading the second as the first silently renames authors. `VENUE_FIELDS`
   reads `journaltitle` as well as `journal`: that is what a Better BibTeX BibLaTeX export writes.
-- **Latent, not fixed:** DBLP's `@misc` artifacts carry an unfilled `note = {Accessed on
-YYYY-MM-DD.}`. The website already works around it — `VENUE_FIELDS` tries `publisher` before
-  `note` for exactly this reason — but `cv/cv.tex` has no equivalent, so the placeholder would
-  print verbatim if `@misc` were ever added to its `other` filter. It is not today. Fixing the
-  printed side is a separate task.
+- DBLP's `@misc` artifacts carry an unfilled `note = {Accessed on YYYY-MM-DD.}`. Both sides drop
+  it now: `VENUE_FIELDS` tries `publisher` before `note`, and `cv.tex`'s `\DeclareSourcemap` nulls
+  a `note` matching that exact placeholder, so a declared `types: [misc]` section renders.
 - `web/src/lib/cv.ts` reads `content/cv.yaml` through Vite's `?raw` import, not `node:fs`. Do
   **not** rewrite it as `readFileSync(new URL('../../../content/cv.yaml', import.meta.url))`:
   that builds and then fails at prerender with `ENOENT`, for the same relocation reason as the

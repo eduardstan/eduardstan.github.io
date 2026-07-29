@@ -315,6 +315,16 @@
       \step[fieldset=altmetric, null]
       \step[fieldset=dimensions, null]
     }
+    % DBLP's @misc artifact records carry an UNFILLED placeholder,
+    % `note = {Accessed on YYYY-MM-DD.}`, which biblatex would print verbatim as
+    % the venue of a released software package. The website already skips it
+    % (`VENUE_FIELDS` in web/src/lib/record.ts prefers `publisher`); this is the
+    % same fix on the printed side, so declaring a `types: [misc]` section in
+    % content/cv.yaml renders correctly instead of printing the placeholder.
+    \map{
+      \step[fieldsource=note, match=\regexp{\AAccessed\son\sYYYY-MM-DD\.?\Z}, final]
+      \step[fieldset=note, null]
+    }
   }
 }
 
@@ -327,22 +337,12 @@
   \vspace{0.8mm}\textbf{#1}\par\vspace{-0.3mm}
 }
 
-% Filters for publications (use entrytypes + keywords)
-\defbibfilter{journals}{type=article}
-\defbibfilter{conferences}{type=inproceedings and not keyword=workshop}
-\defbibfilter{workshops}{type=inproceedings and keyword=workshop}
-\defbibfilter{underreview}{type=online and keyword=underreview}
-% Books and chapters, and everything else with a home in neither list. Both are
-% empty for a bibliography of articles and papers, and an empty
-% \printbibliography prints nothing - so an adopter whose career is chapters
-% gets them automatically instead of losing them silently.
-\defbibfilter{bookschapters}{type=incollection or type=book}
-\defbibfilter{other}{type=phdthesis or type=techreport}
-
-% Filters for presentations
-\defbibfilter{invited}{keyword=invited}
-\defbibfilter{oral}{keyword=oral}
-\defbibfilter{poster}{keyword=poster}
+% No filters here. Which entry type belongs under which heading is a curated
+% opinion, so it is declared in `content/cv.yaml` under `publications:` and
+% `talks:` and read by the website too. build-cv-data.mjs turns each declared
+% section into its \defbibfilter and its \printbibliography, and gives this file
+% \cvPublicationsKey / \cvPublicationsSections and \cvTalksKey /
+% \cvTalksSections. Adding, reordering or renaming a section is a cv.yaml edit.
 
 % --------------------------------
 % CONTENT (generated from content/cv.yaml)
@@ -441,26 +441,16 @@
 }
 \fi
 
-\section{\textbf{Talks \& Presentations} \hfill \textcolor{darkblue}{\scriptsize I=Invited talks, O=Oral sessions, P=Poster sessions}}
+\section{\textbf{Talks \& Presentations} \hfill \textcolor{darkblue}{\scriptsize \cvTalksKey}}
 
 \begin{refsection}[../content/talks.bib]
 \nocite{*}
 
-\begin{refcontext}[labelprefix=I]
-\printbibliography[heading=bibsubheading, title={Invited talks}, filter=invited, resetnumbers=true]
-\end{refcontext}
-
-\begin{refcontext}[labelprefix=O]
-\printbibliography[heading=bibsubheading, title={Conference oral presentations}, filter=oral, resetnumbers=true]
-\end{refcontext}
-
-\begin{refcontext}[labelprefix=P]
-\printbibliography[heading=bibsubheading, title={Poster presentations}, filter=poster, resetnumbers=true]
-\end{refcontext}
+\cvTalksSections
 
 \end{refsection}
 
-\section{\textbf{Publications} \hfill \textcolor{darkblue}{\scriptsize J=Journal, C=Conference, W=Workshop, U=Under review}}
+\section{\textbf{Publications} \hfill \textcolor{darkblue}{\scriptsize \cvPublicationsKey}}
 
 \IfFileExists{scholar.png}{%
 \begin{figure}[h!]
@@ -474,33 +464,11 @@
 \begin{refsection}[../content/publications.bib]
 \nocite{*}
 
-\begin{refcontext}[labelprefix=J]
-\printbibliography[heading=bibsubheading, title={Journal articles (peer-reviewed)}, filter=journals, resetnumbers=true]
-\end{refcontext}
-
-\begin{refcontext}[labelprefix=C]
-\printbibliography[heading=bibsubheading, title={Conference papers (peer-reviewed)}, filter=conferences, resetnumbers=true]
-\end{refcontext}
-
-\begin{refcontext}[labelprefix=W]
-\printbibliography[heading=bibsubheading, title={Workshop papers}, filter=workshops, resetnumbers=true]
-\end{refcontext}
-
-\begin{refcontext}[labelprefix=U]
-\printbibliography[heading=bibsubheading, title={Under review}, filter=underreview, resetnumbers=true]
-\end{refcontext}
-
-% Empty for a bibliography of articles and papers, and an empty
-% \printbibliography prints nothing at all - no heading, no gap. They are here
-% so an adopter whose career is books and chapters gets them without editing
-% this file. Delete them if you prefer.
-\begin{refcontext}[labelprefix=B]
-\printbibliography[heading=bibsubheading, title={Books \& chapters}, filter=bookschapters, resetnumbers=true]
-\end{refcontext}
-
-\begin{refcontext}[labelprefix=X]
-\printbibliography[heading=bibsubheading, title={Other}, filter=other, resetnumbers=true]
-\end{refcontext}
+% Every section declared under `publications:` in content/cv.yaml, in the order
+% it is written there. A section whose filter matches nothing prints nothing at
+% all - no heading, no gap - so an adopter whose career is books declares one
+% and it appears with the first entry.
+\cvPublicationsSections
 
 \end{refsection}
 

@@ -616,3 +616,52 @@ Ph.D. Representative (35th Ph.D. Cycle) (Academic Board, Ph.D. in Mathematics, U
 }
 
 \newcommand{\cvLeadershipCount}{5}
+
+\defbibfilter{publications1}{type=article}
+\defbibfilter{publications2}{type=inproceedings and not keyword=workshop}
+\defbibfilter{publications3}{type=inproceedings and keyword=workshop}
+\defbibfilter{publications4}{type=online and keyword=underreview}
+
+\newcommand{\cvPublicationsKey}{%
+J=Journal, C=Conference, W=Workshop, U=Under review%
+}
+
+\newcommand{\cvPublicationsSections}{%
+\begin{refcontext}[labelprefix=J]
+\printbibliography[heading=bibsubheading, title={Journal articles (peer-reviewed)}, filter=publications1, resetnumbers=true]
+\end{refcontext}
+
+\begin{refcontext}[labelprefix=C]
+\printbibliography[heading=bibsubheading, title={Conference papers (peer-reviewed)}, filter=publications2, resetnumbers=true]
+\end{refcontext}
+
+\begin{refcontext}[labelprefix=W]
+\printbibliography[heading=bibsubheading, title={Workshop papers}, filter=publications3, resetnumbers=true]
+\end{refcontext}
+
+\begin{refcontext}[labelprefix=U]
+\printbibliography[heading=bibsubheading, title={Under review}, filter=publications4, resetnumbers=true]
+\end{refcontext}%
+}
+
+\defbibfilter{talks1}{keyword=invited}
+\defbibfilter{talks2}{keyword=oral}
+\defbibfilter{talks3}{keyword=poster}
+
+\newcommand{\cvTalksKey}{%
+I=Invited talks, O=Oral sessions, P=Poster sessions%
+}
+
+\newcommand{\cvTalksSections}{%
+\begin{refcontext}[labelprefix=I]
+\printbibliography[heading=bibsubheading, title={Invited talks}, filter=talks1, resetnumbers=true]
+\end{refcontext}
+
+\begin{refcontext}[labelprefix=O]
+\printbibliography[heading=bibsubheading, title={Conference oral presentations}, filter=talks2, resetnumbers=true]
+\end{refcontext}
+
+\begin{refcontext}[labelprefix=P]
+\printbibliography[heading=bibsubheading, title={Poster presentations}, filter=talks3, resetnumbers=true]
+\end{refcontext}%
+}
