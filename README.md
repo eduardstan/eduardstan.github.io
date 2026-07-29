@@ -34,12 +34,13 @@ cd web
 npm ci
 npm run dev      # http://localhost:4321
 npm run build    # runs the consistency gate; refuses to publish a contradiction
-npm test         # the readers and the gate, against the repository's real records
+npm test         # run the repository self-checks
 ```
 
 `content/README.md` is the adopter's documentation — the one file to read if you are
 reusing this site. `web/README.md` documents the routes, the design and the sharp edges,
-and `AGENTS.md` (`CLAUDE.md`) holds the knowledge that should travel with the code.
+and `AGENTS.md` (`.claude/CLAUDE.md` for Claude Code) holds the knowledge that should travel
+with the code.
 
 ## History
 

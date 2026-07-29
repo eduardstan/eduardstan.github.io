@@ -80,7 +80,7 @@ for (const entry of bib.entries) {
 }
 
 // A property of THIS repository's data as it stands, not an invariant of the
-// reader: every one of the captain's entries is claimed by a declared section,
+// reader: every one of the site owner's entries is claimed by a declared section,
 // so a group quietly dropped from the declaration still fails loudly here.
 const unlabelled = bib.entries.filter((entry) => entry.kind === 'Other');
 assert.deepEqual(
