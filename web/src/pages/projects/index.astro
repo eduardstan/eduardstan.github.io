@@ -1,33 +1,89 @@
 ---
-import { getCollection } from 'astro:content';
-import PageHead from '../../components/PageHead.astro';
+/**
+ * Funded research projects, rendered from `cv/cv.yaml`'s `projects[]`.
+ *
+ * The `funding` figures are the reason this page reads the YAML rather than a
+ * content collection: the comment above `projects:` in that file records that
+ * the amounts are deliberately kept out of the printed CV and held there so the
+ * website can use them. This is the site using them.
+ *
+ * There is no `projects` content collection any more. The one it held was an
+ * al-folio template stub, and a second place to write a project down is a second
+ * place for it to go stale.
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import Record from '../../components/Record.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import { cv, CV_SOURCE, keysOf } from '../../lib/cv';
+import { inline } from '../../lib/inline';
 
-const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const projects = cv.projects;
+const funded = projects.filter((project) => project.funding);
+const running = projects.filter((project) => /present\s*$/i.test(project.dates ?? ''));
+
+const description =
+  `${projects.length} funded research projects, ${running.length} running, ` +
+  `read from ${CV_SOURCE} at build time.`;
 ---
 
-<BaseLayout title="Projects" description="Projects by Eduard I. Stan.">
-  <PageHead title="Projects" />
-  <p class="single mt-4 text-muted">
-    Structural placeholder rendering the sample projects collection. Real
-    projects are migrated by a later task.
-  </p>
-  <ul class="single mt-6 space-y-4">
+<BaseLayout title="Research projects" description={description}>
+  <PageHead title="Research projects">
+    <p class="blurb">
+      <b>{projects.length} funded projects</b>, newest first as the file writes them, read from <b
+        >{CV_SOURCE}</b
+      > when this page was built. The amounts are the file's own <b>funding</b> field: the printed CV
+      does not carry them, and that file keeps them so this page can. Turn <b>inspect sources</b> on,
+      in the bar above, to see what each row is built from.
+    </p>
+  </PageHead>
+
+  <SectionHead source={`${CV_SOURCE} · projects[]`}>Projects</SectionHead>
+  <ul class="rows">
     {
       projects.map((project) => (
         <li>
-          <p class="font-medium">{project.data.title}</p>
-          <p class="text-sm">{project.data.description}</p>
-          {project.data.github && (
-            <a
-              href={project.data.github}
-              class="text-sm text-accent underline underline-offset-2"
-            >
-              GitHub
-            </a>
-          )}
+          <span class="k">
+            {project.url ? (
+              <a href={project.url} set:html={inline(project.title)} />
+            ) : (
+              <Fragment set:html={inline(project.title)} />
+            )}
+            <span class="sub" set:html={inline(project.detail)} />
+          </span>
+          <span class="v">
+            {project.items && (
+              <ul>
+                {project.items.map((item) => (
+                  <li set:html={inline(item)} />
+                ))}
+              </ul>
+            )}
+          </span>
+          <span class="when">
+            <Fragment set:html={inline(project.dates)} />
+            {project.funding && <span class="sub" set:html={inline(project.funding)} />}
+          </span>
         </li>
       ))
     }
   </ul>
+  <Record>
+    <p>
+      <b>{CV_SOURCE}</b> — <b>projects[]</b>, {projects.length} entries in file order. Keys read:{' '}
+      {keysOf(projects)}. {running.length} of {projects.length} have <b>dates</b> running to Present.
+    </p>
+    <p>
+      {funded.length} of {projects.length} state a <b>funding</b> figure, shown under the dates: {
+        funded.map((project) => project.funding).join(', ')
+      }. Each is that field verbatim, including its own note about what the amount covers; nothing is
+      summed here, because a programme total and a grant to one group are not the same quantity and
+      adding them would state something the file does not.
+    </p>
+    <p>
+      This page renders the whole of <b>projects[]</b>. It is not a software portfolio: the code
+      behind the work is on <a href="https://github.com/eduardstan">GitHub</a> and the papers are in
+      the <a href="/publications/">publications index</a>.
+    </p>
+  </Record>
 </BaseLayout>

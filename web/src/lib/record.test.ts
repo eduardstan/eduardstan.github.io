@@ -12,7 +12,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { about, activities, bibliography, SOURCES } from './record.ts';
+import { about, bibliography, talks, SOURCES } from './record.ts';
 import { announcements, formatStamp } from './announcements.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -207,12 +207,71 @@ assert.ok(starred, 'the `OVERLAY@AI*IA` venue did not survive the markdown round
 assert.ok(starred.html.includes('AI*IA'), 'the literal asterisk was rendered as emphasis');
 
 // Every talk in cv/pres.bib carries its own ISO date, so all of them announce.
-const talks = feed.items.filter((item) => item.kind === 'Talk');
-assert.equal(talks.length, 11, `expected 11 talks in the feed, got ${talks.length}`);
+const talkItems = feed.items.filter((item) => item.kind === 'Talk');
+assert.equal(talkItems.length, 11, `expected 11 talks in the feed, got ${talkItems.length}`);
 
-// About and activities. Prettier runs over the source markdown and spells
-// emphasis `_like this_`, so both markers have to render — and neither may fire
-// on an underscore inside a word.
+// ------------------------------------------------------------------ talks ---
+// /talks/ renders every entry in cv/pres.bib, so the same rule as the
+// bibliography applies: nothing filtered, nothing relabelled, nothing left
+// carrying LaTeX.
+const pres = talks();
+const presGrepped = readFileSync(root + SOURCES.talks, 'utf8').match(/^@/gm)!.length;
+assert.equal(pres.entries.length, presGrepped, 'talk count disagrees with `grep -c "^@"`');
+assert.equal(pres.entries.length, 11, `expected 11 talks, got ${pres.entries.length}`);
+assert.deepEqual(pres.undated, [], 'a talk reached the page without an ISO 8601 date');
+
+for (const talk of pres.entries) {
+  assert.ok(talk.title, `${talk.key}: no title`);
+  assert.ok(talk.event, `${talk.key}: no eventtitle`);
+  assert.ok(
+    talk.note,
+    `${talk.key}: no note — the page prints the entry's own word for what it was`,
+  );
+  // The badge on every row. An entry with no `keywords` would render an empty one.
+  assert.ok(
+    ['invited', 'oral', 'poster'].includes(talk.category),
+    `${talk.key}: unexpected category "${talk.category}"`,
+  );
+  assert.match(
+    talk.date,
+    /^\d{4}-\d{2}-\d{2}$/,
+    `${talk.key}: date "${talk.date}" is not an ISO day`,
+  );
+  assert.ok(talk.year > 1990, `${talk.key}: implausible year ${talk.year}`);
+  for (const [field, value] of Object.entries({
+    title: talk.title,
+    event: talk.event,
+    where: talk.where,
+    note: talk.note,
+  })) {
+    assert.ok(!/[{}\\]/.test(value), `${talk.key}: unresolved LaTeX in ${field} — ${value}`);
+  }
+}
+
+// The two entries a naive read gets wrong: an accent, and a braced acronym.
+assert.ok(
+  pres.entries.some((talk) => talk.where === 'Kraków, Poland'),
+  'the accented venue was not de-LaTeXed',
+);
+assert.ok(
+  pres.entries.some((talk) => talk.title.includes('for HS3')),
+  'the braced acronym {HS3} kept its braces',
+);
+
+// Newest first, and the category counts account for every entry.
+for (let i = 1; i < pres.entries.length; i++) {
+  assert.ok(pres.entries[i - 1].date >= pres.entries[i].date, 'talks are not newest-first');
+}
+assert.equal(
+  pres.byCategory.reduce((total, category) => total + category.count, 0),
+  pres.entries.length,
+  'the category counts do not add up to the number of talks',
+);
+assert.equal(pres.years.first, 2017, `earliest talk year is ${pres.years.first}`);
+
+// About. Prettier runs over the source markdown and spells emphasis
+// `_like this_`, so both markers have to render — and neither may fire on an
+// underscore inside a word.
 const bio = about();
 assert.ok(bio.paragraphs.length >= 3, 'about section did not parse');
 assert.ok(
@@ -224,20 +283,19 @@ assert.ok(
   'no emphasis rendered from the about page',
 );
 assert.ok(!/[*_]/.test(bio.firstPerson), 'markdown markers left in the first-person line');
-const sections = activities().sections;
-assert.ok(sections.length >= 3, 'activities sections did not parse');
-const ranks = sections.flatMap((section) => section.entries.flatMap((entry) => entry.rank ?? []));
-assert.ok(ranks.length > 0, 'no ranks parsed from the activities page');
-// `A\*` is how the source writes the CORE rank A*; the backslash is markup.
-assert.ok(ranks.includes('A*'), 'markdown backslash escape left in a rank');
-assert.ok(
-  !sections.some((section) =>
-    section.entries.some((entry) => /[\\*_]/.test(entry.name + (entry.rankNote ?? ''))),
-  ),
-  'markdown markers left in an activity name or rank note',
+// `_pages/professional_activities.md` is no longer read by anything. It is a
+// hand-written third copy of `cv/cv.yaml`'s `service[]` that had drifted from
+// it, and both the home page and /professional_activities/ now read the YAML
+// through one grouping. Re-adding a reader for it re-opens that gap.
+const reader = readFileSync(fileURLToPath(new URL('./record.ts', import.meta.url)), 'utf8');
+assert.doesNotMatch(
+  reader,
+  /professional_activities/,
+  'record.ts reads _pages/professional_activities.md again — the stale third copy of service[]',
 );
+assert.ok(!('activities' in SOURCES), 'the retired activities source is back in SOURCES');
 
 console.log(
-  `ok — ${bib.entries.length} entries, ${feed.items.length} announcements, ` +
-    `${feed.undated.length} undated facts, ${sections.length} activity sections`,
+  `ok — ${bib.entries.length} entries, ${pres.entries.length} talks, ` +
+    `${feed.items.length} announcements, ${feed.undated.length} undated facts`,
 );

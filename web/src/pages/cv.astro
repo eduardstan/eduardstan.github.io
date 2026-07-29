@@ -15,11 +15,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import Record from '../components/Record.astro';
 import SectionHead from '../components/SectionHead.astro';
-import { cv, CV_SOURCE } from '../lib/cv';
+import { cv, CV_SOURCE, keysOf } from '../lib/cv';
 import { inline } from '../lib/inline';
-
-/** The field names an entry actually carries, so a record names real keys. */
-const keysOf = (rows: object[]) => [...new Set(rows.flatMap((row) => Object.keys(row)))].join(', ');
 
 const teaching = Object.entries(cv.teaching);
 const courses = teaching.flatMap(([, block]) => block.courses);
@@ -280,7 +277,10 @@ const description =
     </p>
     <p>
       These fields exist in <b>{CV_SOURCE}</b> and this page does not render them: {omitted.join(', ')}.
-      The list is derived from the source keys minus the fields rendered above.
+      The list is derived from the source keys minus the fields rendered above. Two of them have
+      pages of their own, read from this same file: <b>service</b> at <a
+        href="/professional_activities/">/professional_activities/</a
+      > and <b>projects</b> at <a href="/projects/">/projects/</a>.
     </p>
   </Record>
 
