@@ -617,10 +617,10 @@ Ph.D. Representative (35th Ph.D. Cycle) (Academic Board, Ph.D. in Mathematics, U
 
 \newcommand{\cvLeadershipCount}{5}
 
-\defbibfilter{publications1}{type=article}
-\defbibfilter{publications2}{type=inproceedings and not keyword=workshop and not ( type=article )}
-\defbibfilter{publications3}{type=inproceedings and keyword=workshop and not ( type=article ) and not ( type=inproceedings and not keyword=workshop )}
-\defbibfilter{publications4}{type=online and keyword=underreview and not ( type=article ) and not ( type=inproceedings and not keyword=workshop ) and not ( type=inproceedings and keyword=workshop )}
+\defbibfilter{Publications1}{type=article}
+\defbibfilter{Publications2}{type=inproceedings and not keyword=workshop and not ( type=article )}
+\defbibfilter{Publications3}{type=inproceedings and keyword=workshop and not ( type=article ) and not ( type=inproceedings and not keyword=workshop )}
+\defbibfilter{Publications4}{type=online and keyword=underreview and not ( type=article ) and not ( type=inproceedings and not keyword=workshop ) and not ( type=inproceedings and keyword=workshop )}
 
 \newcommand{\cvPublicationsKey}{%
 J=Journal, C=Conference, W=Workshop, U=Under review%
@@ -628,25 +628,25 @@ J=Journal, C=Conference, W=Workshop, U=Under review%
 
 \newcommand{\cvPublicationsSections}{%
 \begin{refcontext}[labelprefix=J]
-\printbibliography[heading=bibsubheading, title={Journal articles (peer-reviewed)}, filter=publications1, resetnumbers=true]
+\printbibliography[heading=bibsubheading, title={Journal articles (peer-reviewed)}, filter=Publications1, resetnumbers=true]
 \end{refcontext}
 
 \begin{refcontext}[labelprefix=C]
-\printbibliography[heading=bibsubheading, title={Conference papers (peer-reviewed)}, filter=publications2, resetnumbers=true]
+\printbibliography[heading=bibsubheading, title={Conference papers (peer-reviewed)}, filter=Publications2, resetnumbers=true]
 \end{refcontext}
 
 \begin{refcontext}[labelprefix=W]
-\printbibliography[heading=bibsubheading, title={Workshop papers}, filter=publications3, resetnumbers=true]
+\printbibliography[heading=bibsubheading, title={Workshop papers}, filter=Publications3, resetnumbers=true]
 \end{refcontext}
 
 \begin{refcontext}[labelprefix=U]
-\printbibliography[heading=bibsubheading, title={Under review}, filter=publications4, resetnumbers=true]
+\printbibliography[heading=bibsubheading, title={Under review}, filter=Publications4, resetnumbers=true]
 \end{refcontext}%
 }
 
-\defbibfilter{talks1}{keyword=invited}
-\defbibfilter{talks2}{keyword=oral and not ( keyword=invited )}
-\defbibfilter{talks3}{keyword=poster and not ( keyword=invited ) and not ( keyword=oral )}
+\defbibfilter{Talks1}{keyword=invited}
+\defbibfilter{Talks2}{keyword=oral and not ( keyword=invited )}
+\defbibfilter{Talks3}{keyword=poster and not ( keyword=invited ) and not ( keyword=oral )}
 
 \newcommand{\cvTalksKey}{%
 I=Invited talks, O=Oral sessions, P=Poster sessions%
@@ -654,14 +654,14 @@ I=Invited talks, O=Oral sessions, P=Poster sessions%
 
 \newcommand{\cvTalksSections}{%
 \begin{refcontext}[labelprefix=I]
-\printbibliography[heading=bibsubheading, title={Invited talks}, filter=talks1, resetnumbers=true]
+\printbibliography[heading=bibsubheading, title={Invited talks}, filter=Talks1, resetnumbers=true]
 \end{refcontext}
 
 \begin{refcontext}[labelprefix=O]
-\printbibliography[heading=bibsubheading, title={Conference oral presentations}, filter=talks2, resetnumbers=true]
+\printbibliography[heading=bibsubheading, title={Conference oral presentations}, filter=Talks2, resetnumbers=true]
 \end{refcontext}
 
 \begin{refcontext}[labelprefix=P]
-\printbibliography[heading=bibsubheading, title={Poster presentations}, filter=talks3, resetnumbers=true]
+\printbibliography[heading=bibsubheading, title={Poster presentations}, filter=Talks3, resetnumbers=true]
 \end{refcontext}%
 }

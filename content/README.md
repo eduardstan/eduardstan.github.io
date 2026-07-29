@@ -277,9 +277,9 @@ field is a **comma-separated** list, and a keyword matches only as written. A se
 `keywords` field — DBLP writes some — is therefore one long keyword to both consumers.
 
 `short` is a display label and nothing reads it for meaning: rename it, translate it, and the
-site and the PDF follow. In particular the rule that keeps an unannounced manuscript under review
-out of the news feed reads the entry's own `underreview` keyword, not the name of the section it
-lands in.
+site and the PDF follow. In particular both halves of the under-review rule — keeping an
+unannounced manuscript out of the news feed, and wording an announced one "submitted to {venue}" —
+read the entry's own `underreview` keyword, not the name of the section it lands in.
 
 **A section whose filter matches nothing prints nothing at all** — no heading, no gap — so
 declaring one costs nothing until the first entry arrives. An entry matching no section is still

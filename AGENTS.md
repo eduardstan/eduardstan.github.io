@@ -143,7 +143,9 @@ byte-identical — check with `--check`.
 canonical sentence per kind and is the only place a sentence literal may live. Grammar: what it
 was, then where; the kind stays on the mono apparatus line and is not repeated in the prose, and
 the venue is the short name. A missing slot must drop its own separator. Zero CSS was added for
-the feed and none should be.
+the feed and none should be. **A template is selected by what the record structurally is, never
+by a display label** — `Submitted` is chosen from `underReview`, not from a section's `short` —
+and `record.test.ts` refuses a declared `short` that collides with a template name.
 
 **A manuscript under review does not announce without an explicit `announced:`.** Its `year` is
 the year it is aimed at, not a date anything happened on; the year fallback put five of them

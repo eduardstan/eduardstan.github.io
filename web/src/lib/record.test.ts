@@ -23,7 +23,7 @@ import {
   SOURCES,
 } from './record.ts';
 import { keywordList } from './cv-schema.ts';
-import { announcements, formatStamp, say, shortVenue } from './announcements.ts';
+import { announcements, formatStamp, say, shortVenue, TEMPLATES } from './announcements.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const bib = bibliography();
@@ -92,7 +92,7 @@ assert.deepEqual(
 const generated = readFileSync(root + 'cv/generated/cv-data.tex', 'utf8');
 const printedHeadings = [
   ...generated.matchAll(
-    /\\printbibliography\[heading=bibsubheading, title=\{(.+?)\}, filter=publications/g,
+    /\\printbibliography\[heading=bibsubheading, title=\{(.+?)\}, filter=Publications/g,
   ),
 ].map((match) => match[1].replace(/\\&/g, '&'));
 assert.deepEqual(
@@ -152,7 +152,7 @@ function evaluateFilter(expression: string, type: string, keywords: string): boo
 // Filter N belongs to the Nth declared section: the generator numbers them by
 // declaration order so an unprinted section cannot shift the ones below it.
 const compiled = [
-  ...generated.matchAll(/\\defbibfilter\{publications(\d+)\}\{([\s\S]*?)\}\n/g),
+  ...generated.matchAll(/\\defbibfilter\{Publications(\d+)\}\{([\s\S]*?)\}\n/g),
 ].map((match) => ({
   section: declared[Number(match[1]) - 1],
   expression: match[2],
@@ -342,10 +342,10 @@ assert.equal(
 );
 assert.equal(say('Talk', { what: 'Modal Symbolic Learning' }), '_Modal Symbolic Learning_.');
 assert.equal(
-  say('Under review', { what: 'A paper', where: 'JAIR' }),
+  say('Submitted', { what: 'A paper', where: 'JAIR' }),
   '**A paper**, submitted to JAIR.',
 );
-assert.equal(say('Under review', { what: 'A paper' }), '**A paper**.');
+assert.equal(say('Submitted', { what: 'A paper' }), '**A paper**.');
 assert.equal(say('Writing', { what: 'A post' }), '**A post**.');
 // An unknown kind — a section an adopter invents — falls back, it does not throw.
 assert.equal(
@@ -392,6 +392,18 @@ for (const entry of underReview) {
   assert.ok(
     feed.undated.some((fact) => fact.what === entry.title),
     `${entry.key}: not in the feed and not named in the undated list either`,
+  );
+}
+
+// The wording is chosen from what the record structurally is, never from the
+// label the declaration displays it under. `TEMPLATES` is keyed on the first,
+// so a key that collides with a declared `short` would hand that group another
+// group's sentence the moment an adopter renamed one — the same fragile-string
+// class the under-review rule above was moved off.
+for (const section of declared) {
+  assert.ok(
+    !(section.short in TEMPLATES),
+    `${SOURCES.cv}: section "${section.short}" shares its name with an announcement template`,
   );
 }
 

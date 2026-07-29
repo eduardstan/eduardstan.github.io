@@ -94,14 +94,14 @@ interface Slots {
   year?: string;
 }
 
-const TEMPLATES: Record<string, (s: Slots) => (string | undefined)[]> = {
+export const TEMPLATES: Record<string, (s: Slots) => (string | undefined)[]> = {
   //  kind on the mono line     the sentence, one segment per comma
   Appointment: (s) => [`**${s.what}**`, s.where],
   Editorial: (s) => [`**${s.what}**`, s.where, s.detail],
   Service: (s) => [`**${s.what}**`, [s.where, s.year].filter(Boolean).join(' ') || undefined],
   Award: (s) => [`**${s.what}**`, s.where ?? s.detail],
   Talk: (s) => [`_${s.what}_`, s.where],
-  'Under review': (s) => [`**${s.what}**`, s.where && `submitted to ${s.where}`],
+  Submitted: (s) => [`**${s.what}**`, s.where && `submitted to ${s.where}`],
   Writing: (s) => [`**${s.what}**`],
   // Every other kind — the bibliography's Journal, Conference, Workshop,
   // Chapter, Book, Software, …, and any CV section an adopter invents. An entry
@@ -110,9 +110,17 @@ const TEMPLATES: Record<string, (s: Slots) => (string | undefined)[]> = {
   default: (s) => [`**${s.what}**`, s.where ?? s.detail],
 };
 
-/** The sentence for a kind, or the default one. One full stop, never two. */
-export function say(kind: string, slots: Slots): string {
-  const template = TEMPLATES[kind] ?? TEMPLATES.default;
+/**
+ * The sentence for a template, or the default one. One full stop, never two.
+ *
+ * The name is a key of `TEMPLATES` above, chosen by the caller from what the
+ * record structurally is — `Talk`, `Writing`, `Submitted`. Where a caller
+ * passes a display label through instead, an unrecognised one is not an error:
+ * it takes `default`, which is the sentence every group the captain's `short`
+ * names does not have wording of its own already gets.
+ */
+export function say(name: string, slots: Slots): string {
+  const template = TEMPLATES[name] ?? TEMPLATES.default;
   const line = template(slots).filter(Boolean).join(', ');
   return line.endsWith('.') ? line : `${line}.`;
 }
@@ -317,7 +325,7 @@ function fromBibliography(into: Announcement[], undated: Undated[]): void {
       item(
         stamp,
         entry.kind,
-        say(entry.kind, {
+        say(entry.underReview ? 'Submitted' : entry.kind, {
           what: link(md(entry.title), entry.link?.href),
           where: md(entry.venue) || undefined,
         }),

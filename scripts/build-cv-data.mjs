@@ -323,7 +323,7 @@ function bibSections(key, declaration) {
     }
     seen.set(prefix, section.short);
     printed.push(section);
-    const filter = `${key}${index + 1}`;
+    const filter = `${name}${index + 1}`;
     filters.push(`\\defbibfilter{${filter}}{${afterEarlier(own, earlier)}}`);
     bodies.push(
       `\\begin{refcontext}[labelprefix=${escapeLatex(prefix)}]\n` +

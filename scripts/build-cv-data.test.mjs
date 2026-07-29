@@ -201,12 +201,12 @@ test("declared sections become the key line and the printed sections, in file or
   });
   assert.equal(
     filters,
-    "\\defbibfilter{publications1}{type=article}\n" + "\\defbibfilter{publications2}{type=incollection and not ( type=article )}"
+    "\\defbibfilter{Publications1}{type=article}\n" + "\\defbibfilter{Publications2}{type=incollection and not ( type=article )}"
   );
   assert.match(key, /J=Journal, B=Books/);
-  assert.match(body, /labelprefix=J[\s\S]*title=\{Journal articles\}, filter=publications1/);
+  assert.match(body, /labelprefix=J[\s\S]*title=\{Journal articles\}, filter=Publications1/);
   // The heading is escaped on the way into LaTeX like every other prose field.
-  assert.match(body, /title=\{Books \\& chapters\}, filter=publications2/);
+  assert.match(body, /title=\{Books \\& chapters\}, filter=Publications2/);
 });
 
 test("a section marked `printed: false` is named for the website and never printed", () => {
@@ -216,7 +216,7 @@ test("a section marked `printed: false` is named for the website and never print
       { title: "Software & artifacts", short: "Software", types: ["misc"], printed: false },
     ],
   });
-  assert.doesNotMatch(filters, /\\defbibfilter\{publications2\}/);
+  assert.doesNotMatch(filters, /\\defbibfilter\{Publications2\}/);
   assert.doesNotMatch(key, /Software/);
   assert.doesNotMatch(body, /Software/);
 });
@@ -232,11 +232,11 @@ test("a printed section's filter excludes every predicate declared before it", (
       { title: "Workshop papers", short: "Workshop", types: ["inproceedings"], keywords: ["workshop"] },
     ],
   });
-  assert.match(filters, /\{publications1\}\{type=article\}/);
-  assert.match(filters, /\{publications2\}\{type=inproceedings and not keyword=workshop and not \( type=article \)\}/);
+  assert.match(filters, /\{Publications1\}\{type=article\}/);
+  assert.match(filters, /\{Publications2\}\{type=inproceedings and not keyword=workshop and not \( type=article \)\}/);
   assert.match(
     filters,
-    /\{publications3\}\{type=inproceedings and keyword=workshop and not \( type=article \) and not \( type=inproceedings and not keyword=workshop \)\}/
+    /\{Publications3\}\{type=inproceedings and keyword=workshop and not \( type=article \) and not \( type=inproceedings and not keyword=workshop \)\}/
   );
 });
 
@@ -249,7 +249,7 @@ test("an unprinted section still claims its entries, so the printed ones below i
       { title: "Everything else", short: "Other work", exclude_keywords: ["hidden"] },
     ],
   });
-  assert.match(filters, /\{publications2\}\{not keyword=hidden and not \( type=misc \)\}/);
+  assert.match(filters, /\{Publications2\}\{not keyword=hidden and not \( type=misc \)\}/);
 });
 
 test("an unprinted section is validated too, rather than relabelling the website in silence", () => {

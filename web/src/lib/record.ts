@@ -60,8 +60,10 @@ export const SOURCES = {
   // `announcements.ts` also runs under plain `node` in the self-check, where
   // that API does not exist.
   posts: 'content/posts',
-  // Read by `src/lib/cv.ts` through Vite's `?raw`, not by `read()` below: it is
-  // named here so there is one registry of where the site's facts come from.
+  // Read twice, on purpose: `src/lib/cv.ts` inlines it through Vite's `?raw`
+  // for the pages, and `cvRecord()` below reads it with `read()` for the
+  // declaration the bibliography's sections are matched against — which also
+  // runs under plain `node`, where `?raw` does not exist.
   cv: 'content/cv.yaml',
 } as const;
 
