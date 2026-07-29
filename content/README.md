@@ -304,6 +304,29 @@ Everything about *you* is in this directory. Two pieces of prose on the site are
   the matching `.bib` is empty; biblatex cannot report a count before it prints. Delete those
   two blocks if you have neither.
 
+## Prove a clean handoff
+
+Make the replacement in a throwaway copy of the repository, never in the copy you are preparing
+to publish. Replace `content/` with the smallest example above, empty `publications.bib` and
+`talks.bib`, and your own portrait and favicon, then run `cd web && npm run build`.
+
+Search the rendered documents in `web/dist/` in both directions: your new name and site domain
+must appear, while the previous owner's name and domain must not. For example:
+
+```sh
+grep -RInF --include='*.html' --include='*.xml' --include='*.json' --include='*.txt' \
+  'Alex Newcomer' web/dist
+grep -RInF --include='*.html' --include='*.xml' --include='*.json' --include='*.txt' \
+  'alex-newcomer.example' web/dist
+grep -RInF --include='*.html' --include='*.xml' --include='*.json' --include='*.txt' \
+  'Previous Owner' web/dist
+grep -RInF --include='*.html' --include='*.xml' --include='*.json' --include='*.txt' \
+  'previous-owner.example' web/dist
+```
+
+The first two commands must print matches. The last two must print nothing and exit with status 1.
+CI runs the same cold-start proof with a synthetic adopter on every push and pull request.
+
 ## The two builds
 
 ```bash

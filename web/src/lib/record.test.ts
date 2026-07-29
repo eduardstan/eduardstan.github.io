@@ -15,9 +15,7 @@ import { fileURLToPath } from 'node:url';
 import {
   about,
   bibliography,
-  listSources,
   profile,
-  readSource,
   stripMarkdown,
   talks,
   SOURCES,
@@ -415,15 +413,6 @@ assert.doesNotMatch(
   /Milano-Bicocca/,
   'the header brand names an institution instead of deriving it from profile.affiliation',
 );
-const surname = owner.bibliographyName.split(/\s+/).at(-1);
-assert.ok(surname, 'profile name has no surname');
-const escapedSurname = surname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const surnameToken = new RegExp(`(?<![\\p{L}\\p{N}_])${escapedSurname}(?![\\p{L}\\p{N}_])`, 'iu');
-assert.doesNotMatch(`interface ${surname}nk {}`, surnameToken, 'surname guard matches a substring');
-assert.match(`const owner = "${surname}"`, surnameToken, 'surname guard misses a standalone token');
-for (const path of listSources('web/src', ['.astro', '.ts', '.tsx', '.js', '.mjs'])) {
-  assert.doesNotMatch(readSource(path), surnameToken, `${path} hard-codes the profile surname`);
-}
 // `journaltitle` is BibLaTeX's name for `journal` and is what Zotero's Better
 // BibTeX writes. Without it an adopter's most recent article renders with no
 // venue and no error anywhere.

@@ -95,6 +95,9 @@ jobs:
         run: npm test
         working-directory: web
 
+      - name: Prove adopter cold start 🧊
+        run: node scripts/check-adopter-build.mjs
+
       - name: Build 🔧
         run: npm run build
         working-directory: web
