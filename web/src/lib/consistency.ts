@@ -58,10 +58,10 @@ export interface Check {
 /**
  * The whole roster. One check, and that is not an accident: every other check
  * the design proposed joined against a source this site no longer reads.
- * `_pages/professional_activities.md` is retired (`record.test.ts` fails if a
- * reader for it comes back) and `_news/` is read only by the Jekyll site, so
- * the checks that compared against them would have to re-open exactly the
- * second-copy problem this rebuild closed.
+ * `_pages/professional_activities.md` and `_news/` were both second copies of
+ * facts the records already hold, and both are gone; the checks that compared
+ * against them would have to re-open exactly the second-copy problem this
+ * rebuild closed.
  *
  * What is left is the one class of duplicate the architecture cannot remove: a
  * fact that states its own date and *also* carries the date it was announced on.

@@ -7,6 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { consistency, report } from './src/lib/consistency.ts';
+import { legacyRedirects } from './src/lib/legacy-urls.ts';
 
 /**
  * The consistency gate, with teeth.
@@ -36,6 +37,9 @@ function consistencyGate() {
 // https://docs.astro.build/en/reference/configuration-reference/
 export default defineConfig({
   site: 'https://eduardstan.github.io',
+  // Addresses the Jekyll site published and this one does not generate. See
+  // `src/lib/legacy-urls.ts` for why they are written down rather than derived.
+  redirects: legacyRedirects,
   markdown: {
     // Astro 7 renders Markdown with Sätteri by default, and Sätteri's plugin API
     // is deliberately not remark/rehype compatible. The existing posts rely on
