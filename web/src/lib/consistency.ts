@@ -94,6 +94,8 @@ export interface Finding {
   check: string;
   /** The record both sides belong to — `service[1] "Frontiers…"`. */
   subject: string;
+  source: string;
+  exceptionSource?: string;
   sides: Side[];
   /** Why these two values cannot both be true, in one sentence. */
   why: string;
@@ -132,13 +134,23 @@ export interface Gate {
  * first one. Upgrade to a position-carrying YAML parse only if that ever
  * misleads someone; today every stamp reported here is unique in its file.
  */
-function locator(path: string): (value: string) => string {
+function locator(path: string): (value: string | RegExp) => string {
   const lines = readSource(path).split('\n');
-  return (value: string) => {
-    const index = lines.findIndex((line) => line.includes(value));
+  return (value: string | RegExp) => {
+    const index = lines.findIndex((line) =>
+      typeof value === 'string' ? line.includes(value) : value.test(line),
+    );
     return index === -1 ? path : `${path}:${index + 1}`;
   };
 }
+
+const regexEscape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const bibField = (field: string, value: string) =>
+  new RegExp(
+    `^\\s*${regexEscape(field)}\\s*=\\s*(?:\\{\\s*${regexEscape(value)}\\s*\\}` +
+      `|"\\s*${regexEscape(value)}\\s*"|${regexEscape(value)})\\s*,?\\s*$`,
+    'i',
+  );
 
 // ------------------------------------------------------------ the check -----
 
@@ -156,6 +168,8 @@ const announcedYear = (stamp: string) =>
  */
 interface Pair {
   subject: string;
+  source: string;
+  exceptionSource?: string;
   year: number;
   yearLabel: string;
   yearValue: string;
@@ -189,6 +203,8 @@ function pairsFromCv(uncomparable: Uncomparable[]): Pair[] {
     }
     pairs.push({
       subject,
+      source: SOURCES.cv,
+      exceptionSource: SOURCES.cv,
       year,
       yearLabel,
       yearValue,
@@ -253,10 +269,11 @@ function pairsFromBibliography(uncomparable: Uncomparable[]): Pair[] {
     }
     pairs.push({
       subject,
+      source: SOURCES.bibliography,
       year: entry.year,
       yearLabel: 'year',
       yearValue: String(entry.year),
-      yearSource: at(`year         = {${entry.year}}`),
+      yearSource: at(bibField('year', String(entry.year))),
       announced,
       announcedSource: at(announced),
       except: [],
@@ -269,6 +286,12 @@ function pairsFromBibliography(uncomparable: Uncomparable[]): Pair[] {
 
 /** ISO day, or the word the design allows for an excuse that will not expire. */
 const PERMANENT = 'permanent';
+
+const isIsoDay = (value: unknown): value is string => {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const day = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(day.valueOf()) && day.toISOString().slice(0, 10) === value;
+};
 
 /**
  * An exception is declared on the fact, in the data, beside what it excuses —
@@ -286,11 +309,25 @@ export function exceptionProblem(
     ].join(', ')}`;
   if ((exception.because ?? '').trim().length < 20)
     return 'states no reason — `because:` is rendered to the reader, so a blank one is a lie in public';
-  if (exception.until !== PERMANENT && !/^\d{4}-\d{2}-\d{2}$/.test(exception.until ?? ''))
+  if (exception.until !== PERMANENT && !isIsoDay(exception.until))
     return `has no expiry — \`until:\` must be an ISO day or \`${PERMANENT}\` (got "${exception.until}")`;
   if (exception.until !== PERMANENT && exception.until < today)
     return `expired on ${exception.until}; the finding it excused for "${subject}" is back`;
   return undefined;
+}
+
+export function restoreRejectedFindings(
+  excused: Finding[],
+  contradictions: Finding[],
+  subject: string,
+  check: string,
+): void {
+  const matches = (finding: Finding) =>
+    finding.subject.startsWith(subject) && finding.check === check;
+  const rejected = excused.filter(matches);
+  if (rejected.length === 0) return;
+  excused.splice(0, excused.length, ...excused.filter((finding) => !matches(finding)));
+  contradictions.push(...rejected.map((finding) => ({ ...finding, excused: undefined })));
 }
 
 // ---------------------------------------------------------------- the gate --
@@ -332,6 +369,8 @@ export function consistency(today = new Date().toISOString().slice(0, 10)): Gate
     const finding: Finding = {
       check: 'announced-in-own-year',
       subject: pair.subject,
+      source: pair.source,
+      exceptionSource: pair.exceptionSource,
       sides: [
         { label: pair.yearLabel, value: pair.yearValue, source: pair.yearSource },
         { label: 'announced', value: pair.announced, source: pair.announcedSource },
@@ -369,13 +408,7 @@ export function consistency(today = new Date().toISOString().slice(0, 10)): Gate
         });
         // An expired or malformed exception excuses nothing, so the finding it
         // was silencing has to come back with it.
-        const wrongly = excused.findIndex(
-          (finding) => finding.subject.startsWith(subject) && finding.check === exception.check,
-        );
-        if (wrongly !== -1) {
-          const [finding] = excused.splice(wrongly, 1);
-          contradictions.push({ ...finding, excused: undefined });
-        }
+        restoreRejectedFindings(excused, contradictions, subject, exception.check);
         continue;
       }
       // An entry-level exception covers the entry and its editions, so a
@@ -425,14 +458,20 @@ export function report(gate: Gate): string {
     for (const side of finding.sides)
       lines.push(`      ${side.label.padEnd(10)} ${side.value.padEnd(28)} ${side.source}`);
     lines.push(`    ${finding.why}`);
-    lines.push(
-      '',
-      '    Fix one of the two, or excuse this one fact in cv/cv.yaml:',
-      '      except:',
-      `        - check: ${finding.check}`,
-      '          because: <why both values are correct>',
-      '          until: YYYY-MM-DD',
-    );
+    if (finding.exceptionSource)
+      lines.push(
+        '',
+        `    Fix one of the two, or excuse this one fact in ${finding.exceptionSource}:`,
+        '      except:',
+        `        - check: ${finding.check}`,
+        '          because: <why both values are correct>',
+        '          until: YYYY-MM-DD',
+      );
+    else
+      lines.push(
+        '',
+        `    Fix one of the contradictory values in ${finding.source}; this record has no exception mechanism.`,
+      );
   }
   for (const problem of gate.exceptionProblems)
     lines.push(

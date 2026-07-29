@@ -13,7 +13,14 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { CHECKS, consistency, coverage, exceptionProblem, report } from './consistency.ts';
+import {
+  CHECKS,
+  consistency,
+  coverage,
+  exceptionProblem,
+  report,
+  restoreRejectedFindings,
+} from './consistency.ts';
 import { SOURCES } from './record.ts';
 
 const gate = consistency();
@@ -48,6 +55,21 @@ assert.match(report(expired), /Build refused/);
 // The failure message hands over its own escape hatch.
 assert.match(report(expired), /except:\n\s+- check: announced-in-own-year/);
 
+const bibliographyContradiction = {
+  ...frontiers,
+  subject: 'paper-key "A paper"',
+  source: SOURCES.bibliography,
+  exceptionSource: undefined,
+  excused: undefined,
+};
+const bibliographyReport = report({
+  ...gate,
+  contradictions: [bibliographyContradiction],
+  excused: [],
+});
+assert.match(bibliographyReport, /this record has no exception mechanism/);
+assert.doesNotMatch(bibliographyReport, /except:\n/);
+
 // The rules the gate enforces on an exception itself. A typo must never look
 // like a successful excuse.
 const ok = { check: CHECKS[0].id, because: 'both of these dates are correct', until: '2099-01-01' };
@@ -55,8 +77,21 @@ assert.equal(exceptionProblem(ok, 'subject', '2026-01-01'), undefined);
 assert.match(exceptionProblem({ ...ok, check: 'no-such-check' }, 's', '2026-01-01')!, /no check/);
 assert.match(exceptionProblem({ ...ok, because: 'typo' }, 's', '2026-01-01')!, /no reason/);
 assert.match(exceptionProblem({ ...ok, until: 'soon' }, 's', '2026-01-01')!, /no expiry/);
+assert.match(exceptionProblem({ ...ok, until: '2027-13-40' }, 's', '2026-01-01')!, /no expiry/);
+assert.match(exceptionProblem({ ...ok, until: '2027-02-29' }, 's', '2026-01-01')!, /no expiry/);
+assert.equal(exceptionProblem({ ...ok, until: '2028-02-29' }, 's', '2026-01-01'), undefined);
 assert.match(exceptionProblem({ ...ok, until: '2025-01-01' }, 's', '2026-01-01')!, /expired/);
 assert.equal(exceptionProblem({ ...ok, until: 'permanent' }, 's', '2026-01-01'), undefined);
+
+const multiExcused = [
+  { ...frontiers, subject: `${frontiers.subject} 2025` },
+  { ...frontiers, subject: `${frontiers.subject} 2026` },
+];
+const restored: typeof multiExcused = [];
+restoreRejectedFindings(multiExcused, restored, frontiers.subject, frontiers.check);
+assert.equal(multiExcused.length, 0, 'a rejected entry exception still excused an edition');
+assert.equal(restored.length, 2, 'not every edition finding came back');
+assert.ok(restored.every((finding) => finding.excused === undefined));
 
 // It cannot fire on a fresh copy of this template. Every comparison needs two
 // hand-typed records of one fact; a fresh copy has one — a date — and no second

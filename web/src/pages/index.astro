@@ -256,6 +256,22 @@ const withheld = feed.items.length - shown.length;
           ))
         }
         {
+          gate.exceptionProblems.map((item) => (
+            <p>
+              Exception rejected — {item.what} {item.why} (<b>{item.source}</b>).
+            </p>
+          ))
+        }
+        {
+          gate.stale.map(({ subject, exception }) => (
+            <p>
+              <b>{exception.check}</b> — stale exception · {subject}
+              <br />
+              {exception.because} · expires {exception.until}
+            </p>
+          ))
+        }
+        {
           gate.uncomparable.map((item) => (
             <p>
               Not compared — {item.what} {item.why} (<b>{item.source}</b>).
