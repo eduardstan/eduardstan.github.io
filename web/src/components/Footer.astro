@@ -12,9 +12,7 @@ const year = new Date().getFullYear();
       <h2 class="label">Contact</h2>
       {email && <a href={`mailto:${email}`}>{email}</a>}
       <Record>
-        <p><b>{SOURCES.config}</b> — <code>email</code>, <code>first_name</code>, <code
-            >middle_name</code
-          >, <code>last_name</code>.</p>
+        <p><b>{SOURCES.cv}</b> — <code>profile.email</code> and <code>profile.name</code>.</p>
       </Record>
     </div>
     <div>
@@ -26,12 +24,14 @@ const year = new Date().getFullYear();
       </div>
       <Record>
         <p>
-          <b>{SOURCES.config}</b> — one link per account field that carries a value.
+          <b>{SOURCES.cv}</b> — one link per <code>profile.links</code> account that carries an ID.
+          The address is built from the ID here and in <b>scripts/build-cv-data.mjs</b>, so no
+          address is written twice.
           {
             missing.length > 0 && (
               <>
                 {' '}
-                Empty in the config, so not shown: {missing.map((key) => <code>{key}</code>)}.
+                No ID in the file, so not shown: {missing.map((kind) => <code>{kind}</code>)}.
               </>
             )
           }
@@ -42,7 +42,10 @@ const year = new Date().getFullYear();
       <h2 class="label">Post</h2>
       <address>{address.map((line) => <>{line}<br /></>)}</address>
       <Record>
-        <p><b>{addressSource}</b> — <code>profile.more_info</code>.</p>
+        <p>
+          <b>{addressSource}</b> — <code>affiliation[]</code> broadest first, then{' '}
+          <code>address[]</code> and <code>place</code>.
+        </p>
       </Record>
     </div>
   </div>

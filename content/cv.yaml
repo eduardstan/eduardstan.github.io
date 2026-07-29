@@ -1,0 +1,490 @@
+# =============================================================================
+# content/cv.yaml - you, and every section of your CV.
+#
+# This file and its three neighbours (`publications.bib`, `talks.bib`,
+# `posts/`) are the whole interface. Nothing outside `content/` holds a fact
+# about you, and this file is the landmark the build walks up to find.
+#
+# Consumers:
+#   * the printed CV - `node scripts/build-cv-data.mjs` -> `cv/generated/cv-data.tex`
+#   * the website    - `web/src/lib/cv.ts` and `web/src/lib/record.ts`
+#
+# Layout, spacing, fonts, table column widths and section order are NOT here:
+# they belong to `cv/cv.tex`, which owns the design and decides which of the
+# sections below the PDF prints.
+#
+# `content/README.md` is the documentation. Everything below is described there.
+#
+# -----------------------------------------------------------------------------
+# Inline markup allowed in any prose field (portable, not LaTeX):
+#   **bold**            -> \textbf{...}
+#   _italic_            -> \emph{...}   (an underscore inside a word - a_b,
+#                       snake_case, file_name.txt - is literal, as in Markdown;
+#                       an unclosed _ or ** is an error, not silent emphasis)
+#   [text](https://...) -> \href{...}{text}
+#   *                   passes through literally (so "CORE Rank: A*" is safe)
+#
+# No URL in this file - a link target above or any URL-valued field below - may
+# contain \ ~ _ ^ $ { }; percent-encode them (~ is %7E, _ is %5F, \ is %5C).
+# Every \href lands inside a \newcommand body, where TeX consumes those characters
+# before hyperref can rescue them, so the build raises rather than emitting a
+# wrong link.
+#
+# Characters that carry typographic meaning, written as real Unicode:
+#   -- em dash   (U+2014)  ->  ---     e.g. "settings-especially healthcare"
+#   - en dash    (U+2013)  ->  --      used for date and year ranges
+#   - non-breaking hyphen (U+2011) -> {-}   (suppresses a line break at that hyphen)
+#   + superscript plus    (U+207A)  ->  $^{+}$   e.g. "Erasmus+"
+#   EUR EURO SIGN (U+20AC) ->  \euro{}
+#
+# Everything else is escaped automatically: &, %, $, #, _, {, }, ~, ^, backslash.
+#
+# -----------------------------------------------------------------------------
+# `except:` - a declared exception to one website consistency check, written on
+# the fact it excuses:
+#
+#   except:
+#     - check: announced-in-own-year   # exactly one id from web/src/lib/consistency.ts
+#       because: >-                    # prose, rendered to the reader
+#         why both values are correct
+#       until: 2027-01-01              # ISO day, or `permanent`
+#
+# The website's build refuses an exception naming an unknown check, carrying a
+# blank reason, or past its `until` date. `build-cv-data.mjs` ignores the key.
+# =============================================================================
+
+profile:
+  name: Ionel Eduard STAN, Ph.D.
+  headline: Assistant Professor (RTD/a)
+  affiliation:
+    - label: Intelligent Sensing Laboratory (ISLab)
+      url: https://islab.disco.unimib.it/
+    - label: Department of Informatics, Systems and Communication (DISCo)
+      url: https://www.disco.unimib.it/
+    - label: University of Milano-Bicocca
+      url: https://www.unimib.it/
+  place: Milan, 20125, Italy
+  # Street-level lines, for the website's footer only. The printed CV's address
+  # block is `headline`, `affiliation[]` and `place`; it never carries these.
+  address:
+    - Viale Sarca 336
+    - Room 1019, 1st Floor
+  email: ioneleduard.stan@unimib.it
+  website:
+    label: eduardstan.github.io
+    url: https://eduardstan.github.io/
+  links:
+    scholar: 8BMCQS8AAAAJ
+    orcid: 0000-0001-9260-102X
+    linkedin: edust
+    github: eduardstan
+  portrait: portrait.jpg
+  bio:
+    short: Ionel Eduard Stan is an Assistant Professor (RTD/a) at the University of Milano-Bicocca
+      (DISCo), within the Intelligent Sensing Laboratory (ISLab). His research builds
+      **trustworthy, interpretable artificial intelligence (AI) for sequential and multimodal
+      data**, combining modern learning with **logic-based and neuro-symbolic** representations
+      to obtain explanations that can be inspected, validated, and monitored. His work targets
+      high-impact settings—especially healthcare and telemonitoring—and extends to smart
+      environments. He contributes to Italian programmes (ANTHEM/PNC; previously iNEST/PNRR) and
+      serves the community as Associate Editor (_Neurocomputing_, _Frontiers in Artificial
+      Intelligence_), including as Lead Editor of a special issue on explainable AI (XAI) for
+      human-centric healthcare, as well as Area Chair and Organizing/Program Committee member
+      for major AI venues. He teaches Databases (B.Sc.), Intelligent Consumer Technologies
+      (M.Sc.), and Foundations of AI (2nd-level Master's).
+    long: >-
+      I am an **Assistant Professor** (_Ricercatore a Tempo Determinato di tipo A---RTD/A_) at
+      the University of Milano-Bicocca, where I bridge the gap between formal methods, symbolic
+      reasoning, and cutting-edge AI technologies. My expertise lies in leveraging **formal
+      logic and symbolic AI** to enhance the interpretability and transparency of machine
+      learning models, particularly within the rapidly evolving field of **formal explainable AI
+      (FXAI)**.
+
+
+      At the **Intelligent Sensing Lab (ISLab)**, I collaborate with a team of deep learning
+      experts, bringing my background in symbolic methods to bear on the challenges of
+      explainability. Our goal is to ensure that the AI systems we develop are effective _and_
+      trustworthy, particularly in high-stakes applications like healthcare. This work is
+      central to our contributions to the **ANTHEM project**, where we focus on developing smart
+      environments and innovative sensors for proximity medicine, working alongside leading
+      institutions and healthcare providers.
+
+
+      In addition to my research, I am deeply committed to my role as an educator. I actively
+      seek out and **mentor students**, guiding them through their theses and fostering their
+      development as future researchers. My teaching is informed by my belief in the importance
+      of **transparency and ethics in AI**, principles that are increasingly critical as AI
+      technologies become more integrated into society.
+
+
+      A vision of AI drives my work as a tool for **enhancing human capabilities**, built on a
+      foundation of trust, ethics, and collaboration. I am excited to continue exploring the
+      potential of **neuro-symbolic AI** and FXAI, and I am always open to new partnerships that
+      align with these goals. Let’s connect and push the boundaries of what AI can achieve
+      together.
+  focus: "**Trustworthy (explainable and neuro-symbolic) AI for time series and multimodal
+    signals**, with an emphasis on **logic-guided learning and representation, auditable
+    explanations, and model monitoring**, applied to healthcare, telemonitoring, and smart
+    environments."
+  footer: "**Data protection and permitted use.** I authorize the processing of my personal data
+    contained in this CV for purposes connected with evaluation and selection procedures, in
+    accordance with Regulation (EU) 2016/679 (GDPR) and Italian legislation (Legislative Decree
+    196/2003 as amended by Legislative Decree 101/2018)."
+appointments:
+  - title: Assistant Professor (RTD/a)
+    place: Milan, Italy
+    org: University of Milano-Bicocca (Intelligent Sensing Laboratory—ISLab)
+    url: https://islab.disco.unimib.it/
+    dates: Jul 2024–Present
+    announced: 2024-07-16T10:00:00+02:00
+    items:
+      - Teaching (Instructor of record), thesis supervision, and mentoring activities.
+      - "Research within the ANTHEM project (Piano Nazionale Complementare—PNC): XAI and
+        neuro-symbolic methods for signals and healthcare-oriented AI."
+  - title: Research Fellow / Postdoctoral Researcher
+    place: Bozen-Bolzano, Italy
+    org: Free University of Bozen-Bolzano (Database Group—DBS Group)
+    url: https://dbs.inf.unibz.it/
+    dates: Mar 2023–Jun 2024
+    items:
+      - "Research in the iNEST ecosystem (Piano Nazionale di Ripresa e Resilienza—PNRR): time
+        series analytics and applied machine learning."
+  - title: Research Assistant
+    place: Ferrara, Italy
+    org: University of Ferrara (Applied Computational Logic and AI Laboratory—ACLAI Lab)
+    url: https://aclai.unife.it/
+    dates: Nov 2019–Jul 2024
+    items:
+      - Modal and interval temporal logic; symbolic / modal machine learning.
+      - Supervised and coordinated multiple theses; some outcomes published in international
+        venues.
+education:
+  - title: Ph.D. in Mathematics (Excellent cum laude)
+    place: Parma, Italy
+    org: University of Parma
+    url: https://www.unipr.it/
+    dates: Nov 2019–Feb 2023
+  - title: M.Sc. in Computer Science (110/110 cum laude)
+    place: Udine, Italy
+    org: University of Udine
+    url: https://www.uniud.it/
+    dates: Oct 2017–Oct 2019
+  - title: B.Sc. in Computer Science (110/110 cum laude)
+    place: Ferrara, Italy
+    org: University of Ferrara
+    url: https://www.unife.it/
+    dates: Oct 2014–Jun 2017
+teaching:
+  - title: Official Lecturer (Instructor of Record)
+    place: Milan, Italy
+    org: University of Milano-Bicocca (DISCo)
+    url: https://elearning.unimib.it/course/info.php?id=60729
+    dates: Jul 2024–Present
+    rows:
+      - course: Databases
+        programme: B.Sc. Computer Science
+        topics: SQL; relational algebra; database design; lab/project work
+        hours: 30 h/yr
+      - course: Intelligent Consumer Technologies
+        programme: M.Sc. AI for Society and Technology (AI4ST)
+        topics: XAI; ethical/legal/privacy aspects; agentic AI (overview)
+        hours: 6 h/yr
+  - title: Official Lecturer (Instructor of Record)
+    place: Milan, Italy
+    org: Bicocca Academy (2nd-level Master, DAI4Health)
+    url: https://www.academy.unimib.it/dai4health-innovazione-digitale-e-intelligenza-artificiale-nel-settore-sanitario-0
+    dates: Dec 2025–Present
+    rows:
+      - course: Foundations of Artificial Intelligence
+        programme: 2nd-level Master (DAI4Health)
+        topics: NLP foundations; agentic AI (overview); ethical/legal/privacy aspects of AI in
+          healthcare
+        hours: 10 h/yr
+  - title: Teaching Assistant
+    place: Ferrara, Italy
+    org: University of Ferrara
+    url: https://www.unife.it/
+    dates: Oct 2019–Feb 2023
+    rows:
+      - course: Algorithms and Data Structures
+        programme: B.Sc. Computer Science
+        topics: Laboratory/project work
+        hours: 21 h/yr
+      - course: Databases and Laboratory
+        programme: B.Sc. Computer Science
+        topics: ER-to-relational mapping; relational algebra; SQL; normal forms
+        hours: 20 h/yr
+      - course: Statistics and Probability Calculus
+        programme: B.Sc. Computer Science
+        topics: Descriptive statistics; discrete/continuous random variables; confidence intervals;
+          hypothesis testing
+        hours: 20 h/yr
+service:
+  - title: Associate Editor
+    org: Elsevier Neurocomputing Journal
+    metric: "IF: 6.5, Q1"
+    url: https://www.sciencedirect.com/journal/neurocomputing
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=24807
+    announced: 2025-10-26T10:00:00+02:00
+    dates: Oct 2025–Present
+  - title: Associate Editor
+    org: Frontiers in Artificial Intelligence Journal
+    detail: Pattern Recognition Section
+    metric: "IF: 4.7, Q2"
+    url: https://www.frontiersin.org/journals/artificial-intelligence/sections/pattern-recognition
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=21101062817&tip=sid&clean=0
+    announced: 2025-03-03T10:00:00+02:00
+    dates: Mar 2024–Present
+    except:
+      - check: announced-in-own-year
+        because: Appointed to the board in March 2024 and announced on the site a year later, on
+          2025-03-03, when the special issue launched. Both dates are correct and both are
+          stated here.
+        until: 2027-01-01
+    items:
+      - "Lead Editor of the Special Issue on [Explainable Artificial Intelligence for
+        Trustworthy and Human‑Centric Healthcare: Methods, Evaluation, and Clinical
+        Impact](https://www.frontiersin.org/research-topics/71848/explainable-artificial-intelligence-for-trustworthy-and-human-centric-healthcare-methods-evaluation-and-clinical-impact) (25+ submissions to date)."
+  - title: Technical Committee Member
+    org: IEEE Consumer Technology Society (CTSoc)
+    detail: Machine learning, Deep learning and AI in CE (MDA) Technical Committee
+    url: https://ctsoc.ieee.org/technical/technical-committees/mda-tc
+    announced: 2025-04-01T10:00:00+02:00
+    dates: Apr 2025–Present
+  - title: Tutorials/Special Session Co-Chair
+    org: IEEE International Conference on Intelligent Reality (ICIR)
+    url: https://icir.ieee.org/
+    years:
+      - 2026
+  - title: Area Chair
+    org: IEEE International Joint Conference on Neural Networks (IJCNN)
+    metric: "CORE Rank: B"
+    url: https://ijcnn.org/
+    rank_url: https://portal.core.edu.au/conf-ranks/685/
+    years:
+      - year: 2025
+        announced: 2025-01-11
+      - 2026
+  - title: Area Chair
+    org: IEEE International Conference on Acoustics, Speech, and Signal Processing (ICASSP)
+    metric: "CORE Rank: B"
+    url: https://2026.ieeeicassp.org/
+    rank_url: https://portal.core.edu.au/conf-ranks/2042/
+    years:
+      - year: 2026
+        announced: 2025-09-09
+  - title: Program Committee
+    org: Association for the Advancement of Artificial Intelligence (AAAI) Conference on Artificial
+      Intelligence
+    metric: "CORE Rank: A*"
+    url: https://aaai.org/conference/aaai/
+    rank_url: https://portal.core.edu.au/conf-ranks/1629/
+    years:
+      - 2024
+      - year: 2025
+        announced: 2024-06-10
+      - year: 2026
+        announced: 2025-07-18
+  - title: Program Committee
+    org: International Conference on Learning Representations (ICLR)
+    metric: "CORE Rank: A*"
+    url: https://iclr.cc/
+    rank_url: https://portal.core.edu.au/conf-ranks/2273/
+    years:
+      - year: 2025
+        announced: 2024-08-28
+      - year: 2026
+        announced: 2025-09-23
+  - title: Program Committee
+    org: International Joint Conference on Artificial Intelligence (IJCAI)
+    metric: "CORE Rank: A*"
+    url: https://www.ijcai.org/
+    rank_url: https://portal.core.edu.au/conf-ranks/1313/
+    years:
+      - year: 2025
+        announced: 2025-01-13T16:00:00+02:00
+      - year: 2026
+        announced: 2025-12-10
+  - title: Program Committee
+    org: European Conference on Artificial Intelligence (ECAI)
+    metric: "CORE Rank: A"
+    url: https://eurai.org/ecai
+    rank_url: https://portal.core.edu.au/conf-ranks/473/
+    years:
+      - year: 2025
+        announced: 2025-04-22
+  - title: Reviewer
+    org: Elsevier Engineering Applications of Artificial Intelligence Journal
+    metric: "IF: 8.0; Q1"
+    url: https://www.sciencedirect.com/journal/engineering-applications-of-artificial-intelligence
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=24182&tip=sid&clean=0
+    announced: 2025-01-13T10:00:00+02:00
+  - title: Reviewer
+    org: IEEE Journal of Biomedical and Health Informatics
+    metric: "IF: 6.7; Q1"
+    url: https://www.embs.org/jbhi/
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=21100256982&tip=sid&clean=0
+    announced: 2024-08-21T10:00:00+02:00
+  - title: Reviewer
+    org: AI Access Foundation Journal of Artificial Intelligence Research
+    metric: "IF: 4.6; Q1"
+    url: https://www.jair.org/
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=24330&tip=sid
+  - title: Reviewer
+    org: PeerJ Computer Science Journal
+    metric: "IF: 2.5; Q1"
+    url: https://peerj.com/computer-science/
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=21100830173&tip=sid&clean=0
+  - title: Reviewer
+    org: Elsevier Information and Computation Journal
+    metric: "IF: 1.0; Q2"
+    url: https://www.sciencedirect.com/journal/information-and-computation
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=25509&tip=sid&clean=0
+projects:
+  - title: ANTHEM — AdvaNced Technologies for Human-centred Medicine
+    detail: Collaborator (University of Milano-Bicocca, ISLab)
+    url: https://fondazioneanthem.it/en/
+    dates: Jul 2024–Present
+    funding: €120M (programme total)
+    items:
+      - Research on explainability and neuro-symbolic learning for time series and multimodal
+        physiological signals, aligned with trustworthy AI in healthcare.
+  - title: iNEST — Interconnected Nord-Est Innovation Ecosystem
+    detail: Collaborator (Free University of Bozen-Bolzano, DBS Group)
+    url: https://www.consorzioinest.it/
+    dates: Feb 2023–Jun 2024
+    funding: €110M (programme total)
+    items:
+      - Contributed to applied time-series analytics and machine learning pipelines within a
+        multi-partner innovation ecosystem, supporting research-to-impact activities on
+        real-world data.
+  - title: Certification, Monitoring, and Interpretability of Artificial Intelligent Systems
+    detail: Research collaborator (University of Ferrara, ACLAI Lab) — GNCS / INdAM
+    url: https://www.altamatematica.it/gncs/
+    dates: Jan 2023–Jan 2024
+    funding: €1,700
+    items:
+      - Developed and assessed interpretability and monitoring strategies for AI systems,
+        focusing on explainability reporting, reliability checks, and reproducible evaluation
+        practices.
+  - title: Set-up and Optimization of an ML Model to Predict Gas Turbine Trip
+    detail: Research collaborator (University of Ferrara, ACLAI Lab) — Siemens Energy Global GmbH &
+      Co. KG
+    url: https://www.siemens-energy.com/global/en/home.html
+    dates: Jan 2022–Jan 2023
+    funding: €40,000
+    items:
+      - Supported predictive modelling for rare-event/failure prediction on operational turbine
+        data, with emphasis on validation protocols and interpretable model analysis and rule
+        extraction for engineering stakeholders.
+  - title: Symbolic and Numerical Analysis of Cyber-Physical Systems
+    detail: Research collaborator (University of Ferrara, ACLAI Lab) — GNCS / INdAM
+    url: https://www.altamatematica.it/gncs/
+    dates: Jan 2022–Jan 2023
+    funding: €6,900
+    items:
+      - Contributed to hybrid symbolic–numerical methods for analyzing cyber-physical behaviors,
+        connecting formal modeling assumptions with empirical validation on representative
+        scenarios.
+  - title: Modal Geometric Symbolic Learning
+    detail: Research collaborator (University of Ferrara, ACLAI Lab) — University of Ferrara
+    url: https://www.unife.it/
+    dates: May 2021–Jun 2022
+    funding: €2,650
+    items:
+      - Investigated interpretable learning methods grounded in modal/logical representations,
+        including prototype implementations and empirical assessment on benchmark tasks.
+  - title: Natural Language Elaboration and Temporal Logic for Text Formalization
+    detail: Research collaborator (University of Ferrara, ACLAI Lab) — GNCS / INdAM
+    url: https://www.altamatematica.it/gncs/
+    dates: Jan 2021–Jan 2022
+    funding: €3,000
+    items:
+      - Explored NLP-to-logic workflows to formalize textual requirements into temporal/logical
+        specifications, targeting traceability and explainable reasoning over system properties.
+  - title: Strategic Reasoning and Automated Synthesis of Multi-Agent Systems
+    detail: Research collaborator (University of Ferrara, ACLAI Lab) — GNCS / INdAM
+    url: https://www.altamatematica.it/gncs/
+    dates: Jan 2020–Jan 2021
+    funding: €3,000
+    items:
+      - Contributed to strategic reasoning and automated synthesis themes, strengthening the
+        formal-methods research line on explainability and symbolic reasoning.
+awards:
+  - title: Finalist (2nd place) & Team Leader
+    detail: Huawei Italy University Challenge
+    dates: Nov 2021
+  - title: 3-year Ph.D. Full Scholarship
+    detail: Ministero dell'Istruzione, dell'Università e della Ricerca (MIUR)
+    dates: Sep 2019
+  - title: Best M.Sc. Graduate Student in Computer Science
+    detail: University of Udine
+    dates: Sep 2019
+    items:
+      - Awarded by the Rector at the Dacia Arena Stadium; prize €1000.
+  - title: Erasmus⁺ Full Scholarship
+    detail: University of Ferrara
+    dates: Sep 2016
+supervision:
+  note:
+    - "**Total supervision:** 10+ B.Sc. theses/internships; 5+ M.Sc. theses/internships.
+      Supervision includes problem definition, methodological guidance, implementation support,
+      evaluation protocols, and thesis/report writing."
+    - "**Topic coverage:** Formal Methods; Knowledge-Based AI; Symbolic AI; Robotics;
+      Human–Computer Interaction; Healthcare AI (e.g., dementia prediction);
+      Trustworthy/Explainable AI."
+  entries:
+    - title: B.Sc. theses / internships
+      count: 10+
+      detail: End-to-end supervision of short-to-medium projects, including prototyping and empirical
+        evaluation
+    - title: M.Sc. theses / internships
+      count: 5+
+      detail: Supervision of research-oriented projects with stronger methodological depth and
+        experimental design
+    - title: Erasmus⁺ visiting student (traineeship)
+      count: "1"
+      detail: Hosted and supervised a 3-month Erasmus⁺ internship (incoming student from TED
+        University, Turkey)
+languages:
+  - title: Romanian
+    detail: native
+  - title: Italian
+    detail: fluent
+  - title: English
+    detail: fluent
+  - title: Spanish
+    detail: fluent
+  - title: French
+    detail: basic
+leadership:
+  - title: Ph.D. Representative (35th Ph.D. Cycle)
+    detail: Academic Board, Ph.D. in Mathematics, Universities of Parma, Reggio-Emilia, and Ferrara
+    dates: November 2019 – February 2023
+    place: Parma, Italy
+  - title: Deputy Coordinator
+    detail: Associazione Dottorandi e Dottori di Ricerca in Italia (ADI), Ferrara's Unit
+    dates: October 2020 – December 2022
+    place: Ferrara, Italy
+    items:
+      - Led the campaign to reduce Ph.D. students' taxes at the University of Ferrara by 75%.
+      - Organized many cultural dissemination events on Climate Change, Artificial Intelligence
+        and Ethics, and the Evolution of Science with more than 200 attendees.
+      - Secured a 3-month extension for all Ph.D. scholarships at the national level due to
+        COVID-19.
+  - title: Ph.D.s' Representative
+    detail: Department Council (Consiglio di Dipartimento), Department of Mathematics and Computer
+      Science, University of Ferrara
+    dates: October 2019 – September 2022
+    place: Ferrara, Italy
+  - title: Students' Representative
+    detail: Addressing Committee for periodic consultations with the labour market (Comitato di
+      indirizzamento per le consultazioni periodiche con il mondo del lavoro), Department of
+      Mathematics, Computer Science and Physics, University of Udine
+    dates: October 2018 – September 2019
+    place: Udine, Italy
+  - title: Students' Representative
+    detail: Quality Assurance Commission (Commissione Assicurazione Qualità), Department of
+      Mathematics, Computer Science and Physics, University of Udine
+    dates: October 2018 – September 2019
+    place: Udine, Italy

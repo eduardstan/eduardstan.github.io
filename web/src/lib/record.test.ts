@@ -13,7 +13,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { about, bibliography, talks, SOURCES } from './record.ts';
-import { announcements, formatStamp } from './announcements.ts';
+import { announcements, formatStamp, say, shortVenue } from './announcements.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const bib = bibliography();
@@ -166,6 +166,89 @@ for (const item of feed.items) {
   );
 }
 
+// The announcement templates, and the sparse cases they have to survive. Every
+// field but the title is optional in the CV, so a template is only ever one
+// missing slot away from a dangling comma or an empty parenthesis.
+assert.equal(say('Appointment', { what: 'Reader', where: 'Example' }), '**Reader**, Example.');
+assert.equal(say('Appointment', { what: 'Reader' }), '**Reader**.');
+assert.equal(
+  say('Editorial', { what: 'Associate Editor', where: 'Frontiers', detail: 'Pattern Recognition' }),
+  '**Associate Editor**, Frontiers, Pattern Recognition.',
+);
+assert.equal(
+  say('Editorial', { what: 'Associate Editor', where: 'Frontiers' }),
+  '**Associate Editor**, Frontiers.',
+);
+assert.equal(
+  say('Service', { what: 'Program Committee', where: 'IJCAI', year: '2026' }),
+  '**Program Committee**, IJCAI 2026.',
+);
+assert.equal(
+  say('Service', { what: 'Program Committee', where: 'IJCAI' }),
+  '**Program Committee**, IJCAI.',
+);
+assert.equal(
+  say('Service', { what: 'Program Committee', year: '2026' }),
+  '**Program Committee**, 2026.',
+);
+assert.equal(say('Service', { what: 'Program Committee' }), '**Program Committee**.');
+assert.equal(
+  say('Award', { what: 'Best Graduate', detail: 'University of Udine' }),
+  '**Best Graduate**, University of Udine.',
+);
+assert.equal(say('Talk', { what: 'Modal Symbolic Learning' }), '_Modal Symbolic Learning_.');
+assert.equal(
+  say('Under review', { what: 'A paper', where: 'JAIR' }),
+  '**A paper**, submitted to JAIR.',
+);
+assert.equal(say('Under review', { what: 'A paper' }), '**A paper**.');
+assert.equal(say('Writing', { what: 'A post' }), '**A post**.');
+// An unknown kind — a section an adopter invents — falls back, it does not throw.
+assert.equal(
+  say('Fieldwork', { what: 'Ross Sea', where: 'RV Tangaroa' }),
+  '**Ross Sea**, RV Tangaroa.',
+);
+// Abbreviated venues already end in a full stop; never two.
+assert.equal(
+  say('Journal', { what: 'A paper', where: 'Inf. Comput.' }),
+  '**A paper**, Inf. Comput.',
+);
+
+// The short venue is the acronym the CV puts in brackets — and a bracket holding
+// several words is a lab or a group, not an acronym.
+assert.equal(
+  shortVenue('International Joint Conference on Artificial Intelligence (IJCAI)'),
+  'IJCAI',
+);
+assert.equal(shortVenue('Elsevier Neurocomputing Journal'), 'Elsevier Neurocomputing Journal');
+assert.equal(
+  shortVenue('University of Milano-Bicocca (Intelligent Sensing Laboratory—ISLab)'),
+  'University of Milano-Bicocca (Intelligent Sensing Laboratory—ISLab)',
+);
+
+// No announcement may reach the page with a separator on one side of nothing.
+for (const item of feed.items) {
+  assert.ok(!/,\s*,|,\s*\.|\(\s*\)|\s{2,}/.test(item.text), `stray separator: ${item.text}`);
+  assert.ok(!/^[,.\s]/.test(item.text), `leading separator: ${item.text}`);
+  assert.match(item.text, /\.$/, `no full stop: ${item.text}`);
+}
+
+// A manuscript under review does not announce on the year it is aimed at, and
+// says so in the provenance rather than vanishing.
+const underReview = bib.entries.filter((entry) => entry.kind === 'Under review');
+assert.ok(underReview.length > 0, 'no under-review entries to check the rule against');
+for (const entry of underReview) {
+  if (entry.fields.announced) continue;
+  assert.ok(
+    !feed.items.some((item) => item.text.startsWith(entry.title)),
+    `${entry.key}: an undated manuscript under review reached the feed`,
+  );
+  assert.ok(
+    feed.undated.some((fact) => fact.what === entry.title),
+    `${entry.key}: not in the feed and not named in the undated list either`,
+  );
+}
+
 const linkedPublication = bib.entries.find((entry) => entry.link?.field === 'doi')!;
 const linkedAnnouncement = feed.items.find(
   (item) => item.source === `${SOURCES.bibliography} (${linkedPublication.key})`,
@@ -185,7 +268,7 @@ for (let i = 1; i < feed.items.length; i++) {
 // sorts below both.
 const sameDay = feed.items.filter((item) => item.stamp.startsWith('2025-01-13'));
 assert.equal(sameDay.length, 3, `expected 3 announcements on 2025-01-13, got ${sameDay.length}`);
-assert.match(sameDay[0].text, /International Joint Conference/, 'IJCAI 2025 lost its place');
+assert.match(sameDay[0].text, /IJCAI 2025/, 'IJCAI 2025 lost its place');
 assert.match(sameDay[1].text, /Engineering Applications/, 'EAAI lost its place');
 
 // Sorting follows the instant, but display follows the calendar date written in
@@ -206,12 +289,16 @@ const starred = feed.items.find((item) => item.text.includes('AI*IA'));
 assert.ok(starred, 'the `OVERLAY@AI*IA` venue did not survive the markdown round trip');
 assert.ok(starred.html.includes('AI*IA'), 'the literal asterisk was rendered as emphasis');
 
-// Every talk in cv/pres.bib carries its own ISO date, so all of them announce.
-const talkItems = feed.items.filter((item) => item.kind === 'Talk');
+// Every talk in content/talks.bib carries its own ISO date, so all of them
+// announce. Each one's kind on the feed's apparatus line is its own `note`
+// ("Invited talk", "Oral presentation", "Poster presentation") — the word moved
+// off the sentence and onto that line, and nothing is relabelled.
+const TALK_KINDS = ['Invited talk', 'Oral presentation', 'Poster presentation'];
+const talkItems = feed.items.filter((item) => TALK_KINDS.includes(item.kind));
 assert.equal(talkItems.length, 11, `expected 11 talks in the feed, got ${talkItems.length}`);
 
 // ------------------------------------------------------------------ talks ---
-// /talks/ renders every entry in cv/pres.bib, so the same rule as the
+// /talks/ renders every entry in content/talks.bib, so the same rule as the
 // bibliography applies: nothing filtered, nothing relabelled, nothing left
 // carrying LaTeX.
 const pres = talks();
@@ -269,11 +356,11 @@ assert.equal(
 );
 assert.equal(pres.years.first, 2017, `earliest talk year is ${pres.years.first}`);
 
-// About. Prettier runs over the source markdown and spells emphasis
-// `_like this_`, so both markers have to render — and neither may fire on an
-// underscore inside a word.
+// About, now `profile.bio.long` in the CV. Prettier runs over the source and
+// spells emphasis `_like this_`, so both markers have to render — and neither
+// may fire on an underscore inside a word.
 const bio = about();
-assert.ok(bio.paragraphs.length >= 3, 'about section did not parse');
+assert.ok(bio.paragraphs.length >= 3, 'profile.bio.long did not parse into paragraphs');
 assert.ok(
   !bio.paragraphs.some((paragraph) => /[*_]{1,2}\w/.test(paragraph)),
   'unrendered markdown emphasis left in the about paragraphs',
@@ -283,17 +370,22 @@ assert.ok(
   'no emphasis rendered from the about page',
 );
 assert.ok(!/[*_]/.test(bio.firstPerson), 'markdown markers left in the first-person line');
-// `_pages/professional_activities.md` is no longer read by anything. It is a
-// hand-written third copy of `cv/cv.yaml`'s `service[]` that had drifted from
-// it, and both the home page and /professional_activities/ now read the YAML
-// through one grouping. Re-adding a reader for it re-opens that gap.
+// Every source the site reads lives in `content/`. That is the whole adopter
+// interface: a reader pointed anywhere else is a fact the adopter cannot change
+// by editing this directory, and the cold-start test stops being true.
+for (const [key, path] of Object.entries(SOURCES)) {
+  assert.ok(path.startsWith('content/'), `SOURCES.${key} reads outside content/: ${path}`);
+}
 const reader = readFileSync(fileURLToPath(new URL('./record.ts', import.meta.url)), 'utf8');
 assert.doesNotMatch(
   reader,
-  /professional_activities/,
-  'record.ts reads _pages/professional_activities.md again — the stale third copy of service[]',
+  /_pages\/|_config\.yml|_bibliography\//,
+  'record.ts reads one of the pre-migration files again',
 );
-assert.ok(!('activities' in SOURCES), 'the retired activities source is back in SOURCES');
+// `journaltitle` is BibLaTeX's name for `journal` and is what Zotero's Better
+// BibTeX writes. Without it an adopter's most recent article renders with no
+// venue and no error anywhere.
+assert.match(reader, /'journaltitle'/, 'VENUE_FIELDS lost journaltitle');
 
 console.log(
   `ok — ${bib.entries.length} entries, ${pres.entries.length} talks, ` +

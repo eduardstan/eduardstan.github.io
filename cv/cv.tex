@@ -11,13 +11,15 @@
 % -----------------------------------------------------------------------------
 % THIS FILE IS LAYOUT AND STYLING ONLY.
 %
-% Every fact printed below comes from `cv/cv.yaml` via the generated macros in
-% `cv/generated/cv-data.tex` (produced by `node scripts/build-cv-data.mjs`).
-% Publications and talks come straight from `_bibliography/papers.bib` and
-% `cv/pres.bib` through the biblatex refsections at the end of this file.
+% Every fact printed below comes from `content/cv.yaml` via the generated macros
+% in `cv/generated/cv-data.tex` (produced by `node scripts/build-cv-data.mjs`).
+% Publications and talks come straight from `content/publications.bib` and
+% `content/talks.bib` through the biblatex refsections at the end of this file.
 %
-% To change what the CV says, edit cv.yaml and regenerate. To change how it
-% looks, edit this file.
+% To change what the CV says, edit content/cv.yaml and regenerate. To change how
+% it looks, edit this file. The document body is one `\cvpart` line per section:
+% reorder the CV by reordering those lines, and a section content/cv.yaml does
+% not have prints nothing at all.
 %
 % Build:  latexmk -xelatex -cd cv/cv.tex      (xelatex is required: academicons)
 % -----------------------------------------------------------------------------
@@ -134,22 +136,90 @@
     \vspace{-2mm}
 }
 
-\newcommand{\resumeSubheading}[4]{
+% One entry, every section: what it was, where it was, when, and the place.
+% `content/cv.yaml` has exactly one entry shape and this is how it is set.
+\newcommand{\cventry}[4]{
 \vspace{0.5mm}\item
     \begin{tabular*}{0.98\textwidth}[t]{l@{\extracolsep{\fill}}r}
-        \textbf{#1} & \textit{\footnotesize{#4}} \\
-        \textit{\footnotesize{#3}} &  \footnotesize{#2}\\
+        \textbf{#1} & \textit{\footnotesize{#3}} \\
+        \textit{\footnotesize{#2}} &  \footnotesize{#4}\\
     \end{tabular*}
     \vspace{-2.4mm}
 }
 
-\newcommand{\resumeProject}[4]{
-\vspace{0.5mm}\item
+% Separates the paragraphs of a section's `note:`. Spacing is layout, so the
+% amount of it lives here and the generator only says where the break goes.
+\newcommand{\cvnotesep}{\par\vspace{1.2mm}}
+
+% Make a section's five macros safe to mention even when content/cv.yaml has no
+% such section. `\cvpart` does this for you; a hand-written section block must
+% call it itself.
+\newcommand{\cvdeclare}[1]{%
+  \expandafter\providecommand\csname cv#1Count\endcsname{0}%
+  \expandafter\providecommand\csname cv#1\endcsname{}%
+  \expandafter\providecommand\csname cv#1Note\endcsname{}%
+  \expandafter\providecommand\csname cv#1Rows\endcsname{}%
+  \expandafter\providecommand\csname cv#1Inline\endcsname{}%
+}
+
+% Print one section of content/cv.yaml. #1 is the heading, #2 the section's
+% macro name (`Awards` for the `awards:` key). A section the file does not have
+% prints nothing at all - no heading, no gap - so this line can stay.
+% Reorder the CV by reordering these lines in the document below.
+\newcommand{\cvpart}[2]{%
+  \cvdeclare{#2}%
+  \ifnum\csname cv#2Count\endcsname>0
+  \section{\textbf{#1}}
+  \vspace{-0.4mm}
+  \resumeSubHeadingListStart
+  \csname cv#2\endcsname
+  \resumeSubHeadingListEnd
+  \vspace{-6mm}
+  \fi
+}
+
+% `\cvpart`, with the second line of every entry set the other way. Which
+% sections use which is a layout choice and lives here; cv.yaml says nothing
+% about it.
+\newcommand{\cvpartflush}[2]{{%
+  \renewcommand{\cventry}[4]{%
+    \vspace{0.5mm}\item
     \begin{tabular*}{0.98\textwidth}[t]{l@{\extracolsep{\fill}}r}
-        \textbf{#1} & \textit{\footnotesize{#3}} \\
-        \footnotesize{\textit{#2}} & \footnotesize{#4}
+        \textbf{##1} & \textit{\footnotesize{##3}} \\
+        \footnotesize{\textit{##2}} & \footnotesize{##4}
     \end{tabular*}
     \vspace{-2.4mm}
+  }%
+  \cvpart{#1}{#2}}}
+
+% A table hanging under an entry: `rows:` in cv.yaml. #1 is the header row built
+% from the row keys, #2 the rows. This template overrides #1 with its own
+% wording. The course tables are hand-tuned: the first is 3mm wider in the
+% second column than the two below it. That tuning is layout, so it lives here
+% - cv.yaml just lists the rows and the counter picks the widths.
+% The \par is load-bearing: without it the table gains a line of vertical space
+% and two page breaks move.
+\newcounter{cvcoursetable}
+\newcommand{\cvcourses}[2]{%
+\par
+\stepcounter{cvcoursetable}%
+\ifnum\value{cvcoursetable}=1
+\begin{cvtable}{P{3.1cm} P{3.8cm} Y P{1.2cm}}
+\toprule
+\textbf{Course} & \textbf{Programme / Level} & \textbf{Key topics} & \textbf{Hours} \\
+\midrule
+#2
+\bottomrule
+\end{cvtable}
+\else
+\begin{cvtable}{P{3.1cm} P{3.5cm} Y P{1.2cm}}
+\toprule
+\textbf{Course} & \textbf{Programme / Level} & \textbf{Key topics} & \textbf{Hours} \\
+\midrule
+#2
+\bottomrule
+\end{cvtable}
+\fi
 }
 
 \newcommand{\resumeSubItem}[2]{\resumeItem{#1}{#2}\vspace{-4pt}}
@@ -180,9 +250,10 @@
 \newcommand{\socialicon}[1]{\raisebox{-0.05em}{\resizebox{!}{1em}{#1}}}
 \newcommand{\ieeeicon}[1]{\raisebox{-0.3em}{\resizebox{!}{1.3em}{#1}}}
 
-% Profile icon registry. `contact.profiles[].kind` in cv.yaml selects one of
-% these by name (kind `scholar` -> \cviconscholar), so the icon choice stays
-% here in the layout and never leaks into the YAML.
+% Profile icon registry. Each key of `profile.links` in content/cv.yaml selects
+% one of these by name (`scholar:` -> \cviconscholar), so the icon choice stays
+% here in the layout and never leaks into the YAML. A new kind needs a macro
+% here AND an address template in ACCOUNTS in scripts/build-cv-data.mjs.
 \newcommand{\cviconscholar}{\socialicon{\aiGoogleScholar}}
 \newcommand{\cviconorcid}{\socialicon{\aiOrcid}}
 \newcommand{\cviconlinkedin}{\socialicon{\faLinkedin}}
@@ -217,11 +288,10 @@
 
 % Two bib databases (kept separate via refsection below).
 % Publications are the repository-wide canonical list, shared with the website.
-\addbibresource{../_bibliography/papers.bib}
-\addbibresource{pres.bib}
+\addbibresource{../content/publications.bib}
+\addbibresource{../content/talks.bib}
 
-% The shared bibliography may carry al-folio rendering fields used only by the
-% website. They are not part of the CV, and abstracts can contain raw % and &
+% The shared bibliography may carry rendering fields used only by the website. They are not part of the CV, and abstracts can contain raw % and &
 % that would break the LaTeX pass, so drop them during biber processing instead
 % of altering the .bib the website reads.
 \DeclareSourcemap{
@@ -255,6 +325,12 @@
 \defbibfilter{conferences}{type=inproceedings and not keyword=workshop}
 \defbibfilter{workshops}{type=inproceedings and keyword=workshop}
 \defbibfilter{underreview}{type=online and keyword=underreview}
+% Books and chapters, and everything else with a home in neither list. Both are
+% empty for a bibliography of articles and papers, and an empty
+% \printbibliography prints nothing - so an adopter whose career is chapters
+% gets them automatically instead of losing them silently.
+\defbibfilter{bookschapters}{type=incollection or type=book}
+\defbibfilter{other}{type=phdthesis or type=techreport}
 
 % Filters for presentations
 \defbibfilter{invited}{keyword=invited}
@@ -262,7 +338,7 @@
 \defbibfilter{poster}{keyword=poster}
 
 % --------------------------------
-% CONTENT (generated from cv/cv.yaml)
+% CONTENT (generated from content/cv.yaml)
 % --------------------------------
 \input{generated/cv-data.tex}
 
@@ -303,97 +379,37 @@
 \cvShortBio
 \vspace{-2mm}
 
+\ifx\cvFocus\empty\else
 \section{\textbf{Research Focus}}
 \vspace{1mm}
 \small{
-\cvResearchFocus
+\cvFocus
 }
 \vspace{-2mm}
+\fi
 
-\section{\textbf{Academic Appointments / Experience}}
-\vspace{-0.4mm}
-  \resumeSubHeadingListStart
-  \cvAppointments
-  \resumeSubHeadingListEnd
-\vspace{-6mm}
+\cvpart{Academic Appointments / Experience}{Appointments}
 
-\section{\textbf{Education}}
-\vspace{-0.4mm}
-\resumeSubHeadingListStart
-\cvEducation
-\resumeSubHeadingListEnd
-\vspace{-6mm}
+\cvpart{Education}{Education}
 
-\section{\textbf{Teaching}}
-\vspace{-0.4mm}
-\resumeSubHeadingListStart
+\cvpart{Teaching}{Teaching}
 
-\cvTeachingUnimibHeading
+\cvpartflush{Editorial, Reviewing \& Conference Service}{Service}
 
-\begin{cvtable}{P{3.1cm} P{3.8cm} Y P{1.2cm}}
-\toprule
-\textbf{Course} & \textbf{Programme / Level} & \textbf{Key topics} & \textbf{Hours} \\
-\midrule
-\cvTeachingUnimibRows
-\bottomrule
-\end{cvtable}
+\cvpartflush{Research Projects}{Projects}
 
-\cvTeachingAcademyHeading
+\cvpartflush{Awards \& Scholarships}{Awards}
 
-\begin{cvtable}{P{3.1cm} P{3.5cm} Y P{1.2cm}}
-\toprule
-\textbf{Course} & \textbf{Programme / Level} & \textbf{Key topics} & \textbf{Hours} \\
-\midrule
-\cvTeachingAcademyRows
-\bottomrule
-\end{cvtable}
-
-\cvTeachingUnifeHeading
-
-\begin{cvtable}{P{3.1cm} P{3.5cm} Y P{1.2cm}}
-\toprule
-\textbf{Course} & \textbf{Programme / Level} & \textbf{Key topics} & \textbf{Hours} \\
-\midrule
-\cvTeachingUnifeRows
-\bottomrule
-\end{cvtable}
-
-\resumeSubHeadingListEnd
-\vspace{-6mm}
-
-\section{\textbf{Editorial, Reviewing \& Conference Service}}
-\vspace{-0.4mm}
-\resumeSubHeadingListStart
-\cvService
-\resumeSubHeadingListEnd
-
-\vspace{-6mm}
-
-\section{\textbf{Research Projects}}
-\vspace{-0.4mm}
-\resumeSubHeadingListStart
-\cvProjects
-\resumeSubHeadingListEnd
-\vspace{-6mm}
-
-\section{\textbf{Awards \& Scholarships}}
-\vspace{-0.4mm}
-\resumeSubHeadingListStart
-\cvAwards
-\resumeSubHeadingListEnd
-
-\vspace{-6mm}
-
+% A section set by hand rather than by \cvpart, because it prints a note and a
+% table of its own. Any such block must call \cvdeclare itself, or the macros
+% below are undefined for someone whose cv.yaml has no `supervision:` key.
+\cvdeclare{Supervision}
+\ifnum\cvSupervisionCount>0
 \section{\textbf{Student Supervision (Theses \& Internships)}}
 \vspace{-0.4mm}
 
 \small{
-\cvSupervisionSummary
-}
-
-\vspace{1.2mm}
-\small{
-\cvSupervisionTopics
+\cvSupervisionNote
 }
 
 \vspace{1.5mm}
@@ -405,16 +421,20 @@
 \cvSupervisionRows
 \bottomrule
 \end{cvtable}
+\fi
 
+\cvdeclare{Languages}
+\ifnum\cvLanguagesCount>0
 \section{\textbf{Additional Information}}
 \vspace{-0.4mm}
 \small{
-\textbf{Languages:} \cvLanguages
+\textbf{Languages:} \cvLanguagesInline
 }
+\fi
 
 \section{\textbf{Talks \& Presentations} \hfill \textcolor{darkblue}{\scriptsize I=Invited talks, O=Oral sessions, P=Poster sessions}}
 
-\begin{refsection}[pres.bib]
+\begin{refsection}[../content/talks.bib]
 \nocite{*}
 
 \begin{refcontext}[labelprefix=I]
@@ -433,15 +453,16 @@
 
 \section{\textbf{Publications} \hfill \textcolor{darkblue}{\scriptsize J=Journal, C=Conference, W=Workshop, U=Under review}}
 
+\IfFileExists{scholar.png}{%
 \begin{figure}[h!]
 \centering
 \includegraphics[scale=0.35]{scholar.png}
 \caption{Google Scholar screenshot.}
-\end{figure}
+\end{figure}}{}
 
 \newpage
 
-\begin{refsection}[../_bibliography/papers.bib]
+\begin{refsection}[../content/publications.bib]
 \nocite{*}
 
 \begin{refcontext}[labelprefix=J]
@@ -460,12 +481,23 @@
 \printbibliography[heading=bibsubheading, title={Under review}, filter=underreview, resetnumbers=true]
 \end{refcontext}
 
+% Empty for a bibliography of articles and papers, and an empty
+% \printbibliography prints nothing at all - no heading, no gap. They are here
+% so an adopter whose career is books and chapters gets them without editing
+% this file. Delete them if you prefer.
+\begin{refcontext}[labelprefix=B]
+\printbibliography[heading=bibsubheading, title={Books \& chapters}, filter=bookschapters, resetnumbers=true]
+\end{refcontext}
+
+\begin{refcontext}[labelprefix=X]
+\printbibliography[heading=bibsubheading, title={Other}, filter=other, resetnumbers=true]
+\end{refcontext}
+
 \end{refsection}
 
 \vspace{5mm}
 {\footnotesize
-\textbf{\cvDataProtectionHeading}
-\cvDataProtectionText
+\cvFooter
 }
 
 \end{document}

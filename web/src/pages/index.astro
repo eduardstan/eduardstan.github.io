@@ -2,14 +2,15 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Record from '../components/Record.astro';
 import SectionHead from '../components/SectionHead.astro';
-import { about, bibliography, profile, SOURCES, yearSpan } from '../lib/record';
-import { cv, CV_SOURCE, isEditorial, serviceGroups, serviceWhen } from '../lib/cv';
+import { about, bibliography, identity, profile, SOURCES, yearSpan } from '../lib/record';
+import { CV_SOURCE, isEditorial, service, serviceGroups, serviceWhen } from '../lib/cv';
 import { inline } from '../lib/inline';
 import { announcements, formatStamp } from '../lib/announcements';
 import { strands } from '../lib/strands';
 import { consistency, coverage } from '../lib/consistency';
 
 const { name, affiliation } = profile();
+const { portrait } = identity();
 const bio = about();
 const bib = bibliography();
 const feed = announcements();
@@ -17,14 +18,14 @@ const research = strands();
 const gate = consistency();
 
 /**
- * Service, read from `cv/cv.yaml` — the file the printed CV is generated from —
- * through the grouping `/professional_activities/` uses.
+ * Service, read from `content/cv.yaml` — the file the printed CV is generated
+ * from — through the grouping `/professional_activities/` uses.
  *
- * It used to be read from `_pages/professional_activities.md`, a hand-written
- * third copy of the same list, while that page read the YAML. The two pages
- * therefore stated the same facts from two sources and disagreed on four of
- * them. There is now one source for both.
+ * It used to be read from a hand-written third copy of the same list while that
+ * page read the YAML. The two pages therefore stated the same facts from two
+ * sources and disagreed on four of them. There is now one source for both.
  */
+const roles = service();
 const groups = serviceGroups();
 const editorials = groups.filter((group) => isEditorial(group.role)).flatMap((group) => group.entries);
 
@@ -32,7 +33,7 @@ const counts = [
   { n: bib.entries.length, label: 'entries in this bibliography' },
   ...bib.byKind.map((kind) => ({ n: kind.count, label: `${kind.kind.toLowerCase()} entries` })),
   { n: editorials.length, label: 'editorial boards' },
-  { n: cv.service.length, label: 'service roles on record' },
+  { n: roles.length, label: 'service roles on record' },
 ];
 
 /**
@@ -72,7 +73,7 @@ const withheld = feed.items.length - shown.length;
       }
       <figure class="person">
         <img
-          src="/img/portrait.jpg"
+          src={portrait}
           width="500"
           height="500"
           alt={`${name}, photographed against a plain background`}
@@ -86,13 +87,13 @@ const withheld = feed.items.length - shown.length;
         </div>
       </figure>
 
-      <SectionHead source={SOURCES.about}>The work</SectionHead>
+      <SectionHead source={bio.source}>The work</SectionHead>
       {bio.paragraphs.map((paragraph) => <p set:html={paragraph} />)}
       <Record>
         <p>
-          <b>{SOURCES.about}</b>, section <code>## about</code>, {bio.lineRange} — {
-            bio.paragraphs.length
-          } paragraphs, rendered verbatim.
+          <b>{bio.source}</b> — {bio.paragraphs.length} paragraphs, rendered verbatim. The printed CV
+          does not carry them: it prints <b>profile.bio.short</b>, the same person in the third
+          person.
         </p>
       </Record>
 
@@ -148,9 +149,9 @@ const withheld = feed.items.length - shown.length;
             yearSpan(bib.years) && `, ${yearSpan(bib.years)}`
           }, counted at build by parsing the file. The two service figures are counted from <b
             >{CV_SOURCE}</b
-          >: <b>{editorials.length}</b> entries of <b>service[]</b> whose <b>role</b> matches
-          “editor” ({editorials.map((entry) => entry.venue).join(', ')}), and <b>
-            {cv.service.length}
+          >: <b>{editorials.length}</b> entries of <b>service[]</b> whose <b>title</b> matches
+          “editor” ({editorials.map((entry) => entry.org).join(', ')}), and <b>
+            {roles.length}
           </b> entries in that list altogether.
         </p>
       </Record>
@@ -169,9 +170,9 @@ const withheld = feed.items.length - shown.length;
                 <li>
                   <span class="a">
                     {entry.url ? (
-                      <a href={entry.url} set:html={inline(entry.venue)} />
+                      <a href={entry.url} set:html={inline(entry.org)} />
                     ) : (
-                      <Fragment set:html={inline(entry.venue)} />
+                      <Fragment set:html={inline(entry.org)} />
                     )}
                     {entry.metric &&
                       (entry.rank_url ? (
@@ -191,9 +192,9 @@ const withheld = feed.items.length - shown.length;
       }
       <Record>
         <p>
-          <b>{CV_SOURCE}</b> — <b>service[]</b>, {cv.service.length} entries grouped into {
+          <b>{CV_SOURCE}</b> — <b>service[]</b>, {roles.length} entries grouped into {
             groups.length
-          } roles by their own <b>role</b> field ({
+          } roles by their own <b>title</b> field ({
             groups.map((group) => `${group.role}: ${group.entries.length}`).join(', ')
           }), in the order those roles first appear in the file. The meta on each row is the entry's{' '}
           <b>dates</b> where it states a term and its <b>years[]</b> where it states editions; the
@@ -201,10 +202,9 @@ const withheld = feed.items.length - shown.length;
         </p>
         <p>
           This column and <a href="/professional_activities/">/professional_activities/</a> read the
-          same list through the same grouping in <b>web/src/lib/cv.ts</b>, so they cannot disagree.
-          Until this build they did: this column came from <b>_pages/professional_activities.md</b>, a
-          hand-written third copy of the same facts that had drifted from the file the CV is generated
-          from. Nothing on this site reads it any more.
+          same list through the same grouping in <b>web/src/lib/cv-schema.ts</b>, so they cannot
+          disagree. They once came from two files that had drifted apart; there is one file now, and
+          it is the one the printed CV is generated from.
         </p>
       </Record>
 

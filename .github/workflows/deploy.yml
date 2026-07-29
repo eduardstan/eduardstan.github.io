@@ -4,8 +4,7 @@ name: Deploy site
 # which GitHub Pages serves at https://eduardstan.github.io/.
 #
 # There are no path filters. The site reads the repository's own records at
-# build time — cv/cv.yaml, the bibliography, cv/pres.bib, _pages/about.md,
-# _config.yml, the blog collection — so almost any file can change what is
+# build time — everything under content/ — so almost any file can change what is
 # published, and a filter list that has to stay in step with
 # `web/src/lib/record.ts`'s SOURCES is one more thing to get wrong. Rebuilding
 # on every push costs a few minutes and cannot silently skip a change.
@@ -56,7 +55,7 @@ jobs:
         run: node scripts/build-cv-data.mjs --check
 
       # The printed CV is typeset from the committed generated form of the same
-      # cv/cv.yaml the /cv/ page renders. It is never committed — no binary
+      # content/cv.yaml the /cv/ page renders. It is never committed — no binary
       # enters git history — so it is built here and dropped into web/public/
       # before astro build picks it up. The texlive pin and the xelatex
       # requirement are explained in cv.yml, which builds the same document on

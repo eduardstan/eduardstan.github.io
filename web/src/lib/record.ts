@@ -8,17 +8,21 @@
  * `source:` string and every "this is missing" note below is derived from the
  * files named in `SOURCES`, and changes when they change.
  *
- * The blog is the only content collection left; everything else the site shows
- * is read from the repository's own files here or in `src/lib/cv.ts`. The shapes
+ * Everything it reads lives under `content/` — the whole adopter interface. The
+ * blog is the only content collection, and it is `content/posts/`. The shapes
  * returned by these readers are the seam consumed by components and provenance
  * blocks.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
+import { parse as parseYaml } from 'yaml';
 
 /**
- * Repository root — the directory holding `_config.yml`, found by walking up
+ * Repository root — the directory holding `content/cv.yaml`, found by walking up
  * from the working directory.
+ *
+ * The landmark is the one file the site genuinely cannot run without, so no
+ * stray file survives only to be a landmark.
  *
  * Not `import.meta.url`: Astro bundles this module into `dist/.prerender/`
  * during `astro build`, so a path relative to the source file resolves
@@ -29,12 +33,14 @@ import { dirname, join, relative, resolve } from 'node:path';
 function repositoryRoot(): string {
   let directory = resolve(process.cwd());
   for (;;) {
-    if (existsSync(join(directory, '_config.yml'))) return directory;
+    if (existsSync(join(directory, 'content', 'cv.yaml'))) return directory;
     const parent = dirname(directory);
     if (parent === directory) {
       throw new Error(
-        'Could not find the repository root (no _config.yml in any parent of ' +
-          `${process.cwd()}). The site reads its content from the repository's own data files.`,
+        `Could not find \`content/cv.yaml\` in \`${process.cwd()}\` or any parent directory. ` +
+          'This site reads its facts from `content/` at the repository root — the CV, the two ' +
+          'BibTeX files, the posts. Run the build from inside the repository, or create ' +
+          '`content/cv.yaml` (see `content/README.md`).',
       );
     }
     directory = parent;
@@ -43,18 +49,21 @@ function repositoryRoot(): string {
 
 const ROOT = repositoryRoot();
 
+/**
+ * Everything the site reads. All four live under `content/`: that directory is
+ * the whole adopter interface, and nothing outside it holds a fact about the
+ * person the site is about.
+ */
 export const SOURCES = {
-  bibliography: '_bibliography/papers.bib',
-  about: '_pages/about.md',
-  talks: 'cv/pres.bib',
-  // The blog collection itself, read as files rather than through
-  // `astro:content` because `announcements.ts` also runs under plain `node` in
-  // the self-check, where that API does not exist.
-  posts: 'web/src/content/blog',
-  config: '_config.yml',
+  bibliography: 'content/publications.bib',
+  talks: 'content/talks.bib',
+  // The posts, read as files rather than through `astro:content` because
+  // `announcements.ts` also runs under plain `node` in the self-check, where
+  // that API does not exist.
+  posts: 'content/posts',
   // Read by `src/lib/cv.ts` through Vite's `?raw`, not by `read()` below: it is
   // named here so there is one registry of where the site's facts come from.
-  cv: 'cv/cv.yaml',
+  cv: 'content/cv.yaml',
 } as const;
 
 const read = (path: string) => readFileSync(join(ROOT, path), 'utf8');
@@ -325,8 +334,20 @@ function parseFields(body: string): Record<string, string> {
  * neither simply has no venue line. `publisher` is tried before `note` because
  * the `@misc` artifacts have both, and their note is DBLP's unfilled
  * "Accessed on YYYY-MM-DD." template rather than a venue.
+ *
+ * `journaltitle` is BibLaTeX's name for `journal`, and it is what Zotero's
+ * Better BibTeX writes on a BibLaTeX export — the export an adopter picks for a
+ * biblatex CV. Without it their most recent article renders with no venue and
+ * no error anywhere.
  */
-const VENUE_FIELDS = ['journal', 'booktitle', 'school', 'publisher', 'note'] as const;
+const VENUE_FIELDS = [
+  'journal',
+  'journaltitle',
+  'booktitle',
+  'school',
+  'publisher',
+  'note',
+] as const;
 
 /**
  * The venue line as a citation: venue, series, volume, number, pages,
@@ -459,8 +480,8 @@ export interface BibEntry {
 }
 
 /**
- * Split a BibTeX file into entries. Used for `_bibliography/papers.bib` here and
- * for `cv/pres.bib` by `announcements.ts`, so the two files are read by one
+ * Split a BibTeX file into entries. Used for `content/publications.bib` here and
+ * for `content/talks.bib` by `announcements.ts`, so the two files are read by one
  * parser rather than by two that can drift apart.
  */
 export function parseBib(raw: string): BibEntry[] {
@@ -540,8 +561,8 @@ export interface Talks {
 let talksCache: Talks | undefined;
 
 /**
- * `cv/pres.bib`, the talks the CV renders with biblatex, read with the same
- * parser as the bibliography.
+ * `content/talks.bib`, the talks the CV renders with biblatex, read with the
+ * same parser as the bibliography.
  *
  * Nothing is filtered and nothing is relabelled: `note` is the talk's own word
  * for what it was and `keywords` its own category, exactly as `announcements.ts`
@@ -619,7 +640,7 @@ export function inlineHtml(markdown: string): string {
       .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<i>$1</i>')
       // Prettier rewrites `*em*` as `_em_`, and it runs over these source files.
       // Underscores only open emphasis at a word boundary, so identifiers and
-      // paths (`neuro_symb_dt2024`, `_pages/about.md`) are left alone.
+      // paths (`neuro_symb_dt2024`, `content/cv.yaml`) are left alone.
       .replace(/(?<![\w_])_([^_]+)_(?![\w_])/g, '<i>$1</i>'),
   );
 }
@@ -633,131 +654,123 @@ export function stripMarkdown(markdown: string): string {
   ).trim();
 }
 
-// --------------------------------------------------------------- about -----
+// ------------------------------------------------------- who, and the work --
+
+/**
+ * `profile:` from `content/cv.yaml`, parsed here rather than through
+ * `src/lib/cv.ts`.
+ *
+ * `cv.ts` reads the same file through Vite's `?raw`, which only exists inside an
+ * Astro build; this module runs under plain `node` in the self-checks too. The
+ * two readers see one file, so they cannot disagree.
+ */
+interface ProfileBlock {
+  name?: string;
+  headline?: string;
+  affiliation?: { label: string; url?: string }[];
+  place?: string;
+  /** Street-level postal lines. Website only; the printed CV never carries them. */
+  address?: string[];
+  email?: string;
+  website?: { label: string; url: string };
+  links?: Record<string, string | undefined>;
+  portrait?: string;
+  bio?: { short?: string; long?: string };
+  focus?: string;
+  footer?: string;
+}
+
+let profileCache: ProfileBlock | undefined;
+
+const profileBlock = (): ProfileBlock => {
+  profileCache ??= (parseYaml(read(SOURCES.cv)) as { profile?: ProfileBlock })?.profile ?? {};
+  return profileCache;
+};
 
 export interface About {
   source: string;
-  /** Paragraphs of the `## about` section, as inline HTML. */
+  /** Paragraphs of `profile.bio.long`, as inline HTML. */
   paragraphs: string[];
-  lineRange: string;
-  /**
-   * One sentence in his own voice for above the fold. Taken from the opening
-   * sentence with the title clause removed, because the dateline two lines up
-   * already states the title. Nothing is added: if the sentence is ever
-   * rewritten without a `, where …` clause, the whole sentence is used.
-   */
+  /** One sentence in his own voice for above the fold, quoted verbatim. */
   firstPerson: string;
   firstPersonSource: string;
 }
 
 export function about(): About {
-  const raw = read(SOURCES.about);
-  const lines = raw.split('\n');
-  const start = lines.findIndex((line) => /^##\s+about\s*$/i.test(line));
-  let end = lines.length;
-  for (let index = start + 1; index < lines.length; index++) {
-    if (/^##\s+/.test(lines[index])) {
-      end = index;
-      break;
-    }
-  }
-  const paragraphs = lines
-    .slice(start + 1, end)
-    .join('\n')
+  const long = profileBlock().bio?.long ?? '';
+  const paragraphs = long
     .split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
-    .filter(
-      (paragraph) => paragraph && !paragraph.startsWith('<!--') && !paragraph.startsWith('{%'),
-    )
-    .map(inlineHtml);
-  const opening = stripMarkdown(
-    lines
-      .slice(start + 1, end)
-      .join('\n')
-      .trim()
-      .split(/\n{2,}/)[0]
-      .split('. ')[0] + '.',
-  );
-  const clause = /,\s+where\s+(.+)$/.exec(opening);
-  const firstPerson = clause ? `${clause[1][0].toUpperCase()}${clause[1].slice(1)}` : opening;
-
+    .filter(Boolean);
   return {
-    source: SOURCES.about,
-    paragraphs,
-    lineRange: `lines ${start + 2}–${end}`,
-    firstPerson,
-    firstPersonSource: `${SOURCES.about} line ${start + 3}, first sentence`,
+    source: `${SOURCES.cv} · profile.bio.long`,
+    paragraphs: paragraphs.map(inlineHtml),
+    // The opening sentence, as written. Nothing is trimmed off it: an edit that
+    // rewords the sentence changes the quote and nothing else.
+    firstPerson: stripMarkdown(`${(paragraphs[0] ?? '').split('. ')[0]}.`),
+    firstPersonSource: `${SOURCES.cv} · profile.bio.long, first sentence`,
   };
 }
-
-// --------------------------------------------------------------- who -------
 
 export interface Profile {
   source: string;
   name: string;
   email?: string;
-  /** Only the accounts `_config.yml` actually names; blank fields are dropped. */
+  /** Only the accounts `profile.links` actually names; blank ones are dropped. */
   links: { label: string; href: string }[];
-  /** Account fields present but empty in the config, so the omission is visible. */
+  /** Known account kinds `profile.links` has no ID for, so the gap is visible. */
   missing: string[];
-  /** The postal address as written in the about page's front matter. */
+  /** The postal address: the institutions, the street lines, the city. */
   address: string[];
-  /** Role, lab, department, university — the about page's `subtitle`. */
+  /** The affiliation labels, broadest first — the same list the CV header sets. */
   affiliation: string[];
   addressSource: string;
 }
 
-/** Front-matter block scalar (`key: >` followed by an indented run of lines). */
-function blockScalar(raw: string, key: string): string[] {
-  const match = new RegExp(`^\\s*${key}:\\s*>\\n([\\s\\S]*?)\\n\\s*(?:\\n|[a-z_]+:)`, 'm').exec(
-    raw,
-  );
-  return (match?.[1] ?? '')
-    .split('\n')
-    .map((line) => line.replace(/<[^>]+>/g, '').trim())
-    .filter(Boolean);
-}
-
-/** Top-level `key: value` pairs, which is all this reader needs from the YAML. */
-function configValue(raw: string, key: string): string | undefined {
-  const match = new RegExp(`^${key}:\\s*(.*?)\\s*(?:#.*)?$`, 'm').exec(raw);
-  const value = match?.[1]?.replace(/^["']|["']$/g, '').trim();
-  return value || undefined;
-}
+/**
+ * The account kinds an ID can be given for. The same four
+ * `scripts/build-cv-data.mjs` knows: one table each, because the printed CV also
+ * needs an icon macro, and neither file can invent an address for a kind the
+ * other cannot render.
+ */
+const ACCOUNTS: [kind: string, label: string, href: (id: string) => string][] = [
+  ['scholar', 'Google Scholar', (id) => `https://scholar.google.com/citations?user=${id}`],
+  ['orcid', 'ORCID', (id) => `https://orcid.org/${id}`],
+  ['github', 'GitHub', (id) => `https://github.com/${id}`],
+  ['linkedin', 'LinkedIn', (id) => `https://www.linkedin.com/in/${id}`],
+];
 
 export function profile(): Profile {
-  const raw = read(SOURCES.config);
-  const name = [
-    configValue(raw, 'first_name'),
-    configValue(raw, 'middle_name'),
-    configValue(raw, 'last_name'),
-  ]
-    .filter(Boolean)
-    .join(' ');
-
-  const accounts: [string, string, (id: string) => string][] = [
-    ['scholar_userid', 'Google Scholar', (id) => `https://scholar.google.com/citations?user=${id}`],
-    ['orcid_id', 'ORCID', (id) => `https://orcid.org/${id}`],
-    ['github_username', 'GitHub', (id) => `https://github.com/${id}`],
-    ['linkedin_username', 'LinkedIn', (id) => `https://www.linkedin.com/in/${id}`],
-  ];
-  const links = accounts.flatMap(([key, label, href]) => {
-    const id = configValue(raw, key);
-    return id ? [{ label: `${label} · ${id}`, href: href(id) }] : [];
-  });
-  const missing = accounts.filter(([key]) => !configValue(raw, key)).map(([key]) => key);
-
-  // The address and the affiliation lines live in the about page's front matter.
-  const aboutRaw = read(SOURCES.about);
-
+  const block = profileBlock();
+  const ids = block.links ?? {};
+  const affiliation = (block.affiliation ?? []).map((entry) => entry.label);
   return {
-    source: SOURCES.config,
-    name,
-    email: configValue(raw, 'email'),
-    links,
-    missing,
-    address: blockScalar(aboutRaw, 'more_info'),
-    affiliation: blockScalar(aboutRaw, 'subtitle'),
-    addressSource: `${SOURCES.about} (front matter)`,
+    source: SOURCES.cv,
+    name: block.name ?? '',
+    email: block.email,
+    links: ACCOUNTS.flatMap(([kind, label, href]) =>
+      ids[kind] ? [{ label: `${label} · ${ids[kind]}`, href: href(ids[kind]!) }] : [],
+    ),
+    missing: ACCOUNTS.filter(([kind]) => !ids[kind]).map(([kind]) => kind),
+    // Broadest first, the way an envelope is addressed, then the street lines
+    // and the city. Every part is a field of `profile:`; none is written twice.
+    address: [
+      ...[...affiliation].reverse(),
+      ...(block.address ?? []),
+      ...(block.place ? [block.place] : []),
+    ],
+    affiliation,
+    addressSource: `${SOURCES.cv} · profile`,
   };
 }
+
+/** The display name, the headline and the portrait, for the pages that set them. */
+export const identity = () => {
+  const block = profileBlock();
+  return {
+    name: block.name ?? '',
+    headline: block.headline ?? '',
+    /** A file in `content/media/`, published at `/media/`. */
+    portrait: block.portrait ? `/media/${block.portrait}` : undefined,
+  };
+};

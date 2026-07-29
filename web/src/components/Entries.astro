@@ -1,0 +1,55 @@
+---
+/**
+ * One section of `content/cv.yaml`, as rows.
+ *
+ * There is one entry shape, so there is one renderer for it. The second column
+ * is built by the same rule the printed CV uses for an entry's second line —
+ * `org`, then `detail` — so a section reads the same in both, and an
+ * appointment (which states only `org`), an award (only `detail`) and a service
+ * role (both) all fall out of it without a case each.
+ *
+ * This replaced five near-identical blocks on `/cv/`.
+ */
+import { inline } from '../lib/inline';
+import type { Entry } from '../lib/cv';
+
+interface Props {
+  entries: Entry[];
+}
+
+const { entries } = Astro.props;
+
+/** `org, detail` — whichever of the two this entry has. */
+const where = (entry: Entry) => [entry.detail].filter(Boolean).join(', ');
+---
+
+<ul class="rows">
+  {
+    entries.map((entry) => (
+      <li>
+        <span class="k">
+          <Fragment set:html={inline(entry.title)} />
+          {entry.place && <span class="sub" set:html={inline(entry.place)} />}
+        </span>
+        <span class="v">
+          {entry.org &&
+            (entry.url ? (
+              <a href={entry.url} set:html={inline(entry.org)} />
+            ) : (
+              <Fragment set:html={inline(entry.org)} />
+            ))}
+          {entry.org && where(entry) && ', '}
+          {where(entry) && <Fragment set:html={inline(where(entry))} />}
+          {entry.items && (
+            <ul>
+              {entry.items.map((item) => (
+                <li set:html={inline(item)} />
+              ))}
+            </ul>
+          )}
+        </span>
+        <span class="when" set:html={inline(entry.dates ?? String(entry.count ?? ''))} />
+      </li>
+    ))
+  }
+</ul>

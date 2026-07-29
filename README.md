@@ -10,19 +10,21 @@ published from `master` by `.github/workflows/deploy.yml`.
 Every fact on the site is read from one record and rendered from it. Nothing is
 transcribed, so nothing can drift:
 
-| Record                     | Owns                                                      |
-| -------------------------- | --------------------------------------------------------- |
-| `cv/cv.yaml`               | every CV fact — appointments, teaching, service, projects |
-| `_bibliography/papers.bib` | every publication, for the site and the printed CV alike  |
-| `cv/pres.bib`              | talks and presentations                                   |
-| `_pages/about.md`          | the biography and the affiliation lines                   |
-| `_config.yml`              | name, email and the accounts linked in the footer         |
-| `web/src/content/blog/`    | the posts                                                 |
+**Everything you would edit is in [`content/`](content/README.md)**, and nothing outside it
+holds a fact about the person the site is about:
+
+| Record                     | Owns                                                                |
+| -------------------------- | ------------------------------------------------------------------- |
+| `content/cv.yaml`          | who you are, and every section of your CV — including the biography |
+| `content/publications.bib` | every publication, for the site and the printed CV alike            |
+| `content/talks.bib`        | talks and presentations                                             |
+| `content/posts/`           | the posts                                                           |
+| `content/media/`           | the portrait and the images                                         |
 
 Turn on **inspect sources** in the site's header and every block names the record it came
 from. `web/src/lib/consistency.ts` fails the build when two records of one fact disagree.
 
-The printed CV is generated from the same `cv/cv.yaml` (`node scripts/build-cv-data.mjs`,
+The printed CV is generated from the same `content/cv.yaml` (`node scripts/build-cv-data.mjs`,
 then `latexmk -xelatex -cd cv/cv.tex`) and typeset at deploy, so `/cv/` can offer a
 current PDF without a binary entering git history.
 
@@ -36,8 +38,9 @@ npm run build    # runs the consistency gate; refuses to publish a contradiction
 npm test         # the readers and the gate, against the repository's real records
 ```
 
-`web/README.md` documents the routes, the design and the sharp edges. `CLAUDE.md` holds
-the knowledge that should travel with the code.
+`content/README.md` is the adopter's documentation — the one file to read if you are
+reusing this site. `web/README.md` documents the routes, the design and the sharp edges,
+and `AGENTS.md` (`CLAUDE.md`) holds the knowledge that should travel with the code.
 
 ## History
 

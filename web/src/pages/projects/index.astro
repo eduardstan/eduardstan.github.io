@@ -1,6 +1,6 @@
 ---
 /**
- * Funded research projects, rendered from `cv/cv.yaml`'s `projects[]`.
+ * Funded research projects, rendered from `content/cv.yaml`'s `projects[]`.
  *
  * The `funding` figures are the reason this page reads the YAML rather than a
  * content collection: the comment above `projects:` in that file records that
@@ -15,10 +15,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import Record from '../../components/Record.astro';
 import SectionHead from '../../components/SectionHead.astro';
-import { cv, CV_SOURCE, keysOf } from '../../lib/cv';
+import { cv, CV_SOURCE, entriesOf, keysOf } from '../../lib/cv';
 import { inline } from '../../lib/inline';
 
-const projects = cv.projects;
+const projects = entriesOf(cv.projects);
 const funded = projects.filter((project) => project.funding);
 const running = projects.filter((project) => /present\s*$/i.test(project.dates ?? ''));
 
@@ -49,7 +49,7 @@ const description =
             ) : (
               <Fragment set:html={inline(project.title)} />
             )}
-            <span class="sub" set:html={inline(project.detail)} />
+            {project.detail && <span class="sub" set:html={inline(project.detail)} />}
           </span>
           <span class="v">
             {project.items && (

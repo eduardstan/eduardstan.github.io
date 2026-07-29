@@ -1,6 +1,6 @@
 name: Build CV
 
-# Builds the PDF CV from cv/cv.yaml + cv/cv.tex and uploads it as an artifact.
+# Builds the PDF CV from content/cv.yaml + cv/cv.tex and uploads it as an artifact.
 #
 # This workflow deliberately does NOT deploy or publish the PDF: deploy.yml builds
 # the same document and stages it for the Astro site. This workflow only provides
@@ -13,14 +13,14 @@ on:
       - main
     paths:
       - "cv/**"
-      - "_bibliography/papers.bib"
+      - "content/**"
       - "scripts/build-cv-data.mjs"
       - "scripts/build-cv-data.test.mjs"
       - ".github/workflows/cv.yml"
   pull_request:
     paths:
       - "cv/**"
-      - "_bibliography/papers.bib"
+      - "content/**"
       - "scripts/build-cv-data.mjs"
       - "scripts/build-cv-data.test.mjs"
       - ".github/workflows/cv.yml"
