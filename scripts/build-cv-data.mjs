@@ -287,6 +287,22 @@ const bibPrefix = (section) =>
 const afterEarlier = (own, earlier) => [own, ...earlier.map((predicate) => `not ( ${predicate} )`)].join(" and ");
 
 /**
+ * How many entries `content/<key>.bib` holds, as \cv<Key>Count for cv.tex.
+ *
+ * Only zero-or-not matters, and it matters a lot: biber IGNORES a data source
+ * with no entries ("Data source ... is empty, ignoring"), and a \refsection
+ * over a file biber dropped leaves every label number in the WHOLE document at
+ * 0 - [J0] [C0] [C0] - with no error and exit 0. cv.tex skips such a refsection
+ * rather than print a silently mis-numbered bibliography. Adopters start with
+ * these files empty, so this is the cold-start path, not an edge case.
+ */
+function bibEntryCount(key) {
+  const path = join(ROOT, "content", `${key}.bib`);
+  if (!existsSync(path)) return 0;
+  return (readFileSync(path, "utf8").match(/^[^%\n]*@\w+\s*[{(]/gm) ?? []).length;
+}
+
+/**
  * One declared bibliography, as the filters it needs and the two macros cv.tex
  * calls: the key printed beside the section header, and the sections themselves.
  *
@@ -436,7 +452,7 @@ function render(cv) {
   for (const [key, value] of Object.entries(cv)) {
     if (key === "profile") continue;
     if (Array.isArray(value?.sections)) {
-      blocks.push(...bibSections(key, value));
+      blocks.push(`\\newcommand{\\cv${macroName(key)}Count}{${bibEntryCount(key)}}`, ...bibSections(key, value));
       continue;
     }
     const rows = Array.isArray(value) ? value : value?.entries;
@@ -488,6 +504,6 @@ function main() {
   console.log(`wrote ${rel(OUT_PUBLIC)}`);
 }
 
-export { renderInline, where, editions, affiliationBlock, profilesLine, macroName, tableHeader, entry, bibFilter, bibPrefix, bibSections };
+export { renderInline, where, editions, affiliationBlock, profilesLine, macroName, tableHeader, entry, bibFilter, bibPrefix, bibSections, render };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();

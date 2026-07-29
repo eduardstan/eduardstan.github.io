@@ -2,11 +2,16 @@
 // Run: node --test scripts/build-cv-data.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { load } from "js-yaml";
 import {
   affiliationBlock,
   bibFilter,
   bibPrefix,
   bibSections,
+  render,
   editions,
   entry,
   macroName,
@@ -286,4 +291,30 @@ test("two sections claiming the same numbering letter raise instead of colliding
       }),
     /already used by "Conference"/
   );
+});
+
+// The cold-start trap: cv.tex names a macro the generator only emits when
+// cv.yaml declares the section it comes from, so an adopter's first
+// `latexmk -xelatex -cd cv/cv.tex` stops at TeX's interactive `?` prompt with
+// an undefined control sequence. This checks the whole class at once, against
+// the very file content/README.md tells a newcomer to start from.
+test("cv.tex defines every generated macro it names, for README's smallest file that works", () => {
+  const root = dirname(dirname(fileURLToPath(import.meta.url)));
+  const readme = readFileSync(join(root, "content/README.md"), "utf8");
+  const minimal = readme.match(/## The smallest file that works\s*```yaml\n([\s\S]*?)```/);
+  assert.ok(minimal, "content/README.md no longer carries a `The smallest file that works` example");
+  const tex = readFileSync(join(root, "cv/cv.tex"), "utf8");
+
+  const defined = new Set();
+  const add = (names) => names.forEach((name) => defined.add(name));
+  for (const [, name] of render(load(minimal[1])).matchAll(/\\newcommand\{\\(cv[A-Za-z]+)\}/g)) defined.add(name);
+  for (const [, name] of tex.matchAll(/\\(?:new|provide)command\{\\(cv[A-Za-z]+)\}/g)) defined.add(name);
+  // cv.tex's own guards, which build their macro names with \csname.
+  const section = (name) => ["Count", "", "Note", "Rows", "Inline"].map((suffix) => `cv${name}${suffix}`);
+  for (const [, name] of tex.matchAll(/\\cvdeclare\{([A-Za-z]+)\}/g)) add(section(name));
+  for (const [, name] of tex.matchAll(/\\cvpart(?:flush)?\{[^{}]*\}\{([A-Za-z]+)\}/g)) add(section(name));
+  for (const [, name] of tex.matchAll(/\\cvdeclarebib\{([A-Za-z]+)\}/g)) add([`cv${name}Count`, `cv${name}Key`, `cv${name}Sections`]);
+
+  const referenced = [...tex.matchAll(/\\(cv[A-Z][A-Za-z]*)/g)].map((m) => m[1]);
+  assert.deepEqual([...new Set(referenced.filter((name) => !defined.has(name)))], []);
 });

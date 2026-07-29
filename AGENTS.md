@@ -90,6 +90,16 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
   bibliography really contains `OVERLAY@AI*IA 2019` and DOIs ending `…-7_26`, which would otherwise
   be read as markdown emphasis. `content/talks.bib` is LaTeX like `publications.bib` is, so its
   fields need `deLatex()` first.
+- **The cold-start path through `cv.tex` is guarded, and both guards must stay.** A macro the
+  layout names but `cv.yaml` does not produce is an `Undefined control sequence` that stops
+  xelatex at its **interactive `?` prompt** — a hang, not a failure. `\cvdeclare` (ordinary
+  sections) and `\cvdeclarebib` (`publications:`/`talks:`) default every such macro; the test in
+  `scripts/build-cv-data.test.mjs` proves cv.tex defines every `\cv<Name>` it names for the
+  smallest file `content/README.md` documents. And **an entry-less `.bib` inside a `\refsection`
+  silently renumbers the whole document to `[J0] [C0]`** with exit 0 — biber ignores an empty data
+  source — so the generator emits `\cv<Key>Count` from the file's entry count and `cv.tex` skips
+  the refsection at 0. An adopter starts with both `.bib` files empty, so this is the first path
+  anyone walks.
 - **The printed CV has a baseline gate, not a byte-identical generated file.**
   `data/cv-baseline/` holds the extracted text and the page count of the CV as published;
   `data/cv-baseline/README.md` gives the three commands. A change to `cv.yaml`, the generator or
