@@ -623,9 +623,10 @@ Ph.D. Representative (35th Ph.D. Cycle) (Academic Board, Ph.D. in Mathematics, U
 \defbibfilter{Publications2}{type=inproceedings and not keyword=workshop and not ( type=article )}
 \defbibfilter{Publications3}{type=inproceedings and keyword=workshop and not ( type=article ) and not ( type=inproceedings and not keyword=workshop )}
 \defbibfilter{Publications4}{type=online and keyword=underreview and not ( type=article ) and not ( type=inproceedings and not keyword=workshop ) and not ( type=inproceedings and keyword=workshop )}
+\defbibfilter{Publications5}{type=misc and not ( type=article ) and not ( type=inproceedings and not keyword=workshop ) and not ( type=inproceedings and keyword=workshop ) and not ( type=online and keyword=underreview )}
 
 \newcommand{\cvPublicationsKey}{%
-J=Journal, C=Conference, W=Workshop, U=Under review%
+J=Journal, C=Conference, W=Workshop, U=Under review, S=Software%
 }
 
 \newcommand{\cvPublicationsSections}{%
@@ -643,6 +644,10 @@ J=Journal, C=Conference, W=Workshop, U=Under review%
 
 \begin{refcontext}[labelprefix=U]
 \printbibliography[heading=bibsubheading, title={Under review}, filter=Publications4, resetnumbers=true]
+\end{refcontext}
+
+\begin{refcontext}[labelprefix=S]
+\printbibliography[heading=bibsubheading, title={Software \& artifacts}, filter=Publications5, resetnumbers=true]
 \end{refcontext}%
 }
 

@@ -338,6 +338,26 @@
       \step[fieldsource=note, match=\regexp{\AAccessed\son\sYYYY-MM-DD\.?\Z}, final]
       \step[fieldset=note, null]
     }
+    % Prefer structured link fields for every entry: suppress howpublished
+    % whenever a URL or DOI is present, then suppress URL whenever a DOI is
+    % present. For @misc records, map publisher to the field the standard
+    % biblatex driver uses for the artifact's venue.
+    \map{
+      \step[fieldsource=url, final]
+      \step[fieldset=howpublished, null]
+    }
+    \map{
+      \step[fieldsource=doi, final]
+      \step[fieldset=howpublished, null]
+    }
+    \map{
+      \step[fieldsource=doi, final]
+      \step[fieldset=url, null]
+    }
+    \map{
+      \pertype{misc}
+      \step[fieldsource=publisher, fieldtarget=organization]
+    }
   }
 }
 
