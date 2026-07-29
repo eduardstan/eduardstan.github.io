@@ -8,7 +8,7 @@
  *   `cv/cv.yaml`               appointments, service roles and editions, awards
  *   `_bibliography/papers.bib` publications, preprints, released software
  *   `cv/pres.bib`              invited talks, oral and poster presentations
- *   `_posts/`                  writing
+ *   `web/src/content/blog/`     writing
  *
  * A fact is announced on the date it carries. Most carry one already: a talk has
  * an ISO `date`, a post has a front-matter `date`, an award has a month, a paper

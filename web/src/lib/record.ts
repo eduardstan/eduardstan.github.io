@@ -47,7 +47,10 @@ export const SOURCES = {
   bibliography: '_bibliography/papers.bib',
   about: '_pages/about.md',
   talks: 'cv/pres.bib',
-  posts: '_posts',
+  // The blog collection itself, read as files rather than through
+  // `astro:content` because `announcements.ts` also runs under plain `node` in
+  // the self-check, where that API does not exist.
+  posts: 'web/src/content/blog',
   config: '_config.yml',
   // Read by `src/lib/cv.ts` through Vite's `?raw`, not by `read()` below: it is
   // named here so there is one registry of where the site's facts come from.
@@ -67,8 +70,8 @@ export const readSource = read;
 
 /**
  * Every file under a repository-relative directory, one level of subdirectory
- * deep, as repository-relative paths. `_posts/` uses both root files and year
- * directories, so both levels are included.
+ * deep, as repository-relative paths. The blog keeps posts in year directories
+ * but need not, so both levels are included.
  */
 export function listSources(directory: string, extension = '.md'): string[] {
   const base = join(ROOT, directory);
