@@ -23,8 +23,8 @@ gate.** Any difference must be explained, not accepted.
 ## Baseline facts
 
 - Pages: 7
-- Extracted text: 409 lines
-- Text sha256 (first 16): 2ef100d0e684dbf6
+- Extracted text: 416 lines
+- Text sha256 (first 16): f319a990a04c86f
 - `cv-baseline.pdf` is the exact PDF, kept for visual comparison.
 
 ## Known intended differences
@@ -33,3 +33,6 @@ gate.** Any difference must be explained, not accepted.
   carry the full publication record. The page break that followed the figure was also removed:
   without the figure it orphaned the Publications heading, while removing it keeps the heading
   with the first five entries and reduces the CV from 8 pages to 7.
+- 2026-07-29: Added the Software & artifacts publication section because released software is a
+  research output and belongs in the printed CV. Its two `@misc` entries fit on the existing final
+  page, so the CV remains 7 pages.

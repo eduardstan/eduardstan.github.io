@@ -206,7 +206,7 @@ Poster presentations
  [P1]    I. E. Stan. “Evolutionary Explainable Rule Extraction from (Modal) Random Forests”. 26th European
          Conference on Artiﬁcial Intelligence, ECAI 2023 (Kraków, Poland). Poster presentation. Oct. 4, 2023.
 
-P UBLICATIONS                                                      J=J OURNAL , C=C ONFERENCE , W=W ORKSHOP, U=U NDER REVIEW
+P UBLICATIONS                                          J=J OURNAL , C=C ONFERENCE , W=W ORKSHOP, U=U NDER REVIEW, S=S OFTWARE
 
 Journal articles (peer-reviewed)
 
@@ -387,7 +387,6 @@ Workshop papers
         https://ceur-ws.org/Vol-2509/paper10.pdf.
 
 Under review
-
  [U1]   G. Badia, R. Monego, C. Noguera, A. Paparella, G. Sciavicco, and I. E. Stan. Reasoning in Many-Valued
         Multi-Modal Logic: A Uniform and General Approach. Journal of Artiﬁcial Intelligence Research (Manuscript
         under review). 2026.
@@ -402,6 +401,14 @@ Under review
         Journal of Artiﬁcial Intelligence Research (Manuscript under review). 2026.
  [U6]   P. Cavina, F. Manzella, G. Pagliarini, G. Sciavicco, and I. E. Stan. Beyond Tabular Data: Feature Extraction and
         Selection for High-Dimensional Data. Elsevier Array (Manuscript under review). 2025.
+
+Software & artifacts
+ [S1]   M. Milella, G. Pagliarini, G. Sciavicco, and I. E. Stan. ModalAssociationRules.jl.
+        https://doi.org/10.4230/artifacts.24783. Oct. 2025. DOI: 10.4230/ARTIFACTS.24783. URL:
+        https://doi.org/10.4230/artifacts.24783.
+ [S2]   M. Milella, G. Pagliarini, G. Sciavicco, and I. E. Stan. Sole.jl. https://doi.org/10.4230/artifacts.24782. Oct. 2025.
+        DOI : 10.4230/ARTIFACTS.24782. URL : https://doi.org/10.4230/artifacts.24782.
+
 
 
 Data protection and permitted use. I authorize the processing of my personal data contained in this CV for purposes connected
