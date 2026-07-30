@@ -1,0 +1,510 @@
+%
+%Academic CV LaTeX Template
+% Author: Dubasi Pavan Kumar
+% LinkedIn: https://www.linkedin.com/in/im-pavankumar/
+% License: MIT
+%
+% For errors, suggestions, or improvements, please contact:
+% Email: pavankumard.pg19.ma@nitp.ac.in
+%
+%
+% -----------------------------------------------------------------------------
+% THIS FILE IS STYLING AND MACROS ONLY, SHARED BY EVERY DOCUMENT UNDER cv/.
+%
+% Every fact printed below comes from `content/cv.yaml` via the generated macros
+% in `cv/generated/cv-data.tex` (produced by `node scripts/build-cv-data.mjs`).
+% Publications and talks come straight from `content/publications.bib` and
+% `content/talks.bib` through the biblatex refsections at the end of this file.
+%
+% Packages, page geometry, fonts, colours, the biblatex setup and the section
+% macros live here. Every printable document under cv/ opens with
+% \input{preamble.tex}, so a change to the printed design is made once and
+% reaches all of them.
+%
+% To change what a CV says, edit content/cv.yaml and regenerate. To change how
+% it looks, edit this file. To change WHICH of it one document prints, edit that
+% document's body - cv/cv.tex, cv/short.tex or cv/teaching.tex.
+%
+% WHICH sections print is a record fact, not a layout one. The `\cvpart` lines in
+% a document body places the sections whose heading or setting that document
+% curates; `\cvAutoSections` then prints every remaining section of
+% content/cv.yaml, in the order the record writes them, under the heading its key
+% spells out. Adding a section to the record therefore needs no edit here. Give
+% a section `printed: false` in content/cv.yaml to keep it off the PDF - that
+% holds for the curated ones below too - and `heading:` to name an uncurated one
+% something other than its key.
+%
+% Build:  latexmk -xelatex -cd cv/cv.tex      (xelatex is required: academicons)
+%         the same for cv/short.tex and cv/teaching.tex
+% -----------------------------------------------------------------------------
+
+
+
+\documentclass[a4paper,11pt]{article}
+
+% Package imports
+\usepackage{latexsym}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{ragged2e}
+\usepackage[empty]{fullpage}
+\usepackage{wrapfig}
+\usepackage{lipsum}
+\usepackage{booktabs}   % high-quality horizontal rules (no vertical rules)
+\usepackage{array}      % better column types
+\usepackage{xparse}
+\usepackage{tabularx}
+\usepackage{titlesec}
+\usepackage{geometry}
+\usepackage{marvosym}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{multicol}
+\usepackage{graphicx}
+% THE TYPEFACE. A document that wants another one defines \cvtypeface BEFORE its
+% \input{preamble.tex}; this \providecommand then leaves that definition alone.
+%
+% It carries the whole font setup, not a font name, because there is no one
+% mechanism to name it through: this template selects a system Unicode face with
+% fontspec, while an NFSS font package - cfr-lm, newtx, kpfonts - is loaded
+% instead and takes no such argument. One macro holding either is the smallest
+% thing that accepts both.
+%
+% \headerfontiii below is what every document body selects, and it follows the
+% main font. A document setting an NFSS typeface usually renews that too.
+\providecommand{\cvtypeface}{%
+  \usepackage{fontspec}%
+  \setmainfont{TeX Gyre Pagella}%
+}
+\cvtypeface
+\usepackage{fontawesome5}
+\usepackage{academicons} % <-- NEW (Scholar, ORCID, etc.)
+\usepackage{eurosym} % <-- NEW (€)
+
+% Column helpers (tight but readable)
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+% A reusable CV table environment (no floats, correct spacing)
+\NewDocumentEnvironment{cvtable}{m +b}{%
+  \vspace{0.25em}
+  \small
+  \setlength{\tabcolsep}{5pt}
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabularx}{\linewidth}{@{}#1@{}}
+  #2
+  \end{tabularx}
+  \vspace{0.25em}
+}{}
+
+% Color definitions
+\definecolor{darkblue}{RGB}{0,0,139}
+
+% Page layout
+\setlength{\multicolsep}{0pt}
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\geometry{left=1.4cm, top=0.8cm, right=1.2cm, bottom=1cm}
+\setlength{\footskip}{5pt} % Addressing fancyhdr warning
+
+% Hyperlink setup (moved after fancyhdr to address warning)
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=darkblue,
+    filecolor=darkblue,
+    urlcolor=darkblue,
+}
+
+% Custom box settings
+\usepackage[most]{tcolorbox}
+\tcbset{
+    frame code={},
+    center title,
+    left=0pt,
+    right=0pt,
+    top=0pt,
+    bottom=0pt,
+    colback=gray!20,
+    colframe=white,
+    width=\dimexpr\textwidth\relax,
+    enlarge left by=-2mm,
+    boxsep=4pt,
+    arc=0pt,outer arc=0pt,
+}
+
+% URL style
+\urlstyle{same}
+
+% Text alignment
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Section formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-7pt}]
+
+% Custom commands
+\newcommand{\resumeItem}[2]{
+  \item{
+    \textbf{#1}{\hspace{0.5mm}#2 \vspace{-0.5mm}}
+  }
+}
+
+\newcommand{\resumePOR}[3]{
+\vspace{0.5mm}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+        \textbf{#1}\hspace{0.3mm}#2 & \textit{\small{#3}}
+    \end{tabular*}
+    \vspace{-2mm}
+}
+
+% One entry, every section: what it was, where it was, when, and the place.
+% `content/cv.yaml` has exactly one entry shape and this is how it is set.
+\newcommand{\cventry}[4]{
+\vspace{0.5mm}\item
+    \begin{tabularx}{0.98\textwidth}[t]{@{}Y >{\raggedleft\arraybackslash}p{4.8cm}@{}}
+        \textbf{#1} & \textit{\footnotesize{#3}} \\
+        \textit{\footnotesize{#2}} &  \footnotesize{#4}\\
+    \end{tabularx}
+    \vspace{-2.4mm}
+}
+
+% An empty generated macro, to test the optional prose fields against.
+% NOT `\ifx\cvFocus\empty`: \newcommand makes its macros \long and \empty is
+% not, so \ifx compares false for two macros that both hold nothing, and the
+% heading prints over an empty field. This one is made the same way they are.
+\newcommand{\cvempty}{}
+
+% Separates the paragraphs of a section's `note:`. Spacing is layout, so the
+% amount of it lives here and the generator only says where the break goes.
+\newcommand{\cvnotesep}{\par\vspace{1.2mm}}
+
+% Record that this file lays out one section key itself, so \cvautopart below
+% does not print it a second time from the record's own section sequence.
+% \gdef, not \def: \cvpartflush sets its entries inside a group.
+\newcommand{\cvlaidout}[1]{\expandafter\gdef\csname cvlaidout@#1\endcsname{}}
+
+% Make the five generated macros this layout may mention safe even when
+% content/cv.yaml has no such section, and default the section to printing.
+% (`Header` is the sixth generated macro, but this layout supplies its own table
+% headings.) `\cvpart` does this for you; a hand-written section block must call it
+% itself.
+\newcommand{\cvdeclare}[1]{%
+  \cvlaidout{#1}%
+  % Printing is the default: only `printed: false` in content/cv.yaml generates a
+  % \cv<Key>Printed of 0, and this \providecommand leaves that definition alone.
+  \expandafter\providecommand\csname cv#1Printed\endcsname{1}%
+  \expandafter\providecommand\csname cv#1Count\endcsname{0}%
+  \expandafter\providecommand\csname cv#1\endcsname{}%
+  \expandafter\providecommand\csname cv#1Note\endcsname{}%
+  \expandafter\providecommand\csname cv#1Rows\endcsname{}%
+  \expandafter\providecommand\csname cv#1Inline\endcsname{}%
+}
+
+% The same, for a bibliography section: `publications:`/`talks:` in cv.yaml
+% generate \cv<Name>Key, \cv<Name>Sections and \cv<Name>Count (the number of
+% entries in the matching .bib) instead of the five above. An adopter who has
+% declared neither - which is everyone on day one - would otherwise meet a raw
+% "Undefined control sequence" that stops xelatex at its interactive prompt.
+% Empty is the documented behaviour: the zero count makes the document skip
+% the heading and its entire refsection.
+\newcommand{\cvdeclarebib}[1]{%
+  \expandafter\providecommand\csname cv#1Count\endcsname{0}%
+  \expandafter\providecommand\csname cv#1Key\endcsname{}%
+  \expandafter\providecommand\csname cv#1Sections\endcsname{}%
+}
+
+% How many entries of a section a document prints. The generated \cv<Name>
+% guards each of its entries with \ifnum<n>>\cvmax, so this is the cutoff.
+%
+% This is the layout's call, and it is a different question from the record's
+% `printed:`. WHICH sections print is a record fact; HOW MANY entries of one a
+% document prints is a page budget belonging to that document - the same section
+% is worth three entries in a short CV and all of them in the full one - so the
+% number lives here and content/cv.yaml never states it. A count high enough
+% that no record reaches it is the default, which keeps the full CV whole.
+%
+% Curation is neither: "my five best papers" is a judgement about the work, so
+% it is marked on the fact itself - see the `selected` keyword in
+% content/publications.bib and how cv/short.tex filters on it.
+%
+% The sentinel is named once here and used for \cvmax and for the optional
+% argument of \cvpart and \cvpartflush, so the three cannot disagree.
+\newcommand{\cvall}{99999}
+\newcommand{\cvmax}{\cvall}
+
+% Print one section of content/cv.yaml. #2 is the heading, #3 the section's
+% macro name (`Awards` for the `awards:` key), and the optional #1 is how many
+% of its entries to print. A section the file does not have, or gives
+% `printed: false`, prints nothing at all - no heading, no gap - so this line
+% can stay. Reorder the CV by reordering these lines in the document body.
+%
+% The entry limit and printing are grouped so that \cvmax is restored
+% afterwards: a \cvpart[3] must not silently truncate the section written after
+% it. \cvdeclare stays OUTSIDE that group: its \providecommand declarations are
+% local, so scoping them here would leave \cv<Key>Printed and the rest undefined
+% for a later hand-written block - the cold-start trap they exist to prevent.
+%
+% The count is tested alongside the section's own: \cvpart[0] asks for no
+% entries, and every entry is then suppressed by the generated guard, so
+% printing the heading would open an itemize with nothing to put in it.
+\newcommand{\cvpart}[3][\cvall]{%
+  \cvdeclare{#3}%
+  {%
+    \renewcommand{\cvmax}{#1}%
+    \ifnum#1>0
+    \ifnum\csname cv#3Count\endcsname>0
+    \ifnum\csname cv#3Printed\endcsname>0
+    \section{\textbf{#2}}
+    \vspace{-0.4mm}
+    \resumeSubHeadingListStart
+    \csname cv#3\endcsname
+    \resumeSubHeadingListEnd
+    \vspace{-6mm}
+    \fi
+    \fi
+    \fi
+  }%
+}
+
+% One section of the record's own section sequence: `\cvpart`, unless this file
+% has already laid that key out by hand above. Every line of \cvAutoSections is
+% one of these, so an adopter's new section prints with no edit here, and the
+% ones curated below keep their curated heading, order and setting.
+\newcommand{\cvautopart}[2]{%
+  \expandafter\ifx\csname cvlaidout@#2\endcsname\relax\cvpart{#1}{#2}\fi%
+}
+
+% `\cvpart`, with the second line of every entry set the other way. Which
+% sections use which is a layout choice and lives here; cv.yaml says nothing
+% about it.
+\newcommand{\cvpartflush}[3][\cvall]{%
+  \cvdeclare{#3}%
+  {%
+    \renewcommand{\cventry}[4]{%
+      \vspace{0.5mm}\item
+      \begin{tabularx}{0.98\textwidth}[t]{@{}Y >{\raggedleft\arraybackslash}p{4.8cm}@{}}
+          \textbf{##1} & \textit{\footnotesize{##3}} \\
+          \footnotesize{\textit{##2}} & \footnotesize{##4}
+      \end{tabularx}
+      \vspace{-2.4mm}
+    }%
+    \cvpart[#1]{#2}{#3}%
+  }%
+}
+
+% A table hanging under an entry: `rows:` in cv.yaml. #1 is a generated
+% equal-width column specification, #2 the generated headings and #3 the rows.
+% Any number of consistently shaped columns therefore works without editing
+% this layout. The generator refuses rows whose key order disagrees.
+%
+% THE COLUMN GEOMETRY. Equal widths suit no particular set of course names, so a
+% document may hand-tune them by defining \cvcoursecols BEFORE its
+% \input{preamble.tex}: it takes the generated specification as #1 and returns
+% the one to use, and the default returns it unchanged. The tables are numbered
+% in printing order by the `cvcoursetable` counter, so widths may differ per
+% table:
+%
+%   \newcommand{\cvcoursecols}[1]{%
+%     \ifnum\value{cvcoursetable}=1 P{3.1cm} P{3.8cm} Y P{1.2cm}%
+%     \else P{3.1cm} P{3.5cm} Y P{1.2cm}\fi}
+%
+% The counter is stepped here rather than left to the document because tabularx
+% reads its body more than once, so a counter stepped inside the table would
+% count wrong.
+%
+% The result is expanded before the table sees it: `array` reads a column
+% specification token by token and rejects a macro it finds there, so a
+% \cvcoursecols left unexpanded would stop the build with "Illegal pream-token".
+% Column TYPES survive that expansion - they are letters, as `P` and `Y` are -
+% so write the widths with those, not with a bare `>{\raggedright...}p{3cm}`.
+\newcounter{cvcoursetable}
+\providecommand{\cvcoursecols}[1]{#1}
+\newcommand{\cvcourses}[3]{%
+\par
+\stepcounter{cvcoursetable}%
+\edef\cvcoursespec{\cvcoursecols{#1}}%
+\expandafter\cvcoursesprint\expandafter{\cvcoursespec}{#2}{#3}%
+}
+\newcommand{\cvcoursesprint}[3]{%
+\begin{cvtable}{#1}
+\toprule
+#2
+\midrule
+#3
+\bottomrule
+\end{cvtable}
+}
+
+\newcommand{\resumeSubItem}[2]{\resumeItem{#1}{#2}\vspace{-4pt}}
+
+\renewcommand{\labelitemi}{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\renewcommand{\labelitemii}{$\vcenter{\hbox{\tiny$\circ$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*,labelsep=1mm]}
+\newcommand{\resumeHeadingSkillStart}{\begin{itemize}[leftmargin=*,itemsep=1.7mm, rightmargin=2ex]}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=*,labelsep=1mm,itemsep=0.5mm]}
+
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}\vspace{2mm}}
+\newcommand{\resumeHeadingSkillEnd}{\end{itemize}\vspace{-2mm}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-2mm}}
+\newcommand{\cvsection}[1]{%
+\vspace{2mm}
+\begin{tcolorbox}
+    \textbf{\large #1}
+\end{tcolorbox}
+    \vspace{-4mm}
+}
+
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}%
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}%
+\newcolumntype{C}{>{\centering\arraybackslash}X}%
+
+% Commands for icon sizing and positioning
+\newcommand{\socialicon}[1]{\raisebox{-0.05em}{\resizebox{!}{1em}{#1}}}
+\newcommand{\ieeeicon}[1]{\raisebox{-0.3em}{\resizebox{!}{1.3em}{#1}}}
+
+% Profile icon registry. Known compact account IDs select their service icon;
+% arbitrary `{label, url}` links use \cviconlink.
+\newcommand{\cviconscholar}{\socialicon{\aiGoogleScholar}}
+\newcommand{\cviconorcid}{\socialicon{\aiOrcid}}
+\newcommand{\cviconlinkedin}{\socialicon{\faLinkedin}}
+\newcommand{\cvicongithub}{\socialicon{\faGithub}}
+\newcommand{\cviconlink}{\socialicon{\faLink}}
+
+% Font options
+\newcommand{\headerfonti}{\fontfamily{phv}\selectfont} % Helvetica-like (similar to Arial/Calibri)
+\newcommand{\headerfontii}{\fontfamily{ptm}\selectfont} % Times-like (similar to Times New Roman)
+\newcommand{\headerfontiii}{\rmfamily} % TeX Gyre Pagella, set above with Unicode support
+\newcommand{\headerfontiv}{\fontfamily{pbk}\selectfont} % Bookman (readable serif)
+\newcommand{\headerfontv}{\fontfamily{pag}\selectfont} % Avant Garde-like (similar to Trebuchet MS)
+\newcommand{\headerfontvi}{\fontfamily{cmss}\selectfont} % Computer Modern Sans Serif
+\newcommand{\headerfontvii}{\fontfamily{qhv}\selectfont} % Quasi-Helvetica (another Arial/Calibri alternative)
+\newcommand{\headerfontviii}{\fontfamily{qpl}\selectfont} % Quasi-Palatino (another elegant serif option)
+\newcommand{\headerfontix}{\fontfamily{qtm}\selectfont} % Quasi-Times (another Times New Roman alternative)
+\newcommand{\headerfontx}{\fontfamily{bch}\selectfont} % Charter (clean serif font)
+
+% --------------------------------
+% BIBLATEX (publications + talks)
+% --------------------------------
+\usepackage[
+  backend=biber,
+  style=numeric,
+  sorting=ydnt,
+  defernumbers=true,
+  maxbibnames=99,
+  giveninits=true,
+  doi=true,
+  url=true,
+  isbn=false
+]{biblatex}
+
+% Two bib databases (kept separate via refsection below).
+% Publications are the repository-wide canonical list, shared with the website.
+\addbibresource{../content/publications.bib}
+\addbibresource{../content/talks.bib}
+
+% The shared bibliography may carry rendering fields used only by the website. They are not part of the CV, and abstracts can contain raw % and &
+% that would break the LaTeX pass, so drop them during biber processing instead
+% of altering the .bib the website reads.
+\providecommand{\cvsourcemaps}{}
+\DeclareSourcemap{
+  \maps[datatype=bibtex]{
+    \map{
+      \step[fieldset=abstract, null]
+      \step[fieldset=selected, null]
+      \step[fieldset=preview, null]
+      \step[fieldset=abbr, null]
+      \step[fieldset=bibtex_show, null]
+      \step[fieldset=html, null]
+      \step[fieldset=pdf, null]
+      \step[fieldset=code, null]
+      \step[fieldset=altmetric, null]
+      \step[fieldset=dimensions, null]
+    }
+    % DBLP's @misc artifact records carry an UNFILLED placeholder,
+    % `note = {Accessed on YYYY-MM-DD.}`, which biblatex would print verbatim as
+    % the venue of a released software package. The website already skips it
+    % (`VENUE_FIELDS` in web/src/lib/record.ts prefers `publisher`); this is the
+    % same fix on the printed side, so declaring a `types: [misc]` section in
+    % content/cv.yaml renders correctly instead of printing the placeholder.
+    \map{
+      \step[fieldsource=note, match=\regexp{\AAccessed\son\sYYYY-MM-DD\.?\Z}, final]
+      \step[fieldset=note, null]
+    }
+    % THE BIBLIOGRAPHY TIDYING. biblatex takes exactly one \DeclareSourcemap, so
+    % a document cannot add its own without losing the two above. It defines
+    % \cvsourcemaps BEFORE its \input{preamble.tex} instead, holding \map blocks
+    % that then run after these:
+    %
+    %   \newcommand{\cvsourcemaps}{%
+    %     \map{\step[fieldsource=doi, final]\step[fieldset=url, null]}}
+    %
+    % Nothing goes here by default. What one bibliography needs tidying is a
+    % fact about that bibliography - which fields its export tool fills, and
+    % which of them its owner would rather not print - so it belongs to the
+    % document that prints it, not to everyone.
+    \cvsourcemaps
+  }
+}
+
+% Compact bib
+\setlength\bibitemsep{0.25\baselineskip}
+\renewcommand*{\bibfont}{\footnotesize}
+
+% Bib headings matching your tidy style
+\defbibheading{bibsubheading}[\refname]{%
+  \vspace{0.8mm}\textbf{#1}\par\vspace{-0.3mm}
+}
+
+% A \printbibliography whose filter matches nothing prints NOTHING - biblatex
+% skips the block, its own heading included. Where the record's own sections are
+% printed that is the wanted behaviour and needs no help: cv.tex prints one
+% \section over \cvPublicationsSections, so a section that matches nothing simply
+% leaves no trace. It is wrong wherever a document writes its OWN \section above
+% a single filtered block, as cv/short.tex does: the adopter gets a title with
+% silence underneath and nothing to diagnose it by.
+%
+% \cvbibfiltered prints such a block and, when it matched nothing, says so and
+% names the filter. It does not fail the build: an adopter who has simply not
+% marked any work yet has a valid record, and a variant they never asked for must
+% not stop their CV from building. The line names the filter and the document
+% that defined it, which is the pair to grep for - cv/short.tex defines
+% `shortselected` beside the comment explaining which keyword fills it.
+%
+% The count comes from \AtEveryBibitem, which steps a global counter as each
+% entry is typeset, so it is already correct on the line after the block. Nothing
+% is typeset by the step itself: a document with matches is byte-identical.
+\newcounter{cvbibmatched}
+\AtEveryBibitem{\stepcounter{cvbibmatched}}
+\newcommand{\cvbibfiltered}[2]{%
+  \setcounter{cvbibmatched}{0}%
+  \printbibliography[heading=bibsubheading, title={#1}, filter=#2, resetnumbers=true]%
+  \ifnum\value{cvbibmatched}=0
+    \vspace{0.8mm}\textbf{#1}\par\vspace{-0.3mm}
+    {\footnotesize Nothing in the bibliography matches the \texttt{#2} filter,
+    so this section is empty. That filter is defined in \texttt{cv/\jobname.tex},
+    which explains what it selects.\par}
+  \fi
+}
+
+% No filters here. Which entry type belongs under which heading is a curated
+% opinion, so it is declared in `content/cv.yaml` under `publications:` and
+% `talks:` and read by the website too. build-cv-data.mjs turns each declared
+% section into its \defbibfilter and its \printbibliography, and gives this file
+% \cvPublicationsKey / \cvPublicationsSections and \cvTalksKey /
+% \cvTalksSections, plus \cvPublicationsCount / \cvTalksCount - how many entries
+% the .bib holds, which guards the \refsection below.
+% Adding, reordering or renaming a section is a cv.yaml edit.
+
+% --------------------------------
+% CONTENT (generated from content/cv.yaml)
+% --------------------------------
+\input{generated/cv-data.tex}
+

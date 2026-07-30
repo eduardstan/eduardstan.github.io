@@ -1,0 +1,37 @@
+% -----------------------------------------------------------------------------
+% THE SUPERVISION SECTION, SHARED BY EVERY DOCUMENT THAT PRINTS IT.
+%
+% A section set by hand rather than by \cvpart, because it prints a note and a
+% table of its own. That makes it a body fragment rather than a macro, so it is
+% shared the way cv/header.tex is: \input{supervision.tex} from any document
+% that wants it, and the table is designed once.
+%
+% It must call \cvdeclare itself, or the macros below are undefined for someone
+% whose cv.yaml has no `supervision:` key - and \cvdeclare is also what marks the
+% key laid out, so every document that inputs this fragment must do so ABOVE its
+% \cvAutoSections line, or the record's own sequence prints supervision a second
+% time. It guards on \cvSupervisionPrinted too, so the record's `printed: false`
+% holds here exactly as it does for a \cvpart section.
+% -----------------------------------------------------------------------------
+\cvdeclare{Supervision}
+\ifnum\cvSupervisionCount>0
+\ifnum\cvSupervisionPrinted>0
+\section{\textbf{Student Supervision (Theses \& Internships)}}
+\vspace{-0.4mm}
+
+\small{
+\cvSupervisionNote
+}
+
+\vspace{1.5mm}
+
+\begin{cvtable}{P{5.2cm} >{\centering\arraybackslash}p{1.0cm} Y}
+\toprule
+\textbf{Level} & \textbf{\#} & \textbf{Notes (scope and international experience)} \\
+\midrule
+\cvSupervisionRows
+\bottomrule
+\end{cvtable}
+\fi
+\fi
+

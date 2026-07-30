@@ -149,9 +149,9 @@ const description =
             <li>
               <span class="k">
                 <Fragment set:html={inline(row.course)} />
-                <span class="sub" set:html={inline(row.programme)} />
+                <span class="sub" set:html={inline(row['programme / Level'])} />
               </span>
-              <span class="v" set:html={inline(row.topics)} />
+              <span class="v" set:html={inline(row['key topics'])} />
               <span class="when" set:html={inline(row.hours)} />
             </li>
           ))}

@@ -1,7 +1,7 @@
 # `content/` — the adopter-owned records and media
 
-This directory owns every structured record and media asset about you. The two authored-layout
-exceptions an adopter must review are named below.
+This directory owns every structured record and media asset about you. The one authored-layout
+exception an adopter must review is named below.
 
 ```
 content/
@@ -107,7 +107,8 @@ profile:
     github: adalovelace         # BOTH an entry in ACCOUNTS in
                                 # scripts/build-cv-data.mjs and one in ACCOUNTS
                                 # in web/src/lib/record.ts, plus a \cvicon<kind>
-                                # macro in cv/cv.tex. The build tells you so.
+                                # macro in cv/preamble.tex, or write it as
+                                # { label: ..., url: ... } and it needs neither.
   portrait: portrait.jpg        # a file in content/media/
   favicon: favicon.svg          # another file in content/media/. Optional: if it
                                 # is omitted or missing, no icon link is emitted.
@@ -222,8 +223,9 @@ years: [2024, { year: 2025, announced: 2024-06-10 }, 2026]
 `rows:` turns an entry into a heading over a table. **Each row's keys, in the order you write
 them, are the columns, and the key name becomes the heading.** Write `points:` and the column says
 "Points". Reordering two keys reorders two columns, silently — so write them once and leave them
-alone. The column **widths** are layout and live in `cv/cv.tex`; a table with a different number of
-columns needs that spec changed.
+alone. The column **widths** are layout: the generator emits equal-width columns and
+`cv/cv.tex`'s `\cvcoursecols` hand-tunes them, so a table with a different number of columns
+prints without a LaTeX edit and only its tuning lives there.
 
 ```yaml
 teaching:
@@ -388,17 +390,15 @@ you give it an `announced:` — the day you submitted it. It stays on `/publicat
 The sentence each kind of fact is announced in is one table, `TEMPLATES`, at the top of
 `web/src/lib/announcements.ts`. It is the first thing to edit if you want different wording.
 
-## Two things `content/` does not yet own
+## One thing `content/` does not yet own
 
-Everything about *you* is in this directory. Two pieces of prose on the site are not:
+Everything about *you* is in this directory. One piece of prose on the site is not:
 
 - **`web/src/lib/strands.ts`** — the three research strands on the front page. No file in
   this repository states a strand structure, so this is authored copy rather than a derived
   record, and it is kept alone in one module so that stays obvious. **If you adopt this site,
   rewrite it or delete the block from `web/src/pages/index.astro`** — until you do, the front
   page describes someone else's research.
-- **The `Talks & Presentations` and `Publications` headings in `cv/cv.tex`** print even when
-  the matching `.bib` is empty. Delete those two blocks if you have neither.
 
 ## Prove a clean handoff
 

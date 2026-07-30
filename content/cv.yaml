@@ -10,9 +10,10 @@
 #   * the website    - `web/src/lib/cv.ts` and `web/src/lib/record.ts`
 #
 # Layout, spacing, fonts, table column widths and the order of ordinary CV parts
-# are NOT here: they belong to `cv/cv.tex`, which owns the design and decides
-# which top-level entry lists the PDF prints. The order and inclusion of
-# bibliography subsections are declared under `publications:` and `talks:`.
+# are NOT here: they belong to `cv/preamble.tex`, the shared layout, and to
+# `cv/cv.tex`, which sets this CV's own and decides which top-level entry lists
+# the PDF prints. The order and inclusion of bibliography subsections are
+# declared under `publications:` and `talks:`.
 #
 # `content/README.md` is the documentation. Everything below is described there.
 #
@@ -185,12 +186,12 @@ teaching:
     dates: Jul 2024–Present
     rows:
       - course: Databases
-        programme: B.Sc. Computer Science
-        topics: SQL; relational algebra; database design; lab/project work
+        programme / Level: B.Sc. Computer Science
+        key topics: SQL; relational algebra; database design; lab/project work
         hours: 30 h/yr
       - course: Intelligent Consumer Technologies
-        programme: M.Sc. AI for Society and Technology (AI4ST)
-        topics: XAI; ethical/legal/privacy aspects; agentic AI (overview)
+        programme / Level: M.Sc. AI for Society and Technology (AI4ST)
+        key topics: XAI; ethical/legal/privacy aspects; agentic AI (overview)
         hours: 6 h/yr
   - title: Official Lecturer (Instructor of Record)
     place: Milan, Italy
@@ -199,8 +200,8 @@ teaching:
     dates: Dec 2025–Present
     rows:
       - course: Foundations of Artificial Intelligence
-        programme: 2nd-level Master (DAI4Health)
-        topics: NLP foundations; agentic AI (overview); ethical/legal/privacy aspects of AI in
+        programme / Level: 2nd-level Master (DAI4Health)
+        key topics: NLP foundations; agentic AI (overview); ethical/legal/privacy aspects of AI in
           healthcare
         hours: 10 h/yr
   - title: Teaching Assistant
@@ -210,16 +211,16 @@ teaching:
     dates: Oct 2019–Feb 2023
     rows:
       - course: Algorithms and Data Structures
-        programme: B.Sc. Computer Science
-        topics: Laboratory/project work
+        programme / Level: B.Sc. Computer Science
+        key topics: Laboratory/project work
         hours: 21 h/yr
       - course: Databases and Laboratory
-        programme: B.Sc. Computer Science
-        topics: ER-to-relational mapping; relational algebra; SQL; normal forms
+        programme / Level: B.Sc. Computer Science
+        key topics: ER-to-relational mapping; relational algebra; SQL; normal forms
         hours: 20 h/yr
       - course: Statistics and Probability Calculus
-        programme: B.Sc. Computer Science
-        topics: Descriptive statistics; discrete/continuous random variables; confidence intervals;
+        programme / Level: B.Sc. Computer Science
+        key topics: Descriptive statistics; discrete/continuous random variables; confidence intervals;
           hypothesis testing
         hours: 20 h/yr
 service:

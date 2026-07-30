@@ -136,7 +136,7 @@ for (const block of teaching) {
   for (const row of block.rows ?? [])
     assert.deepEqual(
       Object.keys(row),
-      ['course', 'programme', 'topics', 'hours'],
+      ['course', 'programme / Level', 'key topics', 'hours'],
       `teaching "${block.org}": row keys are the printed table's columns, in this order`,
     );
 }
