@@ -148,10 +148,11 @@ test("a section key becomes a legal macro name", () => {
   assert.equal(macroName("teaching"), "Teaching");
 });
 
-test("a table's header is its own row keys, so renaming a key renames a column", () => {
-  // The friction log's F12: an NZ adopter writes `points:` and the column says
-  // "Points" without a LaTeX edit.
-  assert.equal(tableHeader([{ course: "Databases", points: "18 points" }]), "\\textbf{Course} & \\textbf{Points} \\\\");
+test("a table's header is its own row keys verbatim, so renaming a key renames a column", () => {
+  // Column headers print the row key exactly as written in the record: no casing
+  // is derived, which is how content/cv.yaml states this CV's printed wording.
+  assert.equal(tableHeader([{ Course: "Databases", Points: "18 points" }]), "\\textbf{Course} & \\textbf{Points} \\\\");
+  assert.equal(tableHeader([{ "Programme / Level": "B.Sc.", "Key topics": "proxies" }]), "\\textbf{Programme / Level} & \\textbf{Key topics} \\\\");
 });
 
 test("an empty or absent rows list emits no course table", () => {

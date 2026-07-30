@@ -198,6 +198,9 @@ a second place to write one is the drift this design closed.
   "one place per fact" is the disease with a lid on it. `archive.leadership` is now the ordinary
   top-level section `leadership:`, which the site renders and `cv/cv.tex` does not print — that is
   the answer to "keep a section off the PDF but on the site".
+- **`NOTICE` carries the upstream CV template's third-party attribution**, and `cv/preamble.tex`'s
+  own header comment points at it. Both come from the ledgerpress template; neither may be deleted
+  when that file is re-copied.
 - **`LICENSE` is MIT, "Copyright (c) 2026 Ionel Eduard Stan".** The repository owner decided
   this after the rebuild left no al-folio files in the current tree. Preserve the project's
   al-folio lineage in the README's History section; earlier commits and their licensing remain

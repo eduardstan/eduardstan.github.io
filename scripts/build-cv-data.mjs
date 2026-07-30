@@ -220,10 +220,30 @@ const tableRows = (rows, strict = true) => {
   return rows.map((r) => `${Object.values(r).map(cell).join(" & ")} \\\\`).join("\n");
 };
 
-/** The header row for those columns: the key names, capitalised. */
-const tableHeader = (rows, strict = true) =>
+/** One word, capitalised. The generator's only casing rule. */
+const capitalise = (word) => word[0].toUpperCase() + word.slice(1);
+
+/**
+ * A section key as a heading: every word capitalised, separators untouched.
+ *
+ * Section keys derive from identifiers (e.g. `field_work` -> "Field Work")
+ * when a section does not declare an explicit `heading:`, and the generated
+ * per-section table header names those schema fields. Course-table column
+ * headers, by contrast, are printed verbatim as written in the record: a row
+ * key is a fact the website publishes on its provenance line, so it prints as
+ * the adopter wrote it, here and there.
+ *
+ * The website has its own copy of this rule (`headingCase` in
+ * `web/src/lib/cv-schema.ts`) for the announcement kind chips on /lately/. No
+ * heading passes through both, so the two are independent, not a pair to keep
+ * in step.
+ */
+const headingCase = (key) => key.replace(/[\p{L}\p{N}]+/gu, capitalise);
+
+/** Course-table labels stay verbatim; per-section schema fields explicitly pass `headingCase`. */
+const tableHeader = (rows, strict = true, displayKey = (key) => key) =>
   `${tableKeys(rows, strict)
-    .map((k) => `\\textbf{${escapeLatex(k[0].toUpperCase() + k.slice(1))}}`)
+    .map((key) => `\\textbf{${escapeLatex(displayKey(key))}}`)
     .join(" & ")} \\\\`;
 
 /** One `\cventry`, plus its bullets and its table where it has them. */
@@ -237,12 +257,16 @@ function entry(item) {
   return [head, itemList(item.items), table].filter(Boolean).join("\n");
 }
 
-/** The words of a section key, each capitalised: `field_work` -> [Field, Work]. */
+/**
+ * The words of a section key, each capitalised: `field_work` -> [Field, Work].
+ *
+ * ASCII-only, because a macro name is: this feeds `macroName`, not a heading.
+ */
 const keyWords = (key) =>
   key
     .split(/[^A-Za-z0-9]+/)
     .filter(Boolean)
-    .map((w) => w[0].toUpperCase() + w.slice(1));
+    .map(capitalise);
 
 /** `field_work` -> `FieldWork`, so a section key becomes a legal macro name. */
 const macroName = (key) => keyWords(key).join("");
@@ -253,8 +277,13 @@ const macroName = (key) => keyWords(key).join("");
  * `fieldwork:` prints as "Fieldwork" with nothing declared, which is what makes a
  * new section print without a LaTeX edit. A section whose heading is not its key
  * spelt out - "Awards & Scholarships" - says so with `heading:`.
+ *
+ * The key becomes a heading by `headingCase`, with
+ * its separators read as spaces: `field_work` prints "Field Work", not
+ * "Field_Work". Not `keyWords`, which is ASCII because macro names are.
  */
-const sectionHeading = (key, value) => arg((Array.isArray(value) ? undefined : value.heading) ?? keyWords(key).join(" "));
+const sectionHeading = (key, value) =>
+  arg((Array.isArray(value) ? undefined : value.heading) ?? headingCase(key.replace(/[^\p{L}\p{N}]+/gu, " ").trim()));
 
 function macro(name, body) {
   return `\\newcommand{\\${name}}{%\n${body}%\n}`;
@@ -562,7 +591,7 @@ function render(cv) {
       macro(`cv${name}Note`, note.map(renderInline).join("\n\\cvnotesep\n")),
       macro(`cv${name}`, rows.map((r, i) => `\\ifnum${i + 1}>\\cvmax\\else\n${entry(r)}\n\\fi`).join("\n\n")),
       macro(`cv${name}Rows`, rows.length ? tableRows(rows, false) : ""),
-      macro(`cv${name}Header`, rows.length ? tableHeader(rows, false) : ""),
+      macro(`cv${name}Header`, rows.length ? tableHeader(rows, false, headingCase) : ""),
       macro(`cv${name}Inline`, rows.map((r) => arg(r.detail ? `${r.title} (${r.detail})` : r.title)).join(", ")),
       `\\newcommand{\\cv${name}Count}{${rows.length}}`
     );

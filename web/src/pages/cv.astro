@@ -43,7 +43,7 @@ const courses = teaching.flatMap((block) => block.rows ?? []);
 const hoursOf = (blocks: typeof teaching) =>
   blocks.reduce(
     (total, block) =>
-      total + (block.rows ?? []).reduce((sum, row) => sum + parseInt(row.hours ?? '0', 10), 0),
+      total + (block.rows ?? []).reduce((sum, row) => sum + parseInt(row['Hours'] ?? '0', 10), 0),
     0,
   );
 /** A post whose `dates` still run to Present; the rest are roles that ended. */
@@ -148,11 +148,11 @@ const description =
           {(block.rows ?? []).map((row) => (
             <li>
               <span class="k">
-                <Fragment set:html={inline(row.course)} />
-                <span class="sub" set:html={inline(row['programme / Level'])} />
+                <Fragment set:html={inline(row['Course'])} />
+                <span class="sub" set:html={inline(row['Programme / Level'])} />
               </span>
-              <span class="v" set:html={inline(row['key topics'])} />
-              <span class="when" set:html={inline(row.hours)} />
+              <span class="v" set:html={inline(row['Key topics'])} />
+              <span class="when" set:html={inline(row['Hours'])} />
             </li>
           ))}
         </ul>
@@ -175,7 +175,7 @@ const description =
         running.length === 1 ? '' : 's'
       } whose <b>dates</b> run to Present; {contactHours} h/yr summed across all {teaching.length}
       {' '}posts on record, the ended ones included ({
-        courses.map((row) => row.hours).join(' + ')
+        courses.map((row) => row['Hours']).join(' + ')
       }). Both totals are computed here from the leading number of each <b>hours</b> column; neither
       is a figure written in the file.
     </p>

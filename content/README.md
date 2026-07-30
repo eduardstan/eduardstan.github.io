@@ -221,11 +221,12 @@ years: [2024, { year: 2025, announced: 2024-06-10 }, 2026]
 ```
 
 `rows:` turns an entry into a heading over a table. **Each row's keys, in the order you write
-them, are the columns, and the key name becomes the heading.** Write `points:` and the column says
-"Points". Reordering two keys reorders two columns, silently — so write them once and leave them
-alone. The column **widths** are layout: the generator emits equal-width columns and
-`cv/cv.tex`'s `\cvcoursecols` hand-tunes them, so a table with a different number of columns
-prints without a LaTeX edit and only its tuning lives there.
+them, are the columns, and the key is printed verbatim as the heading.** Write `Points:` and the
+column says "Points"; write `Programme / Level:` and it says that. No casing is derived, so write
+each key exactly as it should print. Reordering two keys reorders two columns, silently — so write
+them once and leave them alone. The column **widths** are layout: the generator emits equal-width
+columns and `cv/cv.tex`'s `\cvcoursecols` hand-tunes them, so a table with a different number of
+columns prints without a LaTeX edit and only its tuning lives there.
 
 ```yaml
 teaching:
@@ -233,10 +234,10 @@ teaching:
     org: University of Example
     dates: 2024 – Present
     rows:
-      - course: Databases
-        programme: B.Sc. Computer Science
-        topics: SQL; relational algebra
-        hours: 30 h/yr
+      - Course: Databases
+        Programme / Level: B.Sc. Computer Science
+        Key topics: SQL; relational algebra
+        Hours: 30 h/yr
 ```
 
 A section-level `note` is not an entry field. A section that needs a paragraph of its own above

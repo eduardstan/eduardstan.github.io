@@ -1,0 +1,10 @@
+eduardstan.github.io
+Copyright (c) 2026 Ionel Eduard Stan
+
+This product includes software derived from third-party works:
+
+Academic CV Template
+- Author: Dubasi Pavan Kumar (pavankumard.pg19.ma@nitp.ac.in, https://www.linkedin.com/in/im-pavankumar/)
+- Source: https://www.overleaf.com/latex/templates/academic-cv-template/gmyytjmdbvdm
+- Derived Files: cv/preamble.tex (and the LaTeX CV layout under cv/)
+- Licensing Terms: There is a discrepancy between primary sources regarding the license terms. The upstream LaTeX source header specifies "% License: MIT", while the Overleaf template listing page specifies Creative Commons Attribution 4.0 International (CC BY 4.0). This project provides attribution that satisfies both potential terms by retaining the original source header comment in cv/preamble.tex (as required by MIT) and providing visible credit with a link to the source (as required by CC BY 4.0).

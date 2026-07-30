@@ -185,44 +185,44 @@ teaching:
     url: https://elearning.unimib.it/course/info.php?id=60729
     dates: Jul 2024–Present
     rows:
-      - course: Databases
-        programme / Level: B.Sc. Computer Science
-        key topics: SQL; relational algebra; database design; lab/project work
-        hours: 30 h/yr
-      - course: Intelligent Consumer Technologies
-        programme / Level: M.Sc. AI for Society and Technology (AI4ST)
-        key topics: XAI; ethical/legal/privacy aspects; agentic AI (overview)
-        hours: 6 h/yr
+      - Course: Databases
+        Programme / Level: B.Sc. Computer Science
+        Key topics: SQL; relational algebra; database design; lab/project work
+        Hours: 30 h/yr
+      - Course: Intelligent Consumer Technologies
+        Programme / Level: M.Sc. AI for Society and Technology (AI4ST)
+        Key topics: XAI; ethical/legal/privacy aspects; agentic AI (overview)
+        Hours: 6 h/yr
   - title: Official Lecturer (Instructor of Record)
     place: Milan, Italy
     org: Bicocca Academy (2nd-level Master, DAI4Health)
     url: https://www.academy.unimib.it/dai4health-innovazione-digitale-e-intelligenza-artificiale-nel-settore-sanitario-0
     dates: Dec 2025–Present
     rows:
-      - course: Foundations of Artificial Intelligence
-        programme / Level: 2nd-level Master (DAI4Health)
-        key topics: NLP foundations; agentic AI (overview); ethical/legal/privacy aspects of AI in
+      - Course: Foundations of Artificial Intelligence
+        Programme / Level: 2nd-level Master (DAI4Health)
+        Key topics: NLP foundations; agentic AI (overview); ethical/legal/privacy aspects of AI in
           healthcare
-        hours: 10 h/yr
+        Hours: 10 h/yr
   - title: Teaching Assistant
     place: Ferrara, Italy
     org: University of Ferrara
     url: https://www.unife.it/
     dates: Oct 2019–Feb 2023
     rows:
-      - course: Algorithms and Data Structures
-        programme / Level: B.Sc. Computer Science
-        key topics: Laboratory/project work
-        hours: 21 h/yr
-      - course: Databases and Laboratory
-        programme / Level: B.Sc. Computer Science
-        key topics: ER-to-relational mapping; relational algebra; SQL; normal forms
-        hours: 20 h/yr
-      - course: Statistics and Probability Calculus
-        programme / Level: B.Sc. Computer Science
-        key topics: Descriptive statistics; discrete/continuous random variables; confidence intervals;
+      - Course: Algorithms and Data Structures
+        Programme / Level: B.Sc. Computer Science
+        Key topics: Laboratory/project work
+        Hours: 21 h/yr
+      - Course: Databases and Laboratory
+        Programme / Level: B.Sc. Computer Science
+        Key topics: ER-to-relational mapping; relational algebra; SQL; normal forms
+        Hours: 20 h/yr
+      - Course: Statistics and Probability Calculus
+        Programme / Level: B.Sc. Computer Science
+        Key topics: Descriptive statistics; discrete/continuous random variables; confidence intervals;
           hypothesis testing
-        hours: 20 h/yr
+        Hours: 20 h/yr
 service:
   - title: Associate Editor
     org: Elsevier Neurocomputing Journal
