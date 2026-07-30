@@ -5,6 +5,8 @@ The personal academic site of Ionel Eduard Stan — <https://eduardstan.github.i
 It is an [Astro](https://astro.build) site living in [`web/`](web/README.md), built and
 published from `master` by `.github/workflows/deploy.yml`.
 
+Built on the [ledgerpress](https://github.com/eduardstan/ledgerpress) template.
+
 ## The idea
 
 Every fact on the site is read from one record and rendered from it. Nothing is
