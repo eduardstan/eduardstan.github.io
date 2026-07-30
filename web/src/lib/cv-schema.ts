@@ -78,7 +78,7 @@ export interface Entry {
   years?: Edition[];
   /** Grant or programme amount. Website only — the printed CV never carries it. */
   funding?: string;
-  /** How many. A table column, in a section rendered as a table. */
+  /** How many. Printed last on the entry's `org` line, unless it has `rows`. */
   count?: string | number;
   /** A table hanging under the entry: each row's keys, in order, are the columns. */
   rows?: Record<string, string>[];

@@ -211,7 +211,7 @@ heading, no gap, nothing printed, no error.
 | `rank_url` | where that figure is evidenced | the site links `metric` to it |
 | `years` | editions of a recurring role | `2024–2026` after `org` |
 | `funding` | grant or programme amount | website only, never the CV |
-| `count` | how many | a table column — only in a section rendered as a table |
+| `count` | how many | last on the entry's `org` line, unless the entry has `rows` |
 | `rows` | a table hanging under the entry | see below |
 
 `years` is a plain list. Only an edition that carries an announcement date grows into a map:
