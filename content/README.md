@@ -186,7 +186,10 @@ Honours)`, `Ph.D. in Mathematics (Excellent cum laude)`.
 
 `content/cv.yaml` may hold **any** top-level list you like, and `cv/cv.tex` decides which of them
 the PDF prints, in what order, under what heading — one line per section. Add a section to the
-YAML and a `\cvpart{Your Heading}{YourKey}` line to `cv.tex` and it is printed.
+YAML and a `\cvpart{Your Heading}{YourKey}` line to `cv.tex` and it is printed. A section written
+as a map (see [the section-level `note`](#entry-fields-some-sections-need) below) may carry
+`printed: false`, which keeps it out of the PDF with its `\cvpart` line left in place; the website
+renders it either way.
 
 **The website is not open in the same way.** It renders exactly these keys:
 
