@@ -211,8 +211,13 @@ heading, no gap, nothing printed, no error.
 | `rank_url` | where that figure is evidenced | the site links `metric` to it |
 | `years` | editions of a recurring role | `2024–2026` after `org` |
 | `funding` | grant or programme amount | website only, never the CV |
-| `count` | how many | last on the entry's `org` line, unless the entry has `rows` |
+| `count` | how many | last on the entry's `org` line, unless the entry has `rows` — or a column, see below |
 | `rows` | a table hanging under the entry | see below |
+
+`count` folds into the entry's `org` line in a section the document prints with `\cvpart`. A
+section set by hand as a table of its own prints it as a column instead: `supervision:` is that
+section here, and `cv/supervision.tex` prints each entry's `title`, `count` and `detail` as the
+**Level**, **#** and **Notes** columns without printing the entry lines at all.
 
 `years` is a plain list. Only an edition that carries an announcement date grows into a map:
 
@@ -239,6 +244,12 @@ teaching:
         Key topics: SQL; relational algebra
         Hours: 30 h/yr
 ```
+
+Those four keys are fixed **in this repository**, even though the printed heading is whatever you
+write: `/cv/` reads each course row's `Course`, `Programme / Level`, `Key topics` and `Hours` by
+name, and its contact-hours totals read the leading number out of `Hours`. Rename one and the PDF
+prints the new heading while the page renders that column blank and the totals fall to 0. A table
+of your own, in a section of your own, is free-form.
 
 A section-level `note` is not an entry field. A section that needs a paragraph of its own above
 its entries is written as a map:
