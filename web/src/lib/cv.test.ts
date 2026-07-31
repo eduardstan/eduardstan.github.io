@@ -136,7 +136,7 @@ for (const block of teaching) {
   for (const row of block.rows ?? [])
     assert.deepEqual(
       Object.keys(row),
-      ['course', 'programme', 'topics', 'hours'],
+      ['Course', 'Programme / Level', 'Key topics', 'Hours'],
       `teaching "${block.org}": row keys are the printed table's columns, in this order`,
     );
 }
@@ -150,8 +150,8 @@ for (const row of courses) {
   // The page sums the leading number of this column into a contact-hours total,
   // so a value that stopped starting with a number would print NaN.
   assert.ok(
-    Number.isFinite(parseInt(row.hours, 10)),
-    `${row.course}: hours "${row.hours}" does not start with a number`,
+    Number.isFinite(parseInt(row['Hours'], 10)),
+    `${row['Course']}: hours "${row['Hours']}" does not start with a number`,
   );
 }
 

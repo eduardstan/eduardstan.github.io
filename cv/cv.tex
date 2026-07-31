@@ -1,144 +1,88 @@
-%
-%Academic CV LaTeX Template
-% Author: Dubasi Pavan Kumar
-% LinkedIn: https://www.linkedin.com/in/im-pavankumar/
-% License: MIT
-%
-% For errors, suggestions, or improvements, please contact:
-% Email: pavankumard.pg19.ma@nitp.ac.in
-%
-%
 % -----------------------------------------------------------------------------
-% THIS FILE IS LAYOUT AND STYLING ONLY.
+% THE FULL CV: WHICH SECTIONS IT CURATES, AND IN WHAT ORDER.
 %
-% Every fact printed below comes from `content/cv.yaml` via the generated macros
-% in `cv/generated/cv-data.tex` (produced by `node scripts/build-cv-data.mjs`).
-% Publications and talks come straight from `content/publications.bib` and
-% `content/talks.bib` through the biblatex refsections at the end of this file.
+% Styling, packages and the section macros are in cv/preamble.tex; the name and
+% contact block in cv/header.tex; the supervision table in cv/supervision.tex.
+% Those three files are the ledgerpress template's shared layout, kept
+% byte-identical to it so a template update is a copy rather than a merge. This
+% file is the document, and it is the only one this repository owns: the
+% settings below and the \cvpart lines in the body.
 %
-% To change what the CV says, edit content/cv.yaml and regenerate. To change how
-% it looks, edit this file. The document body is one `\cvpart` line per section:
-% reorder the CV by reordering those lines, and a section content/cv.yaml does
-% not have prints nothing at all.
+% Each section is one \cvpart line, placing its heading, its order and its
+% setting. Sections with custom layout use guarded blocks or shared body
+% fragments. This document does NOT print \cvAutoSections - the record's own
+% section sequence - because `leadership:` is deliberately a site-only section;
+% printing the sequence would need the record to say `printed: false`, which is
+% a change to content/ this document does not require. A section added to
+% content/cv.yaml therefore needs a \cvpart line here.
 %
 % Build:  latexmk -xelatex -cd cv/cv.tex      (xelatex is required: academicons)
 % -----------------------------------------------------------------------------
 
+% ---------------------------------------------------------------------------
+% DOCUMENT SETTINGS, read by the shared layout below. Each is a
+% \providecommand there, so defining it here replaces the template's default.
+% ---------------------------------------------------------------------------
 
+% The typeface: cfr-lm, as this CV has always been set. It carries the whole
+% font setup rather than a font name, because the template's default selects a
+% system face with fontspec and an NFSS package takes no such argument.
+\newcommand{\cvtypeface}{\usepackage{cfr-lm}\usepackage[T1]{fontenc}}
 
-\documentclass[a4paper,11pt]{article}
+% The course tables are hand-tuned: the first is 3mm wider in the second column
+% than the ones below it. The generated specification is equal-width columns;
+% this returns the tuned one. Tables are numbered in printing order by the
+% `cvcoursetable` counter, which cv/preamble.tex steps outside the table.
+\newcommand{\cvcoursecols}[1]{%
+  \ifnum\value{cvcoursetable}=1 P{3.1cm} P{3.8cm} Y P{1.2cm}%
+  \else P{3.1cm} P{3.5cm} Y P{1.2cm}\fi}
 
-% Package imports
-\usepackage{latexsym}
-\usepackage{xcolor}
-\usepackage{float}
-\usepackage{ragged2e}
-\usepackage[empty]{fullpage}
-\usepackage{wrapfig}
-\usepackage{lipsum}
-\usepackage{booktabs}   % high-quality horizontal rules (no vertical rules)
-\usepackage{array}      % better column types
-\usepackage{xparse}
-\usepackage{tabularx}
-\usepackage{titlesec}
-\usepackage{geometry}
-\usepackage{marvosym}
-\usepackage{verbatim}
-\usepackage{enumitem}
-\usepackage{fancyhdr}
-\usepackage{multicol}
-\usepackage{graphicx}
-\usepackage{cfr-lm}
-\usepackage[T1]{fontenc}
-\usepackage{fontawesome5}
-\usepackage{academicons} % <-- NEW (Scholar, ORCID, etc.)
-\usepackage{eurosym} % <-- NEW (€)
-
-% Column helpers (tight but readable)
-\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
-\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
-
-% A reusable CV table environment (no floats, correct spacing)
-\NewDocumentEnvironment{cvtable}{m +b}{%
-  \vspace{0.25em}
-  \small
-  \setlength{\tabcolsep}{5pt}
-  \renewcommand{\arraystretch}{1.15}
-  \begin{tabularx}{\linewidth}{@{}#1@{}}
-  #2
-  \end{tabularx}
-  \vspace{0.25em}
-}{}
-
-% Color definitions
-\definecolor{darkblue}{RGB}{0,0,139}
-
-% Page layout
-\setlength{\multicolsep}{0pt}
-\pagestyle{fancy}
-\fancyhf{} % clear all header and footer fields
-\fancyfoot{}
-\renewcommand{\headrulewidth}{0pt}
-\renewcommand{\footrulewidth}{0pt}
-\geometry{left=1.4cm, top=0.8cm, right=1.2cm, bottom=1cm}
-\setlength{\footskip}{5pt} % Addressing fancyhdr warning
-
-% Hyperlink setup (moved after fancyhdr to address warning)
-\usepackage[hidelinks]{hyperref}
-\hypersetup{
-    colorlinks=true,
-    linkcolor=darkblue,
-    filecolor=darkblue,
-    urlcolor=darkblue,
-}
-
-% Custom box settings
-\usepackage[most]{tcolorbox}
-\tcbset{
-    frame code={},
-    center title,
-    left=0pt,
-    right=0pt,
-    top=0pt,
-    bottom=0pt,
-    colback=gray!20,
-    colframe=white,
-    width=\dimexpr\textwidth\relax,
-    enlarge left by=-2mm,
-    boxsep=4pt,
-    arc=0pt,outer arc=0pt,
-}
-
-% URL style
-\urlstyle{same}
-
-% Text alignment
-\raggedright
-\setlength{\tabcolsep}{0in}
-
-% Section formatting
-\titleformat{\section}{
-  \vspace{-4pt}\scshape\raggedright\large
-}{}{0em}{}[\color{black}\titlerule \vspace{-7pt}]
-
-% Custom commands
-\newcommand{\resumeItem}[2]{
-  \item{
-    \textbf{#1}{\hspace{0.5mm}#2 \vspace{-0.5mm}}
+% This bibliography's own tidying, added to the two maps cv/preamble.tex
+% declares. biblatex takes exactly one \DeclareSourcemap, so these go through
+% the hook rather than through a second declaration.
+%
+% Prefer structured link fields for every entry: suppress howpublished whenever
+% a URL or DOI is present, then suppress URL whenever a DOI is present. For
+% @misc records, map publisher to the field the standard biblatex driver uses
+% for the artifact's venue.
+\newcommand{\cvsourcemaps}{%
+  \map{
+    \step[fieldsource=url, final]
+    \step[fieldset=howpublished, null]
   }
+  \map{
+    \step[fieldsource=doi, final]
+    \step[fieldset=howpublished, null]
+  }
+  \map{
+    \step[fieldsource=doi, final]
+    \step[fieldset=url, null]
+  }
+  \map{
+    \pertype{misc}
+    \step[fieldsource=publisher, fieldtarget=organization]
+  }%
 }
 
-\newcommand{\resumePOR}[3]{
-\vspace{0.5mm}\item
-    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
-        \textbf{#1}\hspace{0.3mm}#2 & \textit{\small{#3}}
-    \end{tabular*}
-    \vspace{-2mm}
-}
+\input{preamble.tex}
 
-% One entry, every section: what it was, where it was, when, and the place.
-% `content/cv.yaml` has exactly one entry shape and this is how it is set.
-\newcommand{\cventry}[4]{
+% ---------------------------------------------------------------------------
+% DOCUMENT OVERRIDES: layout the template sets one way and this CV another.
+% Each is a \newcommand or a length there, so it is renewable here and needs no
+% hook of its own.
+% ---------------------------------------------------------------------------
+
+% Palatino for the body, which is what this CV has always used. The template's
+% \headerfontiii is \rmfamily because its own typeface is already Pagella.
+\renewcommand{\headerfontiii}{\fontfamily{ppl}\selectfont} % Palatino (elegant serif)
+
+% The entry line, set with `tabular*` rather than the template's `tabularx`: the
+% left column takes its natural width and the right one is pushed to the margin,
+% so a long organisation or venue name stays on one line instead of wrapping
+% inside a fixed 4.8cm right column. This record has several of those, and the
+% wrapping moves page breaks. \cvpartflush sets the second line the other way
+% and carries its own copy of the entry, so both are renewed here.
+\renewcommand{\cventry}[4]{
 \vspace{0.5mm}\item
     \begin{tabular*}{0.98\textwidth}[t]{l@{\extracolsep{\fill}}r}
         \textbf{#1} & \textit{\footnotesize{#3}} \\
@@ -146,280 +90,38 @@
     \end{tabular*}
     \vspace{-2.4mm}
 }
-
-% An empty generated macro, to test the optional prose fields against.
-% NOT `\ifx\cvFocus\empty`: \newcommand makes its macros \long and \empty is
-% not, so \ifx compares false for two macros that both hold nothing, and the
-% heading prints over an empty field. This one is made the same way they are.
-\newcommand{\cvempty}{}
-
-% Separates the paragraphs of a section's `note:`. Spacing is layout, so the
-% amount of it lives here and the generator only says where the break goes.
-\newcommand{\cvnotesep}{\par\vspace{1.2mm}}
-
-% Make the five generated macros this layout may mention safe even when
-% content/cv.yaml has no such section. (`Header` is the sixth generated macro,
-% but this layout supplies its own table headings.) `\cvpart` does this for you;
-% a hand-written section block must call it itself.
-\newcommand{\cvdeclare}[1]{%
-  \expandafter\providecommand\csname cv#1Count\endcsname{0}%
-  \expandafter\providecommand\csname cv#1\endcsname{}%
-  \expandafter\providecommand\csname cv#1Note\endcsname{}%
-  \expandafter\providecommand\csname cv#1Rows\endcsname{}%
-  \expandafter\providecommand\csname cv#1Inline\endcsname{}%
-}
-
-% The same, for a bibliography section: `publications:`/`talks:` in cv.yaml
-% generate \cv<Name>Key, \cv<Name>Sections and \cv<Name>Count (the number of
-% entries in the matching .bib) instead of the five above. An adopter who has
-% declared neither - which is everyone on day one - would otherwise meet a raw
-% "Undefined control sequence" that stops xelatex at its interactive prompt.
-% Empty is the documented behaviour: the heading prints over an empty
-% bibliography and README.md tells them to delete the block.
-\newcommand{\cvdeclarebib}[1]{%
-  \expandafter\providecommand\csname cv#1Count\endcsname{0}%
-  \expandafter\providecommand\csname cv#1Key\endcsname{}%
-  \expandafter\providecommand\csname cv#1Sections\endcsname{}%
-}
-
-% Print one section of content/cv.yaml. #1 is the heading, #2 the section's
-% macro name (`Awards` for the `awards:` key). A section the file does not have
-% prints nothing at all - no heading, no gap - so this line can stay.
-% Reorder the CV by reordering these lines in the document below.
-\newcommand{\cvpart}[2]{%
-  \cvdeclare{#2}%
-  \ifnum\csname cv#2Count\endcsname>0
-  \section{\textbf{#1}}
-  \vspace{-0.4mm}
-  \resumeSubHeadingListStart
-  \csname cv#2\endcsname
-  \resumeSubHeadingListEnd
-  \vspace{-6mm}
-  \fi
-}
-
-% `\cvpart`, with the second line of every entry set the other way. Which
-% sections use which is a layout choice and lives here; cv.yaml says nothing
-% about it.
-\newcommand{\cvpartflush}[2]{{%
-  \renewcommand{\cventry}[4]{%
-    \vspace{0.5mm}\item
-    \begin{tabular*}{0.98\textwidth}[t]{l@{\extracolsep{\fill}}r}
-        \textbf{##1} & \textit{\footnotesize{##3}} \\
-        \footnotesize{\textit{##2}} & \footnotesize{##4}
-    \end{tabular*}
-    \vspace{-2.4mm}
+\renewcommand{\cvpartflush}[3][\cvall]{%
+  \cvdeclare{#3}%
+  {%
+    \renewcommand{\cventry}[4]{%
+      \vspace{0.5mm}\item
+      \begin{tabular*}{0.98\textwidth}[t]{l@{\extracolsep{\fill}}r}
+          \textbf{##1} & \textit{\footnotesize{##3}} \\
+          \footnotesize{\textit{##2}} & \footnotesize{##4}
+      \end{tabular*}
+      \vspace{-2.4mm}
+    }%
+    \cvpart[#1]{#2}{#3}%
   }%
-  \cvpart{#1}{#2}}}
-
-% A table hanging under an entry: `rows:` in cv.yaml. #1 is the header row built
-% from the row keys, #2 the rows. This template overrides #1 with its own
-% wording. The course tables are hand-tuned: the first is 3mm wider in the
-% second column than the two below it. That tuning is layout, so it lives here
-% - cv.yaml just lists the rows and the counter picks the widths.
-% The \par is load-bearing: without it the table gains a line of vertical space
-% and two page breaks move.
-\newcounter{cvcoursetable}
-\newcommand{\cvcourses}[2]{%
-\par
-\stepcounter{cvcoursetable}%
-\ifnum\value{cvcoursetable}=1
-\begin{cvtable}{P{3.1cm} P{3.8cm} Y P{1.2cm}}
-\toprule
-\textbf{Course} & \textbf{Programme / Level} & \textbf{Key topics} & \textbf{Hours} \\
-\midrule
-#2
-\bottomrule
-\end{cvtable}
-\else
-\begin{cvtable}{P{3.1cm} P{3.5cm} Y P{1.2cm}}
-\toprule
-\textbf{Course} & \textbf{Programme / Level} & \textbf{Key topics} & \textbf{Hours} \\
-\midrule
-#2
-\bottomrule
-\end{cvtable}
-\fi
 }
 
-\newcommand{\resumeSubItem}[2]{\resumeItem{#1}{#2}\vspace{-4pt}}
-
-\renewcommand{\labelitemi}{$\vcenter{\hbox{\tiny$\bullet$}}$}
-\renewcommand{\labelitemii}{$\vcenter{\hbox{\tiny$\circ$}}$}
-
-\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*,labelsep=1mm]}
-\newcommand{\resumeHeadingSkillStart}{\begin{itemize}[leftmargin=*,itemsep=1.7mm, rightmargin=2ex]}
-\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=*,labelsep=1mm,itemsep=0.5mm]}
-
-\newcommand{\resumeSubHeadingListEnd}{\end{itemize}\vspace{2mm}}
-\newcommand{\resumeHeadingSkillEnd}{\end{itemize}\vspace{-2mm}}
-\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-2mm}}
-\newcommand{\cvsection}[1]{%
-\vspace{2mm}
-\begin{tcolorbox}
-    \textbf{\large #1}
-\end{tcolorbox}
-    \vspace{-4mm}
-}
-
-\newcolumntype{L}{>{\raggedright\arraybackslash}X}%
-\newcolumntype{R}{>{\raggedleft\arraybackslash}X}%
-\newcolumntype{C}{>{\centering\arraybackslash}X}%
-
-% Commands for icon sizing and positioning
-\newcommand{\socialicon}[1]{\raisebox{-0.05em}{\resizebox{!}{1em}{#1}}}
-\newcommand{\ieeeicon}[1]{\raisebox{-0.3em}{\resizebox{!}{1.3em}{#1}}}
-
-% Profile icon registry. Each key of `profile.links` in content/cv.yaml selects
-% one of these by name (`scholar:` -> \cviconscholar), so the icon choice stays
-% here in the layout and never leaks into the YAML. A new kind needs a macro
-% here AND an address template in ACCOUNTS in scripts/build-cv-data.mjs.
-\newcommand{\cviconscholar}{\socialicon{\aiGoogleScholar}}
-\newcommand{\cviconorcid}{\socialicon{\aiOrcid}}
-\newcommand{\cviconlinkedin}{\socialicon{\faLinkedin}}
-\newcommand{\cvicongithub}{\socialicon{\faGithub}}
-
-% Font options
-\newcommand{\headerfonti}{\fontfamily{phv}\selectfont} % Helvetica-like (similar to Arial/Calibri)
-\newcommand{\headerfontii}{\fontfamily{ptm}\selectfont} % Times-like (similar to Times New Roman)
-\newcommand{\headerfontiii}{\fontfamily{ppl}\selectfont} % Palatino (elegant serif)
-\newcommand{\headerfontiv}{\fontfamily{pbk}\selectfont} % Bookman (readable serif)
-\newcommand{\headerfontv}{\fontfamily{pag}\selectfont} % Avant Garde-like (similar to Trebuchet MS)
-\newcommand{\headerfontvi}{\fontfamily{cmss}\selectfont} % Computer Modern Sans Serif
-\newcommand{\headerfontvii}{\fontfamily{qhv}\selectfont} % Quasi-Helvetica (another Arial/Calibri alternative)
-\newcommand{\headerfontviii}{\fontfamily{qpl}\selectfont} % Quasi-Palatino (another elegant serif option)
-\newcommand{\headerfontix}{\fontfamily{qtm}\selectfont} % Quasi-Times (another Times New Roman alternative)
-\newcommand{\headerfontx}{\fontfamily{bch}\selectfont} % Charter (clean serif font)
-
-% --------------------------------
-% BIBLATEX (publications + talks)
-% --------------------------------
-\usepackage[
-  backend=biber,
-  style=numeric,
-  sorting=ydnt,
-  defernumbers=true,
-  maxbibnames=99,
-  giveninits=true,
-  doi=true,
-  url=true,
-  isbn=false
-]{biblatex}
-
-% Two bib databases (kept separate via refsection below).
-% Publications are the repository-wide canonical list, shared with the website.
-\addbibresource{../content/publications.bib}
-\addbibresource{../content/talks.bib}
-
-% The shared bibliography may carry rendering fields used only by the website. They are not part of the CV, and abstracts can contain raw % and &
-% that would break the LaTeX pass, so drop them during biber processing instead
-% of altering the .bib the website reads.
-\DeclareSourcemap{
-  \maps[datatype=bibtex]{
-    \map{
-      \step[fieldset=abstract, null]
-      \step[fieldset=selected, null]
-      \step[fieldset=preview, null]
-      \step[fieldset=abbr, null]
-      \step[fieldset=bibtex_show, null]
-      \step[fieldset=html, null]
-      \step[fieldset=pdf, null]
-      \step[fieldset=code, null]
-      \step[fieldset=altmetric, null]
-      \step[fieldset=dimensions, null]
-    }
-    % DBLP's @misc artifact records carry an UNFILLED placeholder,
-    % `note = {Accessed on YYYY-MM-DD.}`, which biblatex would print verbatim as
-    % the venue of a released software package. The website already skips it
-    % (`VENUE_FIELDS` in web/src/lib/record.ts prefers `publisher`); this is the
-    % same fix on the printed side, so declaring a `types: [misc]` section in
-    % content/cv.yaml renders correctly instead of printing the placeholder.
-    \map{
-      \step[fieldsource=note, match=\regexp{\AAccessed\son\sYYYY-MM-DD\.?\Z}, final]
-      \step[fieldset=note, null]
-    }
-    % Prefer structured link fields for every entry: suppress howpublished
-    % whenever a URL or DOI is present, then suppress URL whenever a DOI is
-    % present. For @misc records, map publisher to the field the standard
-    % biblatex driver uses for the artifact's venue.
-    \map{
-      \step[fieldsource=url, final]
-      \step[fieldset=howpublished, null]
-    }
-    \map{
-      \step[fieldsource=doi, final]
-      \step[fieldset=howpublished, null]
-    }
-    \map{
-      \step[fieldsource=doi, final]
-      \step[fieldset=url, null]
-    }
-    \map{
-      \pertype{misc}
-      \step[fieldsource=publisher, fieldtarget=organization]
-    }
-  }
-}
-
-% Compact bib
+% A denser bibliography suits the template's two-page example; this CV's
+% publication list is set at the size and spacing it has always had.
 \setlength\bibitemsep{0.35\baselineskip}
 \renewcommand*{\bibfont}{\small}
-
-% Bib headings matching your tidy style
-\defbibheading{bibsubheading}[\refname]{%
-  \vspace{0.8mm}\textbf{#1}\par\vspace{-0.3mm}
-}
-
-% No filters here. Which entry type belongs under which heading is a curated
-% opinion, so it is declared in `content/cv.yaml` under `publications:` and
-% `talks:` and read by the website too. build-cv-data.mjs turns each declared
-% section into its \defbibfilter and its \printbibliography, and gives this file
-% \cvPublicationsKey / \cvPublicationsSections and \cvTalksKey /
-% \cvTalksSections, plus \cvPublicationsCount / \cvTalksCount - how many entries
-% the .bib holds, which guards the \refsection below.
-% Adding, reordering or renaming a section is a cv.yaml edit.
-
-% --------------------------------
-% CONTENT (generated from content/cv.yaml)
-% --------------------------------
-\input{generated/cv-data.tex}
 
 \begin{document}
 \headerfontiii
 
-% Header
-\begin{center}
-    {\Huge\textbf{\cvName}}
-\end{center}
-\vspace{-6mm}
+\input{header.tex}
 
-\begin{center}
-    \small{
-    \cvContactLine
-    }
-\end{center}
-\vspace{-6mm}
-
-\begin{center}
-	\small{
-	\cvProfilesLine
-	}
-\end{center}
-\vspace{-6mm}
-\begin{center}
-    \small{\cvAffiliation}
-\end{center}
-
-\vspace{-4mm}
-
-% NOTE: the \small{ below is deliberately left open, exactly as in the original
-% hand-written CV. Closing it would change the body font size of every section
-% that follows and reflow the whole document.
+% The ungrouped declaration keeps the rest of the CV at the compact body size.
+% Using \small{ here would leave a group open at \end{document}.
 \ifx\cvShortBio\cvempty\else
 \section{\textbf{Short Bio}}
 \fi
 \vspace{1mm}
-\small{
+\small
 \cvShortBio
 \vspace{-2mm}
 
@@ -444,42 +146,25 @@
 
 \cvpartflush{Awards \& Scholarships}{Awards}
 
-% A section set by hand rather than by \cvpart, because it prints a note and a
-% table of its own. Any such block must call \cvdeclare itself, or the macros
-% below are undefined for someone whose cv.yaml has no `supervision:` key.
-\cvdeclare{Supervision}
-\ifnum\cvSupervisionCount>0
-\section{\textbf{Student Supervision (Theses \& Internships)}}
-\vspace{-0.4mm}
-
-\small{
-\cvSupervisionNote
-}
-
-\vspace{1.5mm}
-
-\begin{cvtable}{P{5.2cm} >{\centering\arraybackslash}p{1.0cm} Y}
-\toprule
-\textbf{Level} & \textbf{\#} & \textbf{Notes (scope and international experience)} \\
-\midrule
-\cvSupervisionRows
-\bottomrule
-\end{cvtable}
-\fi
+% The supervision table, shared with the template as a body fragment because it
+% prints a note and a table of its own rather than going through \cvpart.
+\input{supervision.tex}
 
 \cvdeclare{Languages}
 \ifnum\cvLanguagesCount>0
+\ifnum\cvLanguagesPrinted>0
 \section{\textbf{Additional Information}}
 \vspace{-0.4mm}
 \small{
 \textbf{Languages:} \cvLanguagesInline
 }
 \fi
+\fi
 
 \cvdeclarebib{Talks}
+\ifnum\cvTalksCount>0
 \section{\textbf{Talks \& Presentations} \hfill \textcolor{darkblue}{\scriptsize \cvTalksKey}}
 
-\ifnum\cvTalksCount>0
 \begin{refsection}[../content/talks.bib]
 \nocite{*}
 
@@ -489,9 +174,9 @@
 \fi
 
 \cvdeclarebib{Publications}
+\ifnum\cvPublicationsCount>0
 \section{\textbf{Publications} \hfill \textcolor{darkblue}{\scriptsize \cvPublicationsKey}}
 
-\ifnum\cvPublicationsCount>0
 \begin{refsection}[../content/publications.bib]
 \nocite{*}
 

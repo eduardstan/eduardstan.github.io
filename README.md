@@ -49,5 +49,6 @@ with the code.
 The site was a [Jekyll](https://jekyllrb.com/) site on the
 [al-folio](https://github.com/alshedivat/al-folio) theme until the July 2026 cutover to
 this rebuild. Earlier commits contain al-folio-derived code under al-folio's MIT licence.
-The current site's MIT licence attributes copyright to Ionel Eduard Stan.
+The current site's MIT licence attributes copyright to Ionel Eduard Stan, and `NOTICE` credits the
+third-party work the printed CV's layout derives from.
 `docs/url-parity.md` records what every URL the Jekyll site published does now.

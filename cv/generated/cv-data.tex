@@ -5,7 +5,7 @@
 % Edit cv.yaml and regenerate; hand edits here are overwritten and CI rejects
 % them (the workflow fails if this file is stale relative to cv.yaml).
 %
-% This file holds CONTENT ONLY. Layout, spacing and styling live in cv/cv.tex.
+% This file holds CONTENT ONLY. Layout, spacing and styling live in cv/preamble.tex.
 % =============================================================================
 
 \newcommand{\cvName}{%
@@ -51,6 +51,7 @@ Ionel Eduard Stan is an Assistant Professor (RTD/a) at the University of Milano-
 }
 
 \newcommand{\cvAppointments}{%
+\ifnum1>\cvmax\else
 \cventry
   {Assistant Professor (RTD/a)}
   {University of Milano-Bicocca (Intelligent Sensing Laboratory---ISLab)}
@@ -60,7 +61,9 @@ Ionel Eduard Stan is an Assistant Professor (RTD/a) at the University of Milano-
   \item Teaching (Instructor of record), thesis supervision, and mentoring activities.
   \item Research within the ANTHEM project (Piano Nazionale Complementare---PNC): XAI and neuro-symbolic methods for signals and healthcare-oriented AI.
 \resumeItemListEnd
+\fi
 
+\ifnum2>\cvmax\else
 \cventry
   {Research Fellow / Postdoctoral Researcher}
   {Free University of Bozen-Bolzano (Database Group---DBS Group)}
@@ -69,7 +72,9 @@ Ionel Eduard Stan is an Assistant Professor (RTD/a) at the University of Milano-
 \resumeItemListStart
   \item Research in the iNEST ecosystem (Piano Nazionale di Ripresa e Resilienza---PNRR): time series analytics and applied machine learning.
 \resumeItemListEnd
+\fi
 
+\ifnum3>\cvmax\else
 \cventry
   {Research Assistant}
   {University of Ferrara (Applied Computational Logic and AI Laboratory---ACLAI Lab)}
@@ -78,13 +83,14 @@ Ionel Eduard Stan is an Assistant Professor (RTD/a) at the University of Milano-
 \resumeItemListStart
   \item Modal and interval temporal logic; symbolic / modal machine learning.
   \item Supervised and coordinated multiple theses; some outcomes published in international venues.
-\resumeItemListEnd%
+\resumeItemListEnd
+\fi%
 }
 
 \newcommand{\cvAppointmentsRows}{%
-Assistant Professor (RTD/a) & Milan, Italy & University of Milano-Bicocca (Intelligent Sensing Laboratory---ISLab) & https://islab.disco.unimib.it/ & Jul 2024--Present & 2024-07-16T10:00:00+02:00 & Teaching (Instructor of record), thesis supervision, and mentoring activities.,Research within the ANTHEM project (Piano Nazionale Complementare---PNC): XAI and neuro-symbolic methods for signals and healthcare-oriented AI. \\
+Assistant Professor (RTD/a) & Milan, Italy & University of Milano-Bicocca (Intelligent Sensing Laboratory---ISLab) & https://islab.disco.unimib.it/ & Jul 2024--Present & 2024-07-16T10:00:00+02:00 & Teaching (Instructor of record), thesis supervision, and mentoring activities., Research within the ANTHEM project (Piano Nazionale Complementare---PNC): XAI and neuro-symbolic methods for signals and healthcare-oriented AI. \\
 Research Fellow / Postdoctoral Researcher & Bozen-Bolzano, Italy & Free University of Bozen-Bolzano (Database Group---DBS Group) & https://dbs.inf.unibz.it/ & Mar 2023--Jun 2024 & Research in the iNEST ecosystem (Piano Nazionale di Ripresa e Resilienza---PNRR): time series analytics and applied machine learning. \\
-Research Assistant & Ferrara, Italy & University of Ferrara (Applied Computational Logic and AI Laboratory---ACLAI Lab) & https://aclai.unife.it/ & Nov 2019--Jul 2024 & Modal and interval temporal logic; symbolic / modal machine learning.,Supervised and coordinated multiple theses; some outcomes published in international venues. \\%
+Research Assistant & Ferrara, Italy & University of Ferrara (Applied Computational Logic and AI Laboratory---ACLAI Lab) & https://aclai.unife.it/ & Nov 2019--Jul 2024 & Modal and interval temporal logic; symbolic / modal machine learning., Supervised and coordinated multiple theses; some outcomes published in international venues. \\%
 }
 
 \newcommand{\cvAppointmentsHeader}{%
@@ -102,23 +108,29 @@ Assistant Professor (RTD/a), Research Fellow / Postdoctoral Researcher, Research
 }
 
 \newcommand{\cvEducation}{%
+\ifnum1>\cvmax\else
 \cventry
   {Ph.D. in Mathematics (Excellent cum laude)}
   {University of Parma}
   {Nov 2019--Feb 2023}
   {Parma, Italy}
+\fi
 
+\ifnum2>\cvmax\else
 \cventry
   {M.Sc. in Computer Science (110/110 cum laude)}
   {University of Udine}
   {Oct 2017--Oct 2019}
   {Udine, Italy}
+\fi
 
+\ifnum3>\cvmax\else
 \cventry
   {B.Sc. in Computer Science (110/110 cum laude)}
   {University of Ferrara}
   {Oct 2014--Jun 2017}
-  {Ferrara, Italy}%
+  {Ferrara, Italy}
+\fi%
 }
 
 \newcommand{\cvEducationRows}{%
@@ -142,38 +154,44 @@ Ph.D. in Mathematics (Excellent cum laude), M.Sc. in Computer Science (110/110 c
 }
 
 \newcommand{\cvTeaching}{%
+\ifnum1>\cvmax\else
 \cventry
   {Official Lecturer (Instructor of Record)}
   {University of Milano-Bicocca (DISCo)}
   {Jul 2024--Present}
   {Milan, Italy}
-\cvcourses{\textbf{Course} & \textbf{Programme} & \textbf{Topics} & \textbf{Hours} \\}{
+\cvcourses{Y Y Y Y}{\textbf{Course} & \textbf{Programme / Level} & \textbf{Key topics} & \textbf{Hours} \\}{
 Databases & B.Sc. Computer Science & SQL; relational algebra; database design; lab/project work & 30 h/yr \\
 Intelligent Consumer Technologies & M.Sc. AI for Society and Technology (AI4ST) & XAI; ethical/legal/privacy aspects; agentic AI (overview) & 6 h/yr \\}
+\fi
 
+\ifnum2>\cvmax\else
 \cventry
   {Official Lecturer (Instructor of Record)}
   {Bicocca Academy (2nd-level Master, DAI4Health)}
   {Dec 2025--Present}
   {Milan, Italy}
-\cvcourses{\textbf{Course} & \textbf{Programme} & \textbf{Topics} & \textbf{Hours} \\}{
+\cvcourses{Y Y Y Y}{\textbf{Course} & \textbf{Programme / Level} & \textbf{Key topics} & \textbf{Hours} \\}{
 Foundations of Artificial Intelligence & 2nd-level Master (DAI4Health) & NLP foundations; agentic AI (overview); ethical/legal/privacy aspects of AI in healthcare & 10 h/yr \\}
+\fi
 
+\ifnum3>\cvmax\else
 \cventry
   {Teaching Assistant}
   {University of Ferrara}
   {Oct 2019--Feb 2023}
   {Ferrara, Italy}
-\cvcourses{\textbf{Course} & \textbf{Programme} & \textbf{Topics} & \textbf{Hours} \\}{
+\cvcourses{Y Y Y Y}{\textbf{Course} & \textbf{Programme / Level} & \textbf{Key topics} & \textbf{Hours} \\}{
 Algorithms and Data Structures & B.Sc. Computer Science & Laboratory/project work & 21 h/yr \\
 Databases and Laboratory & B.Sc. Computer Science & ER-to-relational mapping; relational algebra; SQL; normal forms & 20 h/yr \\
-Statistics and Probability Calculus & B.Sc. Computer Science & Descriptive statistics; discrete/continuous random variables; confidence intervals; hypothesis testing & 20 h/yr \\}%
+Statistics and Probability Calculus & B.Sc. Computer Science & Descriptive statistics; discrete/continuous random variables; confidence intervals; hypothesis testing & 20 h/yr \\}
+\fi%
 }
 
 \newcommand{\cvTeachingRows}{%
-Official Lecturer (Instructor of Record) & Milan, Italy & University of Milano-Bicocca (DISCo) & https://elearning.unimib.it/course/info.php?id=60729 & Jul 2024--Present & [object Object],[object Object] \\
-Official Lecturer (Instructor of Record) & Milan, Italy & Bicocca Academy (2nd-level Master, DAI4Health) & https://www.academy.unimib.it/dai4health-innovazione-digitale-e-intelligenza-artificiale-nel-settore-sanitario-0 & Dec 2025--Present & [object Object] \\
-Teaching Assistant & Ferrara, Italy & University of Ferrara & https://www.unife.it/ & Oct 2019--Feb 2023 & [object Object],[object Object],[object Object] \\%
+Official Lecturer (Instructor of Record) & Milan, Italy & University of Milano-Bicocca (DISCo) & https://elearning.unimib.it/course/info.php?id=60729 & Jul 2024--Present & Databases B.Sc. Computer Science SQL; relational algebra; database design; lab/project work 30 h/yr, Intelligent Consumer Technologies M.Sc. AI for Society and Technology (AI4ST) XAI; ethical/legal/privacy aspects; agentic AI (overview) 6 h/yr \\
+Official Lecturer (Instructor of Record) & Milan, Italy & Bicocca Academy (2nd-level Master, DAI4Health) & https://www.academy.unimib.it/dai4health-innovazione-digitale-e-intelligenza-artificiale-nel-settore-sanitario-0 & Dec 2025--Present & Foundations of Artificial Intelligence 2nd-level Master (DAI4Health) NLP foundations; agentic AI (overview); ethical/legal/privacy aspects of AI in healthcare 10 h/yr \\
+Teaching Assistant & Ferrara, Italy & University of Ferrara & https://www.unife.it/ & Oct 2019--Feb 2023 & Algorithms and Data Structures B.Sc. Computer Science Laboratory/project work 21 h/yr, Databases and Laboratory B.Sc. Computer Science ER-to-relational mapping; relational algebra; SQL; normal forms 20 h/yr, Statistics and Probability Calculus B.Sc. Computer Science Descriptive statistics; discrete/continuous random variables; confidence intervals; hypothesis testing 20 h/yr \\%
 }
 
 \newcommand{\cvTeachingHeader}{%
@@ -191,12 +209,15 @@ Official Lecturer (Instructor of Record), Official Lecturer (Instructor of Recor
 }
 
 \newcommand{\cvService}{%
+\ifnum1>\cvmax\else
 \cventry
   {Associate Editor}
   {Elsevier Neurocomputing Journal \textbf{[IF: 6.5, Q1]}}
   {Oct 2025--Present}
   {}
+\fi
 
+\ifnum2>\cvmax\else
 \cventry
   {Associate Editor}
   {Frontiers in Artificial Intelligence Journal, Pattern Recognition Section \textbf{[IF: 4.7, Q2]}}
@@ -205,97 +226,124 @@ Official Lecturer (Instructor of Record), Official Lecturer (Instructor of Recor
 \resumeItemListStart
   \item Lead Editor of the Special Issue on \href{https://www.frontiersin.org/research-topics/71848/explainable-artificial-intelligence-for-trustworthy-and-human-centric-healthcare-methods-evaluation-and-clinical-impact}{Explainable Artificial Intelligence for Trustworthy and Human{-}Centric Healthcare: Methods, Evaluation, and Clinical Impact} (25+ submissions to date).
 \resumeItemListEnd
+\fi
 
+\ifnum3>\cvmax\else
 \cventry
   {Technical Committee Member}
   {IEEE Consumer Technology Society (CTSoc), Machine learning, Deep learning and AI in CE (MDA) Technical Committee}
   {Apr 2025--Present}
   {}
+\fi
 
+\ifnum4>\cvmax\else
 \cventry
   {Tutorials/Special Session Co-Chair}
   {IEEE International Conference on Intelligent Reality (ICIR), 2026}
   {}
   {}
+\fi
 
+\ifnum5>\cvmax\else
 \cventry
   {Area Chair}
   {IEEE International Joint Conference on Neural Networks (IJCNN), 2025--2026 \textbf{[CORE Rank: B]}}
   {}
   {}
+\fi
 
+\ifnum6>\cvmax\else
 \cventry
   {Area Chair}
   {IEEE International Conference on Acoustics, Speech, and Signal Processing (ICASSP), 2026 \textbf{[CORE Rank: B]}}
   {}
   {}
+\fi
 
+\ifnum7>\cvmax\else
 \cventry
   {Program Committee}
   {Association for the Advancement of Artificial Intelligence (AAAI) Conference on Artificial Intelligence, 2024--2026 \textbf{[CORE Rank: A*]}}
   {}
   {}
+\fi
 
+\ifnum8>\cvmax\else
 \cventry
   {Program Committee}
   {International Conference on Learning Representations (ICLR), 2025--2026 \textbf{[CORE Rank: A*]}}
   {}
   {}
+\fi
 
+\ifnum9>\cvmax\else
 \cventry
   {Program Committee}
   {International Joint Conference on Artificial Intelligence (IJCAI), 2025--2026 \textbf{[CORE Rank: A*]}}
   {}
   {}
+\fi
 
+\ifnum10>\cvmax\else
 \cventry
   {Program Committee}
   {European Conference on Artificial Intelligence (ECAI), 2025 \textbf{[CORE Rank: A]}}
   {}
   {}
+\fi
 
+\ifnum11>\cvmax\else
 \cventry
   {Reviewer}
   {Elsevier Engineering Applications of Artificial Intelligence Journal \textbf{[IF: 8.0; Q1]}}
   {}
   {}
+\fi
 
+\ifnum12>\cvmax\else
 \cventry
   {Reviewer}
   {IEEE Journal of Biomedical and Health Informatics \textbf{[IF: 6.7; Q1]}}
   {}
   {}
+\fi
 
+\ifnum13>\cvmax\else
 \cventry
   {Reviewer}
   {AI Access Foundation Journal of Artificial Intelligence Research \textbf{[IF: 4.6; Q1]}}
   {}
   {}
+\fi
 
+\ifnum14>\cvmax\else
 \cventry
   {Reviewer}
   {PeerJ Computer Science Journal \textbf{[IF: 2.5; Q1]}}
   {}
   {}
+\fi
 
+\ifnum15>\cvmax\else
 \cventry
   {Reviewer}
   {Elsevier Information and Computation Journal \textbf{[IF: 1.0; Q2]}}
   {}
-  {}%
+  {}
+\fi%
 }
 
 \newcommand{\cvServiceRows}{%
 Associate Editor & Elsevier Neurocomputing Journal & IF: 6.5, Q1 & https://www.sciencedirect.com/journal/neurocomputing & https://www.scimagojr.com/journalsearch.php?q=24807 & 2025-10-26T10:00:00+02:00 & Oct 2025--Present \\
-Associate Editor & Frontiers in Artificial Intelligence Journal & Pattern Recognition Section & IF: 4.7, Q2 & https://www.frontiersin.org/journals/artificial-intelligence/sections/pattern-recognition & https://www.scimagojr.com/journalsearch.php?q=21101062817\&tip=sid\&clean=0 & 2025-03-03T10:00:00+02:00 & Mar 2024--Present & [object Object] & Lead Editor of the Special Issue on \href{https://www.frontiersin.org/research-topics/71848/explainable-artificial-intelligence-for-trustworthy-and-human-centric-healthcare-methods-evaluation-and-clinical-impact}{Explainable Artificial Intelligence for Trustworthy and Human{-}Centric Healthcare: Methods, Evaluation, and Clinical Impact} (25+ submissions to date). \\
+Associate Editor & Frontiers in Artificial Intelligence Journal & Pattern Recognition Section & IF: 4.7, Q2 & https://www.frontiersin.org/journals/artificial-intelligence/sections/pattern-recognition & https://www.scimagojr.com/journalsearch.php?q=21101062817\&tip=sid\&clean=0 & 2025-03-03T10:00:00+02:00 & Mar 2024--Present & announced-in-own-year Appointed to the board in March 2024 and announced on the site a year later, on 2025-03-03, when the special issue launched. Both dates are correct and both are stated here. 2027-01-01 & Lead Editor of the Special Issue on \href{https://www.frontiersin.org/research-topics/71848/explainable-artificial-intelligence-for-trustworthy-and-human-centric-healthcare-methods-evaluation-and-clinical-impact}{Explainable Artificial Intelligence for Trustworthy and Human{-}Centric Healthcare: Methods, Evaluation, and Clinical Impact} (25+ submissions to date). \\
 Technical Committee Member & IEEE Consumer Technology Society (CTSoc) & Machine learning, Deep learning and AI in CE (MDA) Technical Committee & https://ctsoc.ieee.org/technical/technical-committees/mda-tc & 2025-04-01T10:00:00+02:00 & Apr 2025--Present \\
 Tutorials/Special Session Co-Chair & IEEE International Conference on Intelligent Reality (ICIR) & https://icir.ieee.org/ & 2026 \\
-Area Chair & IEEE International Joint Conference on Neural Networks (IJCNN) & CORE Rank: B & https://ijcnn.org/ & https://portal.core.edu.au/conf-ranks/685/ & [object Object],2026 \\
-Area Chair & IEEE International Conference on Acoustics, Speech, and Signal Processing (ICASSP) & CORE Rank: B & https://2026.ieeeicassp.org/ & https://portal.core.edu.au/conf-ranks/2042/ & [object Object] \\
-Program Committee & Association for the Advancement of Artificial Intelligence (AAAI) Conference on Artificial Intelligence & CORE Rank: A* & https://aaai.org/conference/aaai/ & https://portal.core.edu.au/conf-ranks/1629/ & 2024,[object Object],[object Object] \\
-Program Committee & International Conference on Learning Representations (ICLR) & CORE Rank: A* & https://iclr.cc/ & https://portal.core.edu.au/conf-ranks/2273/ & [object Object],[object Object] \\
-Program Committee & International Joint Conference on Artificial Intelligence (IJCAI) & CORE Rank: A* & https://www.ijcai.org/ & https://portal.core.edu.au/conf-ranks/1313/ & [object Object],[object Object] \\
-Program Committee & European Conference on Artificial Intelligence (ECAI) & CORE Rank: A & https://eurai.org/ecai & https://portal.core.edu.au/conf-ranks/473/ & [object Object] \\
+Area Chair & IEEE International Joint Conference on Neural Networks (IJCNN) & CORE Rank: B & https://ijcnn.org/ & https://portal.core.edu.au/conf-ranks/685/ & 2025--2026 \\
+Area Chair & IEEE International Conference on Acoustics, Speech, and Signal Processing (ICASSP) & CORE Rank: B & https://2026.ieeeicassp.org/ & https://portal.core.edu.au/conf-ranks/2042/ & 2026 \\
+Program Committee & Association for the Advancement of Artificial Intelligence (AAAI) Conference on Artificial Intelligence & CORE Rank: A* & https://aaai.org/conference/aaai/ & https://portal.core.edu.au/conf-ranks/1629/ & 2024--2026 \\
+Program Committee & International Conference on Learning Representations (ICLR) & CORE Rank: A* & https://iclr.cc/ & https://portal.core.edu.au/conf-ranks/2273/ & 2025--2026 \\
+Program Committee & International Joint Conference on Artificial Intelligence (IJCAI) & CORE Rank: A* & https://www.ijcai.org/ & https://portal.core.edu.au/conf-ranks/1313/ & 2025--2026 \\
+Program Committee & European Conference on Artificial Intelligence (ECAI) & CORE Rank: A & https://eurai.org/ecai & https://portal.core.edu.au/conf-ranks/473/ & 2025 \\
 Reviewer & Elsevier Engineering Applications of Artificial Intelligence Journal & IF: 8.0; Q1 & https://www.sciencedirect.com/journal/engineering-applications-of-artificial-intelligence & https://www.scimagojr.com/journalsearch.php?q=24182\&tip=sid\&clean=0 & 2025-01-13T10:00:00+02:00 \\
 Reviewer & IEEE Journal of Biomedical and Health Informatics & IF: 6.7; Q1 & https://www.embs.org/jbhi/ & https://www.scimagojr.com/journalsearch.php?q=21100256982\&tip=sid\&clean=0 & 2024-08-21T10:00:00+02:00 \\
 Reviewer & AI Access Foundation Journal of Artificial Intelligence Research & IF: 4.6; Q1 & https://www.jair.org/ & https://www.scimagojr.com/journalsearch.php?q=24330\&tip=sid \\
@@ -304,7 +352,7 @@ Reviewer & Elsevier Information and Computation Journal & IF: 1.0; Q2 & https://
 }
 
 \newcommand{\cvServiceHeader}{%
-\textbf{Title} & \textbf{Org} & \textbf{Metric} & \textbf{Url} & \textbf{Rank\_url} & \textbf{Announced} & \textbf{Dates} \\%
+\textbf{Title} & \textbf{Org} & \textbf{Metric} & \textbf{Url} & \textbf{Rank\_Url} & \textbf{Announced} & \textbf{Dates} \\%
 }
 
 \newcommand{\cvServiceInline}{%
@@ -318,6 +366,7 @@ Associate Editor, Associate Editor (Pattern Recognition Section), Technical Comm
 }
 
 \newcommand{\cvProjects}{%
+\ifnum1>\cvmax\else
 \cventry
   {ANTHEM --- AdvaNced Technologies for Human-centred Medicine}
   {Collaborator (University of Milano-Bicocca, ISLab)}
@@ -326,7 +375,9 @@ Associate Editor, Associate Editor (Pattern Recognition Section), Technical Comm
 \resumeItemListStart
   \item Research on explainability and neuro-symbolic learning for time series and multimodal physiological signals, aligned with trustworthy AI in healthcare.
 \resumeItemListEnd
+\fi
 
+\ifnum2>\cvmax\else
 \cventry
   {iNEST --- Interconnected Nord-Est Innovation Ecosystem}
   {Collaborator (Free University of Bozen-Bolzano, DBS Group)}
@@ -335,7 +386,9 @@ Associate Editor, Associate Editor (Pattern Recognition Section), Technical Comm
 \resumeItemListStart
   \item Contributed to applied time-series analytics and machine learning pipelines within a multi-partner innovation ecosystem, supporting research-to-impact activities on real-world data.
 \resumeItemListEnd
+\fi
 
+\ifnum3>\cvmax\else
 \cventry
   {Certification, Monitoring, and Interpretability of Artificial Intelligent Systems}
   {Research collaborator (University of Ferrara, ACLAI Lab) --- GNCS / INdAM}
@@ -344,7 +397,9 @@ Associate Editor, Associate Editor (Pattern Recognition Section), Technical Comm
 \resumeItemListStart
   \item Developed and assessed interpretability and monitoring strategies for AI systems, focusing on explainability reporting, reliability checks, and reproducible evaluation practices.
 \resumeItemListEnd
+\fi
 
+\ifnum4>\cvmax\else
 \cventry
   {Set-up and Optimization of an ML Model to Predict Gas Turbine Trip}
   {Research collaborator (University of Ferrara, ACLAI Lab) --- Siemens Energy Global GmbH \& Co. KG}
@@ -353,7 +408,9 @@ Associate Editor, Associate Editor (Pattern Recognition Section), Technical Comm
 \resumeItemListStart
   \item Supported predictive modelling for rare-event/failure prediction on operational turbine data, with emphasis on validation protocols and interpretable model analysis and rule extraction for engineering stakeholders.
 \resumeItemListEnd
+\fi
 
+\ifnum5>\cvmax\else
 \cventry
   {Symbolic and Numerical Analysis of Cyber-Physical Systems}
   {Research collaborator (University of Ferrara, ACLAI Lab) --- GNCS / INdAM}
@@ -362,7 +419,9 @@ Associate Editor, Associate Editor (Pattern Recognition Section), Technical Comm
 \resumeItemListStart
   \item Contributed to hybrid symbolic--numerical methods for analyzing cyber-physical behaviors, connecting formal modeling assumptions with empirical validation on representative scenarios.
 \resumeItemListEnd
+\fi
 
+\ifnum6>\cvmax\else
 \cventry
   {Modal Geometric Symbolic Learning}
   {Research collaborator (University of Ferrara, ACLAI Lab) --- University of Ferrara}
@@ -371,7 +430,9 @@ Associate Editor, Associate Editor (Pattern Recognition Section), Technical Comm
 \resumeItemListStart
   \item Investigated interpretable learning methods grounded in modal/logical representations, including prototype implementations and empirical assessment on benchmark tasks.
 \resumeItemListEnd
+\fi
 
+\ifnum7>\cvmax\else
 \cventry
   {Natural Language Elaboration and Temporal Logic for Text Formalization}
   {Research collaborator (University of Ferrara, ACLAI Lab) --- GNCS / INdAM}
@@ -380,7 +441,9 @@ Associate Editor, Associate Editor (Pattern Recognition Section), Technical Comm
 \resumeItemListStart
   \item Explored NLP-to-logic workflows to formalize textual requirements into temporal/logical specifications, targeting traceability and explainable reasoning over system properties.
 \resumeItemListEnd
+\fi
 
+\ifnum8>\cvmax\else
 \cventry
   {Strategic Reasoning and Automated Synthesis of Multi-Agent Systems}
   {Research collaborator (University of Ferrara, ACLAI Lab) --- GNCS / INdAM}
@@ -388,7 +451,8 @@ Associate Editor, Associate Editor (Pattern Recognition Section), Technical Comm
   {}
 \resumeItemListStart
   \item Contributed to strategic reasoning and automated synthesis themes, strengthening the formal-methods research line on explainability and symbolic reasoning.
-\resumeItemListEnd%
+\resumeItemListEnd
+\fi%
 }
 
 \newcommand{\cvProjectsRows}{%
@@ -417,18 +481,23 @@ ANTHEM --- AdvaNced Technologies for Human-centred Medicine (Collaborator (Unive
 }
 
 \newcommand{\cvAwards}{%
+\ifnum1>\cvmax\else
 \cventry
   {Finalist (2nd place) \& Team Leader}
   {Huawei Italy University Challenge}
   {Nov 2021}
   {}
+\fi
 
+\ifnum2>\cvmax\else
 \cventry
   {3-year Ph.D. Full Scholarship}
   {Ministero dell'Istruzione, dell'Università e della Ricerca (MIUR)}
   {Sep 2019}
   {}
+\fi
 
+\ifnum3>\cvmax\else
 \cventry
   {Best M.Sc. Graduate Student in Computer Science}
   {University of Udine}
@@ -437,12 +506,15 @@ ANTHEM --- AdvaNced Technologies for Human-centred Medicine (Collaborator (Unive
 \resumeItemListStart
   \item Awarded by the Rector at the Dacia Arena Stadium; prize \euro{}1000.
 \resumeItemListEnd
+\fi
 
+\ifnum4>\cvmax\else
 \cventry
   {Erasmus$^{+}$ Full Scholarship}
   {University of Ferrara}
   {Sep 2016}
-  {}%
+  {}
+\fi%
 }
 
 \newcommand{\cvAwardsRows}{%
@@ -469,23 +541,29 @@ Finalist (2nd place) \& Team Leader (Huawei Italy University Challenge), 3-year 
 }
 
 \newcommand{\cvSupervision}{%
+\ifnum1>\cvmax\else
 \cventry
   {B.Sc. theses / internships}
-  {End-to-end supervision of short-to-medium projects, including prototyping and empirical evaluation}
+  {End-to-end supervision of short-to-medium projects, including prototyping and empirical evaluation, 10+}
   {}
   {}
+\fi
 
+\ifnum2>\cvmax\else
 \cventry
   {M.Sc. theses / internships}
-  {Supervision of research-oriented projects with stronger methodological depth and experimental design}
+  {Supervision of research-oriented projects with stronger methodological depth and experimental design, 5+}
   {}
   {}
+\fi
 
+\ifnum3>\cvmax\else
 \cventry
   {Erasmus$^{+}$ visiting student (traineeship)}
-  {Hosted and supervised a 3-month Erasmus$^{+}$ internship (incoming student from TED University, Turkey)}
+  {Hosted and supervised a 3-month Erasmus$^{+}$ internship (incoming student from TED University, Turkey), 1}
   {}
-  {}%
+  {}
+\fi%
 }
 
 \newcommand{\cvSupervisionRows}{%
@@ -509,35 +587,45 @@ B.Sc. theses / internships (End-to-end supervision of short-to-medium projects, 
 }
 
 \newcommand{\cvLanguages}{%
+\ifnum1>\cvmax\else
 \cventry
   {Romanian}
   {native}
   {}
   {}
+\fi
 
+\ifnum2>\cvmax\else
 \cventry
   {Italian}
   {fluent}
   {}
   {}
+\fi
 
+\ifnum3>\cvmax\else
 \cventry
   {English}
   {fluent}
   {}
   {}
+\fi
 
+\ifnum4>\cvmax\else
 \cventry
   {Spanish}
   {fluent}
   {}
   {}
+\fi
 
+\ifnum5>\cvmax\else
 \cventry
   {French}
   {basic}
   {}
-  {}%
+  {}
+\fi%
 }
 
 \newcommand{\cvLanguagesRows}{%
@@ -563,12 +651,15 @@ Romanian (native), Italian (fluent), English (fluent), Spanish (fluent), French 
 }
 
 \newcommand{\cvLeadership}{%
+\ifnum1>\cvmax\else
 \cventry
   {Ph.D. Representative (35th Ph.D. Cycle)}
   {Academic Board, Ph.D. in Mathematics, Universities of Parma, Reggio-Emilia, and Ferrara}
   {November 2019 -- February 2023}
   {Parma, Italy}
+\fi
 
+\ifnum2>\cvmax\else
 \cventry
   {Deputy Coordinator}
   {Associazione Dottorandi e Dottori di Ricerca in Italia (ADI), Ferrara's Unit}
@@ -579,29 +670,36 @@ Romanian (native), Italian (fluent), English (fluent), Spanish (fluent), French 
   \item Organized many cultural dissemination events on Climate Change, Artificial Intelligence and Ethics, and the Evolution of Science with more than 200 attendees.
   \item Secured a 3-month extension for all Ph.D. scholarships at the national level due to COVID-19.
 \resumeItemListEnd
+\fi
 
+\ifnum3>\cvmax\else
 \cventry
   {Ph.D.s' Representative}
   {Department Council (Consiglio di Dipartimento), Department of Mathematics and Computer Science, University of Ferrara}
   {October 2019 -- September 2022}
   {Ferrara, Italy}
+\fi
 
+\ifnum4>\cvmax\else
 \cventry
   {Students' Representative}
   {Addressing Committee for periodic consultations with the labour market (Comitato di indirizzamento per le consultazioni periodiche con il mondo del lavoro), Department of Mathematics, Computer Science and Physics, University of Udine}
   {October 2018 -- September 2019}
   {Udine, Italy}
+\fi
 
+\ifnum5>\cvmax\else
 \cventry
   {Students' Representative}
   {Quality Assurance Commission (Commissione Assicurazione Qualità), Department of Mathematics, Computer Science and Physics, University of Udine}
   {October 2018 -- September 2019}
-  {Udine, Italy}%
+  {Udine, Italy}
+\fi%
 }
 
 \newcommand{\cvLeadershipRows}{%
 Ph.D. Representative (35th Ph.D. Cycle) & Academic Board, Ph.D. in Mathematics, Universities of Parma, Reggio-Emilia, and Ferrara & November 2019 -- February 2023 & Parma, Italy \\
-Deputy Coordinator & Associazione Dottorandi e Dottori di Ricerca in Italia (ADI), Ferrara's Unit & October 2020 -- December 2022 & Ferrara, Italy & Led the campaign to reduce Ph.D. students' taxes at the University of Ferrara by 75\%.,Organized many cultural dissemination events on Climate Change, Artificial Intelligence and Ethics, and the Evolution of Science with more than 200 attendees.,Secured a 3-month extension for all Ph.D. scholarships at the national level due to COVID-19. \\
+Deputy Coordinator & Associazione Dottorandi e Dottori di Ricerca in Italia (ADI), Ferrara's Unit & October 2020 -- December 2022 & Ferrara, Italy & Led the campaign to reduce Ph.D. students' taxes at the University of Ferrara by 75\%., Organized many cultural dissemination events on Climate Change, Artificial Intelligence and Ethics, and the Evolution of Science with more than 200 attendees., Secured a 3-month extension for all Ph.D. scholarships at the national level due to COVID-19. \\
 Ph.D.s' Representative & Department Council (Consiglio di Dipartimento), Department of Mathematics and Computer Science, University of Ferrara & October 2019 -- September 2022 & Ferrara, Italy \\
 Students' Representative & Addressing Committee for periodic consultations with the labour market (Comitato di indirizzamento per le consultazioni periodiche con il mondo del lavoro), Department of Mathematics, Computer Science and Physics, University of Udine & October 2018 -- September 2019 & Udine, Italy \\
 Students' Representative & Quality Assurance Commission (Commissione Assicurazione Qualità), Department of Mathematics, Computer Science and Physics, University of Udine & October 2018 -- September 2019 & Udine, Italy \\%
@@ -673,4 +771,16 @@ I=Invited talks, O=Oral sessions, P=Poster sessions%
 \begin{refcontext}[labelprefix=P]
 \printbibliography[heading=bibsubheading, title={Poster presentations}, filter=Talks3, resetnumbers=true]
 \end{refcontext}%
+}
+
+\newcommand{\cvAutoSections}{%
+\cvautopart{Appointments}{Appointments}%
+\cvautopart{Education}{Education}%
+\cvautopart{Teaching}{Teaching}%
+\cvautopart{Service}{Service}%
+\cvautopart{Projects}{Projects}%
+\cvautopart{Awards}{Awards}%
+\cvautopart{Supervision}{Supervision}%
+\cvautopart{Languages}{Languages}%
+\cvautopart{Leadership}{Leadership}%
 }
