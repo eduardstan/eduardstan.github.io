@@ -16,14 +16,17 @@ change what is published. Do not add filters back.
 ## `content/` is the interface
 
 **Every adopter-owned record and media asset is in `content/`**; `content/README.md` documents
-that interface and the authored-layout exceptions an adopter must review. It is written for a
+that interface and the authored-layout exception an adopter must review. It is written for a
 stranger adopting the repository, not for us. `web/src/lib/record.ts`'s `SOURCES` is the whole
 list of records the site reads; `web/src/lib/record.test.ts` fails if an entry of it ever points
 outside `content/`.
 
 `content/cv.yaml` is also the **repo-root landmark** `repositoryRoot()` walks up for, chosen
 because it is the one file the site cannot run without. `cv/` and `scripts/` are the CV
-pipeline and `cv/cv.tex` is layout only.
+pipeline. `cv/preamble.tex`, `cv/header.tex` and `cv/supervision.tex` are the
+[ledgerpress](https://github.com/eduardstan/ledgerpress) template's shared layout, kept
+byte-identical to it; `cv/cv.tex` is this repository's document — its settings, its overrides and
+one `\cvpart` line per section.
 
 **One entry shape, and a top-level list is a section by construction.** `title` is the only
 required field; `org`, `place`, `dates`, `detail`, `url`, `items`, `announced` and the optional
@@ -69,11 +72,12 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
   BibTeX name forms; reading the second as the first silently renames authors. `VENUE_FIELDS`
   reads `journaltitle` as well as `journal`: that is what a Better BibTeX BibLaTeX export writes.
 - DBLP's `@misc` artifacts carry an unfilled `note = {Accessed on YYYY-MM-DD.}`. Both sides keep it
-  out of the rendered venue: `VENUE_FIELDS` tries `publisher` before `note`, and `cv/cv.tex`'s
-  `\DeclareSourcemap` nulls a `note` matching that exact placeholder, so a declared
-  `types: [misc]` section renders.
-  The printed layout also removes redundant `howpublished`/`url` DOI addresses and maps the
-  publisher to the standard `@misc` driver's printable organization field. Keep these as
+  out of the rendered venue: `VENUE_FIELDS` tries `publisher` before `note`, and
+  `cv/preamble.tex`'s `\DeclareSourcemap` nulls a `note` matching that exact placeholder, so a
+  declared `types: [misc]` section renders.
+  `cv/cv.tex`'s `\cvsourcemaps` also removes redundant `howpublished`/`url` DOI addresses and maps
+  the publisher to the standard `@misc` driver's printable organization field. biblatex takes
+  exactly one `\DeclareSourcemap`, which is why a document adds its maps through that hook. Keep these as
   rendering rules — do not edit the canonical bibliography to suit LaTeX.
 - `web/src/lib/cv.ts` reads `content/cv.yaml` through Vite's `?raw` import, not `node:fs`. Do
   **not** rewrite it as `readFileSync(new URL('../../../content/cv.yaml', import.meta.url))`:
@@ -95,11 +99,11 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
   bibliographies contain punctuation that Markdown would otherwise read as emphasis.
   `content/talks.bib` is LaTeX like `content/publications.bib` is, so its fields need `deLatex()`
   first.
-- **The cold-start path through `cv/cv.tex` is guarded, and its guards must stay.** A macro the
+- **The cold-start path through the printed CV is guarded, and its guards must stay.** A macro the
   layout names but `content/cv.yaml` does not produce is an `Undefined control sequence` that stops
   xelatex at its **interactive `?` prompt** — a hang, not a failure. `\cvdeclare` (ordinary
   sections) and `\cvdeclarebib` (`publications:`/`talks:`) default every such macro; the test in
-  `scripts/build-cv-data.test.mjs` proves `cv/cv.tex` defines every `\cv<Name>` it names for the
+  `scripts/build-cv-data.test.mjs` proves the four layout files define every `\cv<Name>` they name for the
   smallest file `content/README.md` documents. And **an entry-less `.bib` inside a `\refsection`
   silently renumbers the whole document to `[J0] [C0]`** with exit 0 — biber ignores an empty data
   source — so the generator emits `\cv<Key>Count` from the file's entry count and `cv/cv.tex`
@@ -108,7 +112,7 @@ Rollback: the tag **`pre-astro-cutover`** on the remote is the last Jekyll commi
 - **The printed CV has a baseline gate, not a byte-identical generated file.**
   `data/cv-baseline/` holds the extracted text and the page count of the CV as published;
   `data/cv-baseline/README.md` owns the verification commands and expected artifacts. A change to
-  `content/cv.yaml`, the generator or `cv/cv.tex` must satisfy that documented baseline or record
+  `content/cv.yaml`, the generator or any file under `cv/` must satisfy that documented baseline or record
   the difference there with its reason. `pdftotext -layout` re-quantises a whole page, so a diff
   that looks like harmless horizontal shifts on unrelated lines is usually a moved page break.
 
@@ -194,6 +198,9 @@ a second place to write one is the drift this design closed.
   "one place per fact" is the disease with a lid on it. `archive.leadership` is now the ordinary
   top-level section `leadership:`, which the site renders and `cv/cv.tex` does not print — that is
   the answer to "keep a section off the PDF but on the site".
+- **`NOTICE` carries the upstream CV template's third-party attribution**, and `cv/preamble.tex`'s
+  own header comment points at it. Both come from the ledgerpress template; neither may be deleted
+  when that file is re-copied.
 - **`LICENSE` is MIT, "Copyright (c) 2026 Ionel Eduard Stan".** The repository owner decided
   this after the rebuild left no al-folio files in the current tree. Preserve the project's
   al-folio lineage in the README's History section; earlier commits and their licensing remain
@@ -213,7 +220,8 @@ The CV's facts live in exactly one place and both the PDF and the site are gener
 | `content/cv.yaml`          | all CV facts - the single source of truth        |
 | `content/publications.bib` | all publications, canonical for CV _and_ website |
 | `content/talks.bib`        | talks and presentations                          |
-| `cv/cv.tex`                | layout and styling only                          |
+| `cv/preamble.tex`          | the shared layout, copied from the template      |
+| `cv/cv.tex`                | this CV's settings, overrides and section order  |
 
 - `node scripts/build-cv-data.mjs` renders `content/cv.yaml` into
   `cv/generated/cv-data.tex` (committed, public).
@@ -231,12 +239,20 @@ The CV's facts live in exactly one place and both the PDF and the site are gener
 - A long `detail:` runs off the entry line and silently truncates the dates. `content/README.md`
   owns that field's length and overflow contract; changing the wrapping changes the design.
 - `content/publications.bib` may carry rendering fields (`abstract`,
-  `pdf`, `html`, `selected`, ...) for the website. `cv/cv.tex` strips them via
+  `pdf`, `html`, `selected`, ...) for the website. `cv/preamble.tex` strips them via
   `\DeclareSourcemap` when present, because abstracts can contain raw `%` that
   would break the LaTeX pass. Do not "fix" the .bib to suit LaTeX.
-- `cv/cv.tex` leaves one `\small{` group deliberately unclosed after the Short Bio,
-  exactly as the original hand-written CV did. Closing it reflows the whole
-  document. There is a comment marking it.
+- **`cv/cv.tex` overrides the shared layout in four places, and each keeps the printed CV exactly
+  as `data/cv-baseline/` records it**: `\cvtypeface` (cfr-lm), `\cvcoursecols` (the hand-tuned
+  course widths), `\cvsourcemaps` (this bibliography's tidying) and, after `\input{preamble.tex}`,
+  `\headerfontiii`, `\cventry`/`\cvpartflush` (`tabular*`, so a long org name does not wrap
+  inside a fixed right column) and the bibliography size and spacing. The first three are template
+  hooks and must be defined **before** the `\input`; the rest are ordinary `\renewcommand`s and
+  must come after it.
+- **`cv/cv.tex` does not print `\cvAutoSections`.** The generator emits the record's own section
+  sequence, but printing it here would also print `leadership:`, which is deliberately site-only.
+  Expressing that in the record means giving it `printed: false`, so until someone decides to,
+  a new section of `content/cv.yaml` needs a `\cvpart` line in `cv/cv.tex` to reach the PDF.
 
 ## Maintaining this file
 

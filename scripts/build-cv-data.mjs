@@ -8,7 +8,7 @@
 // Outputs
 //   cv/generated/cv-data.tex  COMMITTED, checked for staleness
 //
-// cv.tex owns layout; this script owns nothing but the mapping from facts to
+// cv/preamble.tex owns layout; this script owns nothing but the mapping from facts to
 // content macros. It never invents, reorders or rewords anything in cv.yaml.
 //
 // It knows the field names of `profile:` and NOTHING about which sections exist:
@@ -16,7 +16,13 @@
 // the same six macros. Adding `fieldwork:` to content/cv.yaml gives you
 // \cvFieldworkNote, \cvFieldwork, \cvFieldworkRows, \cvFieldworkHeader,
 // \cvFieldworkInline and \cvFieldworkCount without touching this file. See
-// cv/cv.tex for the contract.
+// cv/preamble.tex for the contract.
+//
+// It also emits \cvAutoSections: one \cvautopart line per section, in the order
+// content/cv.yaml writes them, so which sections the PDF prints is a record fact
+// rather than a list of \cvpart lines in cv/cv.tex, which skips the ones it lays
+// out by hand. `printed: false` on a section emits \cv<Key>Printed as 0 instead
+// of a second sequence rule, so the opt-out holds for a hand-laid-out section too.
 //
 // A top-level key holding `sections:` instead of entries is a bibliography
 // grouping (`publications:`, `talks:`): each becomes \defbibfilter definitions
@@ -172,33 +178,112 @@ function editions(years) {
  * `detail`, a service role both plus its editions and its ranking.
  */
 function where(entry) {
-  const line = [entry.org, entry.detail, editions(entry.years)].filter(Boolean).join(", ");
+  const line = [entry.org, entry.detail, editions(entry.years), entry.rows?.length ? "" : entry.count].filter(Boolean).join(", ");
   return entry.metric ? `${line} **[${entry.metric}]**` : line;
 }
 
-/** `a & b & c \\` - the row's own keys, in the order they were written. */
-const tableRows = (rows) => rows.map((r) => `${Object.values(r).map(arg).join(" & ")} \\\\`).join("\n");
+function tableKeys(rows, strict = true) {
+  const keys = Object.keys(rows[0] ?? {});
+  if (strict) {
+    for (const [index, row] of rows.entries()) {
+      const actual = Object.keys(row);
+      if (actual.join("\0") !== keys.join("\0")) {
+        throw new Error(
+          `rows[${index}] has columns ${actual.join(", ")}; expected ${keys.join(", ")} in the same order.\n` +
+            "  Every row in one table must declare the same columns in the same order."
+        );
+      }
+    }
+  }
+  return keys;
+}
 
-/** The header row for those columns: the key names, capitalised. */
-const tableHeader = (rows) =>
-  `${Object.keys(rows[0])
-    .map((k) => `\\textbf{${escapeLatex(k[0].toUpperCase() + k.slice(1))}}`)
+/**
+ * One cell. A value in cv.yaml is not always a string: `years:` is a list that
+ * may hold `{ year, announced }` maps and `rows:` is a nested table, and
+ * String() turns either into `[object Object]`. A list of editions folds exactly
+ * as it does on an entry's second line; any other structure is its own values,
+ * rendered the same way.
+ */
+function cell(value) {
+  const edition = (v) => v !== null && (typeof v !== "object" || v.year !== undefined);
+  if (Array.isArray(value)) return value.every(edition) ? arg(editions(value)) : value.map(cell).join(", ");
+  if (value && typeof value === "object" && !(value instanceof Date)) {
+    return value.year !== undefined ? cell(value.year) : Object.values(value).map(cell).join(" ");
+  }
+  return arg(value);
+}
+
+/** `a & b & c \\` - the row's own keys, in their validated order. */
+const tableRows = (rows, strict = true) => {
+  tableKeys(rows, strict);
+  return rows.map((r) => `${Object.values(r).map(cell).join(" & ")} \\\\`).join("\n");
+};
+
+/** One word, capitalised. The generator's only casing rule. */
+const capitalise = (word) => word[0].toUpperCase() + word.slice(1);
+
+/**
+ * A section key as a heading: every word capitalised, separators untouched.
+ *
+ * Section keys derive from identifiers (e.g. `field_work` -> "Field Work")
+ * when a section does not declare an explicit `heading:`, and the generated
+ * per-section table header names those schema fields. Course-table column
+ * headers, by contrast, are printed verbatim as written in the record: a row
+ * key is a fact the website publishes on its provenance line, so it prints as
+ * the adopter wrote it, here and there.
+ *
+ * The website has its own copy of this rule (`headingCase` in
+ * `web/src/lib/cv-schema.ts`) for the announcement kind chips on /lately/. No
+ * heading passes through both, so the two are independent, not a pair to keep
+ * in step.
+ */
+const headingCase = (key) => key.replace(/[\p{L}\p{N}]+/gu, capitalise);
+
+/** Course-table labels stay verbatim; per-section schema fields explicitly pass `headingCase`. */
+const tableHeader = (rows, strict = true, displayKey = (key) => key) =>
+  `${tableKeys(rows, strict)
+    .map((key) => `\\textbf{${escapeLatex(displayKey(key))}}`)
     .join(" & ")} \\\\`;
 
 /** One `\cventry`, plus its bullets and its table where it has them. */
 function entry(item) {
   const head = `\\cventry\n  {${arg(item.title)}}\n  {${arg(where(item))}}\n` + `  {${arg(item.dates)}}\n  {${arg(item.place)}}`;
-  const table = item.rows?.length ? `\\cvcourses{${tableHeader(item.rows)}}{\n${tableRows(item.rows)}}` : "";
+  const table = item.rows?.length
+    ? `\\cvcourses{${tableKeys(item.rows)
+        .map(() => "Y")
+        .join(" ")}}{${tableHeader(item.rows)}}{\n${tableRows(item.rows)}}`
+    : "";
   return [head, itemList(item.items), table].filter(Boolean).join("\n");
 }
 
-/** `field_work` -> `FieldWork`, so a section key becomes a legal macro name. */
-const macroName = (key) =>
+/**
+ * The words of a section key, each capitalised: `field_work` -> [Field, Work].
+ *
+ * ASCII-only, because a macro name is: this feeds `macroName`, not a heading.
+ */
+const keyWords = (key) =>
   key
     .split(/[^A-Za-z0-9]+/)
     .filter(Boolean)
-    .map((w) => w[0].toUpperCase() + w.slice(1))
-    .join("");
+    .map(capitalise);
+
+/** `field_work` -> `FieldWork`, so a section key becomes a legal macro name. */
+const macroName = (key) => keyWords(key).join("");
+
+/**
+ * The heading a section prints under: the one it states, or its own key.
+ *
+ * `fieldwork:` prints as "Fieldwork" with nothing declared, which is what makes a
+ * new section print without a LaTeX edit. A section whose heading is not its key
+ * spelt out - "Awards & Scholarships" - says so with `heading:`.
+ *
+ * The key becomes a heading by `headingCase`, with
+ * its separators read as spaces: `field_work` prints "Field Work", not
+ * "Field_Work". Not `keyWords`, which is ASCII because macro names are.
+ */
+const sectionHeading = (key, value) =>
+  arg((Array.isArray(value) ? undefined : value.heading) ?? headingCase(key.replace(/[^\p{L}\p{N}]+/gu, " ").trim()));
 
 function macro(name, body) {
   return `\\newcommand{\\${name}}{%\n${body}%\n}`;
@@ -396,7 +481,8 @@ function contactLine(profile) {
 }
 
 /**
- * An account ID becomes an address and an icon; the ID itself is the label.
+ * A compact account ID becomes an address and a service icon. A `{label, url}`
+ * value uses the neutral link icon, so new services stay inside content/.
  *
  * The four templates used to be written out as literal URLs in cv.yaml AND kept
  * here, so an adopter typed each address twice. `profile.links` now carries the
@@ -411,15 +497,21 @@ const ACCOUNTS = {
 
 function profilesLine(links = {}) {
   return Object.entries(links)
-    .filter(([, id]) => id)
-    .map(([kind, id]) => {
+    .filter(([, value]) => value)
+    .map(([kind, value]) => {
+      if (typeof value === "object") {
+        if (!value.label || !value.url) {
+          throw new Error(`profile.links.${kind}: custom links need both label and url.`);
+        }
+        return `\\cviconlink\\,\\href{${escapeUrl(value.url)}}{${escapeLatex(value.label)}}`;
+      }
       const url = ACCOUNTS[kind];
       if (!url)
         throw new Error(
           `profile.links: "${kind}" is not a known account kind (${Object.keys(ACCOUNTS).join(", ")}).\n` +
-            `  Add its address template to ACCOUNTS here and a \\cvicon${kind} macro to cv/cv.tex.`
+            `  Write it as { label: ..., url: ... } to add it without editing the machinery.`
         );
-      return `\\cvicon${kind}\\,\\href{${escapeUrl(url(id))}}{${escapeLatex(id)}}`;
+      return `\\cvicon${kind}\\,\\href{${escapeUrl(url(value))}}{${escapeLatex(value)}}`;
     })
     .join("\n\\;|\\;\n");
 }
@@ -454,7 +546,7 @@ const BANNER = [
   "% Edit cv.yaml and regenerate; hand edits here are overwritten and CI rejects",
   "% them (the workflow fails if this file is stale relative to cv.yaml).",
   "%",
-  "% This file holds CONTENT ONLY. Layout, spacing and styling live in cv/cv.tex.",
+  "% This file holds CONTENT ONLY. Layout, spacing and styling live in cv/preamble.tex.",
   "% =============================================================================",
   "",
 ];
@@ -470,8 +562,21 @@ function render(cv) {
     macro("cvFocus", renderInline(p.focus)),
     macro("cvFooter", renderInline(p.footer)),
   ];
-  // Every other top-level list is a section. Six macros each, all mechanical:
-  // the generator has no idea what any of them mean.
+  // Every other top-level list is a section. Six macros each, plus its line of
+  // the printed section sequence and, where the record opts out, one more macro.
+  // All mechanical: the generator has no idea what any of them mean.
+  //
+  // Each entry of \cv<Name> is wrapped in `\ifnum<n>>\cvmax`, which is how a
+  // variant prints only the first few of a section. How many is a page-budget
+  // decision belonging to one document, so the number lives in the layout
+  // (`\cvpart`'s optional argument, cv/preamble.tex) and never in cv.yaml. The
+  // guard is expansion-level and opens no group, so at the default \cvmax the
+  // typeset result is unchanged.
+  //
+  // WHICH sections print is the record's call (`printed:`), HOW MANY of one a
+  // given document prints is that document's (`\cvpart`'s optional count). The
+  // two are independent and both are honoured.
+  const printed = [];
   for (const [key, value] of Object.entries(cv)) {
     if (key === "profile") continue;
     if (Array.isArray(value?.sections)) {
@@ -484,13 +589,23 @@ function render(cv) {
     const name = macroName(key);
     blocks.push(
       macro(`cv${name}Note`, note.map(renderInline).join("\n\\cvnotesep\n")),
-      macro(`cv${name}`, rows.map(entry).join("\n\n")),
-      macro(`cv${name}Rows`, rows.length ? tableRows(rows) : ""),
-      macro(`cv${name}Header`, rows.length ? tableHeader(rows) : ""),
+      macro(`cv${name}`, rows.map((r, i) => `\\ifnum${i + 1}>\\cvmax\\else\n${entry(r)}\n\\fi`).join("\n\n")),
+      macro(`cv${name}Rows`, rows.length ? tableRows(rows, false) : ""),
+      macro(`cv${name}Header`, rows.length ? tableHeader(rows, false, headingCase) : ""),
       macro(`cv${name}Inline`, rows.map((r) => arg(r.detail ? `${r.title} (${r.detail})` : r.title)).join(", ")),
       `\\newcommand{\\cv${name}Count}{${rows.length}}`
     );
+    // `printed: false` is the record's own opt-out, so it holds wherever the
+    // section is set: cv.tex defaults \cv<Key>Printed to 1 and guards on it.
+    if (!Array.isArray(value) && value.printed === false) {
+      blocks.push(`\\newcommand{\\cv${name}Printed}{0}`);
+    }
+    printed.push(`\\cvautopart{${sectionHeading(key, value)}}{${name}}`);
   }
+  // The printed CV's section sequence, in the order content/cv.yaml writes it.
+  // cv.tex prints this list and skips every key it has already laid out by hand,
+  // so a section added to the record needs no LaTeX edit to appear.
+  blocks.push(macro("cvAutoSections", printed.join("%\n")));
   return `${BANNER.join("\n")}\n${blocks.join("\n\n")}\n`;
 }
 
@@ -534,6 +649,7 @@ export {
   affiliationBlock,
   profilesLine,
   macroName,
+  sectionHeading,
   tableHeader,
   entry,
   bibFilter,

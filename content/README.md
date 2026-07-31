@@ -1,7 +1,7 @@
 # `content/` — the adopter-owned records and media
 
-This directory owns every structured record and media asset about you. The two authored-layout
-exceptions an adopter must review are named below.
+This directory owns every structured record and media asset about you. The one authored-layout
+exception an adopter must review is named below.
 
 ```
 content/
@@ -107,7 +107,8 @@ profile:
     github: adalovelace         # BOTH an entry in ACCOUNTS in
                                 # scripts/build-cv-data.mjs and one in ACCOUNTS
                                 # in web/src/lib/record.ts, plus a \cvicon<kind>
-                                # macro in cv/cv.tex. The build tells you so.
+                                # macro in cv/preamble.tex, or write it as
+                                # { label: ..., url: ... } and it needs neither.
   portrait: portrait.jpg        # a file in content/media/
   favicon: favicon.svg          # another file in content/media/. Optional: if it
                                 # is omitted or missing, no icon link is emitted.
@@ -185,7 +186,10 @@ Honours)`, `Ph.D. in Mathematics (Excellent cum laude)`.
 
 `content/cv.yaml` may hold **any** top-level list you like, and `cv/cv.tex` decides which of them
 the PDF prints, in what order, under what heading — one line per section. Add a section to the
-YAML and a `\cvpart{Your Heading}{YourKey}` line to `cv.tex` and it is printed.
+YAML and a `\cvpart{Your Heading}{YourKey}` line to `cv.tex` and it is printed. A section written
+as a map (see [the section-level `note`](#entry-fields-some-sections-need) below) may carry
+`printed: false`, which keeps it out of the PDF with its `\cvpart` line left in place; the website
+renders it either way.
 
 **The website is not open in the same way.** It renders exactly these keys:
 
@@ -210,8 +214,13 @@ heading, no gap, nothing printed, no error.
 | `rank_url` | where that figure is evidenced | the site links `metric` to it |
 | `years` | editions of a recurring role | `2024–2026` after `org` |
 | `funding` | grant or programme amount | website only, never the CV |
-| `count` | how many | a table column — only in a section rendered as a table |
+| `count` | how many | last on the entry's `org` line, unless the entry has `rows` — or a column, see below |
 | `rows` | a table hanging under the entry | see below |
+
+`count` folds into the entry's `org` line in a section the document prints with `\cvpart`. A
+section set by hand as a table of its own prints it as a column instead: `supervision:` is that
+section here, and `cv/supervision.tex` prints each entry's `title`, `count` and `detail` as the
+**Level**, **#** and **Notes** columns without printing the entry lines at all.
 
 `years` is a plain list. Only an edition that carries an announcement date grows into a map:
 
@@ -220,10 +229,12 @@ years: [2024, { year: 2025, announced: 2024-06-10 }, 2026]
 ```
 
 `rows:` turns an entry into a heading over a table. **Each row's keys, in the order you write
-them, are the columns, and the key name becomes the heading.** Write `points:` and the column says
-"Points". Reordering two keys reorders two columns, silently — so write them once and leave them
-alone. The column **widths** are layout and live in `cv/cv.tex`; a table with a different number of
-columns needs that spec changed.
+them, are the columns, and the key is printed verbatim as the heading.** Write `Points:` and the
+column says "Points"; write `Programme / Level:` and it says that. No casing is derived, so write
+each key exactly as it should print. Reordering two keys reorders two columns, silently — so write
+them once and leave them alone. The column **widths** are layout: the generator emits equal-width
+columns and `cv/cv.tex`'s `\cvcoursecols` hand-tunes them, so a table with a different number of
+columns prints without a LaTeX edit and only its tuning lives there.
 
 ```yaml
 teaching:
@@ -231,11 +242,17 @@ teaching:
     org: University of Example
     dates: 2024 – Present
     rows:
-      - course: Databases
-        programme: B.Sc. Computer Science
-        topics: SQL; relational algebra
-        hours: 30 h/yr
+      - Course: Databases
+        Programme / Level: B.Sc. Computer Science
+        Key topics: SQL; relational algebra
+        Hours: 30 h/yr
 ```
+
+Those four keys are fixed **in this repository**, even though the printed heading is whatever you
+write: `/cv/` reads each course row's `Course`, `Programme / Level`, `Key topics` and `Hours` by
+name, and its contact-hours totals read the leading number out of `Hours`. Rename one and the PDF
+prints the new heading while the page renders that column blank and the totals fall to 0. A table
+of your own, in a section of your own, is free-form.
 
 A section-level `note` is not an entry field. A section that needs a paragraph of its own above
 its entries is written as a map:
@@ -388,17 +405,15 @@ you give it an `announced:` — the day you submitted it. It stays on `/publicat
 The sentence each kind of fact is announced in is one table, `TEMPLATES`, at the top of
 `web/src/lib/announcements.ts`. It is the first thing to edit if you want different wording.
 
-## Two things `content/` does not yet own
+## One thing `content/` does not yet own
 
-Everything about *you* is in this directory. Two pieces of prose on the site are not:
+Everything about *you* is in this directory. One piece of prose on the site is not:
 
 - **`web/src/lib/strands.ts`** — the three research strands on the front page. No file in
   this repository states a strand structure, so this is authored copy rather than a derived
   record, and it is kept alone in one module so that stays obvious. **If you adopt this site,
   rewrite it or delete the block from `web/src/pages/index.astro`** — until you do, the front
   page describes someone else's research.
-- **The `Talks & Presentations` and `Publications` headings in `cv/cv.tex`** print even when
-  the matching `.bib` is empty. Delete those two blocks if you have neither.
 
 ## Prove a clean handoff
 

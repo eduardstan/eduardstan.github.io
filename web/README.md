@@ -141,7 +141,7 @@ _after_ `astro build`. It therefore works under `npm run preview` but not under
   extras `metric`, `rank_url`, `years`, `funding`, `count` and `rows`. An appointment, a
   degree, a teaching post, a service role, a project, an award, a supervision row and a
   leadership role are all that shape, so `Entries.astro` renders any of them and the
-  generator builds every entry's second line with one rule — `org, detail, editions`. Six
+  generator builds every entry's second line with one rule — `org, detail, editions, count`. Six
   interfaces and three LaTeX macros collapsed into that. **A top-level list is a section by
   construction**: the generator names none of them, so `fieldwork:` gets `\cvFieldwork` and
   friends for free, and `cv.tex` chooses which to print with one `\cvpart` line each.

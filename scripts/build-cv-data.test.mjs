@@ -127,12 +127,15 @@ test("the address block sets several affiliations over several lines", () => {
   assert.equal(affiliationBlock({ headline: "Researcher", place: "Anywhere" }), "Researcher, Anywhere");
 });
 
-test("profile.links takes an ID and an unknown kind names its two edits", () => {
+test("profile.links accepts compact IDs and arbitrary labelled URLs", () => {
   assert.equal(profilesLine({ orcid: "0000-0002-1825-0097" }), "\\cviconorcid\\,\\href{https://orcid.org/0000-0002-1825-0097}{0000-0002-1825-0097}");
   // A blank ID is dropped rather than rendered as an empty link.
   assert.equal(profilesLine({ orcid: "", github: undefined }), "");
   assert.throws(() => profilesLine({ bluesky: "ada.example.com" }), /not a known account kind/);
-  assert.throws(() => profilesLine({ bluesky: "ada.example.com" }), /cv\/cv\.tex/);
+  assert.equal(
+    profilesLine({ bluesky: { label: "Bluesky", url: "https://bsky.app/profile/ada.example" } }),
+    "\\cviconlink\\,\\href{https://bsky.app/profile/ada.example}{Bluesky}"
+  );
 });
 
 // -----------------------------------------------------------------------------
@@ -145,10 +148,11 @@ test("a section key becomes a legal macro name", () => {
   assert.equal(macroName("teaching"), "Teaching");
 });
 
-test("a table's header is its own row keys, so renaming a key renames a column", () => {
-  // The friction log's F12: an NZ adopter writes `points:` and the column says
-  // "Points" without a LaTeX edit.
-  assert.equal(tableHeader([{ course: "Databases", points: "18 points" }]), "\\textbf{Course} & \\textbf{Points} \\\\");
+test("a table's header is its own row keys verbatim, so renaming a key renames a column", () => {
+  // Column headers print the row key exactly as written in the record: no casing
+  // is derived, which is how content/cv.yaml states this CV's printed wording.
+  assert.equal(tableHeader([{ Course: "Databases", Points: "18 points" }]), "\\textbf{Course} & \\textbf{Points} \\\\");
+  assert.equal(tableHeader([{ "Programme / Level": "B.Sc.", "Key topics": "proxies" }]), "\\textbf{Programme / Level} & \\textbf{Key topics} \\\\");
 });
 
 test("an empty or absent rows list emits no course table", () => {
@@ -316,17 +320,19 @@ test("a directive-only BibTeX file has no entries", () => {
   assert.equal(bibEntryCount(quoted), 1);
 });
 
-// The cold-start trap: cv.tex names a macro the generator only emits when
-// cv.yaml declares the section it comes from, so an adopter's first
-// `latexmk -xelatex -cd cv/cv.tex` stops at TeX's interactive `?` prompt with
-// an undefined control sequence. This checks the whole class at once, against
-// the very file content/README.md tells a newcomer to start from.
-test("cv.tex defines every generated macro it names, for README's smallest file that works", () => {
-  const root = dirname(dirname(fileURLToPath(import.meta.url)));
-  const readme = readFileSync(join(root, "content/README.md"), "utf8");
-  const minimal = readme.match(/## The smallest file that works\s*```yaml\n([\s\S]*?)```/);
-  assert.ok(minimal, "content/README.md no longer carries a `The smallest file that works` example");
-  const tex = readFileSync(join(root, "cv/cv.tex"), "utf8").replace(/(^|[^\\])((?:\\\\)*)%.*$/gm, "$1$2");
+const root = dirname(dirname(fileURLToPath(import.meta.url)));
+
+/** A layout file with its TeX comments removed, so a commented-out macro name does not count. */
+const layout = (name) => readFileSync(join(root, "cv", name), "utf8").replace(/(^|[^\\])((?:\\\\)*)%.*$/gm, "$1$2");
+
+/** The whole layout the printed CV is built from: the shared files it inputs, then the document. */
+const printedCv = () => ["preamble.tex", "header.tex", "supervision.tex", "cv.tex"].map(layout).join("\n");
+
+// The macro contract between the generator and the layout. The layout is the
+// ledgerpress template's cv/preamble.tex, kept byte-identical to it, so this
+// asserts what this repository's generated file needs from a file it copies in.
+test("cv/preamble.tex keeps the declaration macros the generated file relies on", () => {
+  const tex = layout("preamble.tex");
 
   const cvdeclare = tex.match(/\\newcommand\{\\cvdeclare\}\[1\]\{([\s\S]*?)\n\}/);
   assert.ok(cvdeclare, "\\cvdeclare must remain defined");
@@ -340,22 +346,56 @@ test("cv.tex defines every generated macro it names, for README's smallest file 
     assert.match(cvdeclarebib[1], new RegExp(String.raw`\\providecommand\\csname cv#1${suffix}\\endcsname`));
   }
 
-  const cvpart = tex.match(/\\newcommand\{\\cvpart\}\[2\]\{([\s\S]*?)\n\}/);
-  assert.ok(cvpart, "\\cvpart must remain defined");
-  assert.match(cvpart[1], /\\cvdeclare\{#2\}/);
+  // The optional argument is the entry count, and it must reach \cvmax: the
+  // generator guards every entry with \ifnum<n>>\cvmax, so a layout that stopped
+  // setting it would print whole sections where a document asked for three.
+  const cvpart = tex.match(/\\newcommand\{\\cvpart\}\[3\]\[\\cvall\]\{([\s\S]*?)\n\}/);
+  assert.ok(cvpart, "\\cvpart must remain defined, taking an optional entry count");
+  assert.match(cvpart[1], /\\renewcommand\{\\cvmax\}\{#1\}/);
+  assert.match(cvpart[1], /^\s*\\cvdeclare\{#3\}\s*\{/);
+  assert.match(cvpart[1], /\\ifnum#1>0/);
 
-  const cvpartflush = tex.match(/\\newcommand\{\\cvpartflush\}\[2\]\{\{([\s\S]*?)\n\n/);
-  assert.ok(cvpartflush, "\\cvpartflush must remain defined");
-  assert.match(cvpartflush[1], /\\cvpart\{#1\}\{#2\}/);
+  assert.match(tex, /\\newcommand\{\\cvall\}\{\d+\}/);
+  assert.match(tex, /\\newcommand\{\\cvmax\}\{\\cvall\}/);
+});
+
+// The document's own overrides of the shared layout. Each exists to keep the
+// printed CV exactly as data/cv-baseline records it, and each is a plain
+// \renewcommand rather than a hook the template had to grow.
+test("cv/cv.tex sets its typeface, course widths and sourcemaps before the shared layout", () => {
+  const tex = layout("cv.tex");
+  const before = tex.slice(0, tex.indexOf("\\input{preamble.tex}"));
+  assert.ok(before.includes("\\input{preamble.tex}") === false && tex.includes("\\input{preamble.tex}"));
+  // A \providecommand in the preamble only leaves a definition alone if it is
+  // already made, so these three must be above the \input, not below it.
+  for (const hook of ["\\newcommand{\\cvtypeface}", "\\newcommand{\\cvcoursecols}", "\\newcommand{\\cvsourcemaps}"]) {
+    assert.ok(before.includes(hook), `${hook} must be defined before \\input{preamble.tex}`);
+  }
+  const after = tex.slice(tex.indexOf("\\input{preamble.tex}"));
+  assert.match(after, /\\renewcommand\{\\headerfontiii\}\{\\fontfamily\{ppl\}/);
+  assert.match(after, /\\renewcommand\{\\cventry\}\[4\]/);
+  assert.match(after, /\\renewcommand\{\\cvpartflush\}\[3\]\[\\cvall\]/);
+});
+
+// The cold-start trap: the layout names a macro the generator only emits when
+// cv.yaml declares the section it comes from, so an adopter's first
+// `latexmk -xelatex -cd cv/cv.tex` stops at TeX's interactive `?` prompt with
+// an undefined control sequence. This checks the whole class at once, against
+// the very file content/README.md tells a newcomer to start from.
+test("the printed CV defines every generated macro it names, for README's smallest file that works", () => {
+  const readme = readFileSync(join(root, "content/README.md"), "utf8");
+  const minimal = readme.match(/## The smallest file that works\s*```yaml\n([\s\S]*?)```/);
+  assert.ok(minimal, "content/README.md no longer carries a `The smallest file that works` example");
+  const tex = printedCv();
 
   const defined = new Set();
   const add = (names) => names.forEach((name) => defined.add(name));
   for (const [, name] of render(load(minimal[1])).matchAll(/\\newcommand\{\\(cv[A-Za-z]+)\}/g)) defined.add(name);
   for (const [, name] of tex.matchAll(/\\(?:new|provide)command\{\\(cv[A-Za-z]+)\}/g)) defined.add(name);
-  // cv.tex's own guards, which build their macro names with \csname.
-  const section = (name) => ["Count", "", "Note", "Rows", "Inline"].map((suffix) => `cv${name}${suffix}`);
+  // The layout's own guards, which build their macro names with \csname.
+  const section = (name) => ["Count", "Printed", "", "Note", "Rows", "Inline"].map((suffix) => `cv${name}${suffix}`);
   for (const [, name] of tex.matchAll(/\\cvdeclare\{([A-Za-z]+)\}/g)) add(section(name));
-  for (const [, name] of tex.matchAll(/\\cvpart(?:flush)?\{[^{}]*\}\{([A-Za-z]+)\}/g)) add(section(name));
+  for (const [, name] of tex.matchAll(/\\cvpart(?:flush)?(?:\[\d+\])?\{[^{}]*\}\{([A-Za-z]+)\}/g)) add(section(name));
   for (const [, name] of tex.matchAll(/\\cvdeclarebib\{([A-Za-z]+)\}/g)) add([`cv${name}Count`, `cv${name}Key`, `cv${name}Sections`]);
 
   const referenced = [...tex.matchAll(/\\(cv[A-Z][A-Za-z]*)/g)].map((m) => m[1]);
