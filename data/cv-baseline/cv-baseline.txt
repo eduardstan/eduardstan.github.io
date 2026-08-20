@@ -210,10 +210,10 @@ P UBLICATIONS                                          J=J OURNAL , C=C ONFERENC
 
 Journal articles (peer-reviewed)
 
-  [J1]   I. E. Stan, H. Amrani, P. Napoletano, and D. D’Auria. “Authenticated Robotic Teleoperation With Task
-         Recognition”. In: IEEE Consumer Electron. Mag. 15.1 (2026), pp. 33–40. DOI: 10.1109/MCE.2025.3546049.
-  [J2]   G. Badia, R. Monego, C. Noguera, A. Paparella, G. Sciavicco, and I. E. Stan. “Reasoning in Many-Valued
+  [J1]   G. Badia, R. Monego, C. Noguera, A. Paparella, G. Sciavicco, and I. E. Stan. “Reasoning in Many-Valued
          Multi-Modal Logic: A Uniform and General Approach”. In: Journal of Artiﬁcial Intelligence Research (2026).
+  [J2]   I. E. Stan, H. Amrani, P. Napoletano, and D. D’Auria. “Authenticated Robotic Teleoperation With Task
+         Recognition”. In: IEEE Consumer Electron. Mag. 15.1 (2026), pp. 33–40. DOI: 10.1109/MCE.2025.3546049.
   [J3]   I. E. Stan, D. D’Auria, and P. Napoletano. “A Systematic Literature Review of Innovations, Challenges, and
          Future Directions in Telemonitoring and Wearable Health Technologies”. In: IEEE Journal of Biomedical and
          Health Informatics (2025), pp. 1–22. DOI: 10.1109/JBHI.2025.3598056.

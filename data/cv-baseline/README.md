@@ -24,7 +24,7 @@ gate.** Any difference must be explained, not accepted.
 
 - Pages: 7
 - Extracted text: 410 lines
-- Text sha256 (first 16): 3eb2155144d8e83b
+- Text sha256 (first 16): 8086261168e72d60
 - `cv-baseline.pdf` is the exact PDF, kept for visual comparison.
 
 ## Known intended differences
@@ -40,5 +40,5 @@ gate.** Any difference must be explained, not accepted.
   7 pages to 7 pages.
 - 2026-08-20: Moved `stan_jair2026b` from Under review to Journal articles (peer-reviewed)
   after its 2026-08-19 acceptance at the Journal of Artificial Intelligence Research. The
-  bibliography's year/name sorting consequently renumbers the affected journal and under-review
-  entries; no citation data for those entries changed.
+  bibliography's announced-date sorting puts this entry at J1 and consequently renumbers the
+  affected journal and under-review entries; no citation data for those entries changed.
