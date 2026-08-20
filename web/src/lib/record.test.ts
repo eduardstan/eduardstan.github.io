@@ -232,6 +232,17 @@ const sparse = bib.entries.find((entry) => entry.key === 'stan_jair2026')!;
 assert.equal(sparse.citation, `${sparse.venue}.`);
 assert.deepEqual(sparse.citationFields, ['note']);
 assert.equal(sparse.link, undefined, 'a link was invented for an entry with no address field');
+
+// BibLaTeX's standard pubstate is the shared accepted-but-not-yet-published status.
+const inPress = bib.entries.find((entry) => entry.key === 'stan_jair2026b')!;
+assert.equal(inPress.fields.pubstate, 'inpress', `${inPress.key}: status field changed`);
+assert.equal(inPress.inPress, true, `${inPress.key}: in-press status was not read`);
+assert.equal(inPress.underReview, false, `${inPress.key}: acceptance regressed to under review`);
+assert.deepEqual(
+  bib.entries.filter((entry) => entry.inPress).map((entry) => entry.key),
+  ['stan_jair2026b'],
+  'unexpected in-press publication status',
+);
 // No volume but pages present — the comma before the pages is the only one.
 const noVolume = bib.entries.find((entry) => entry.key === '11122906')!;
 assert.equal(noVolume.citation, 'IEEE Journal of Biomedical and Health Informatics, 1-22.');

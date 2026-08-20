@@ -23,8 +23,8 @@ gate.** Any difference must be explained, not accepted.
 ## Baseline facts
 
 - Pages: 7
-- Extracted text: 410 lines
-- Text sha256 (first 16): 8086261168e72d60
+- Extracted text: 400 lines
+- Text sha256 (first 16): 2a06365cd8a1d675
 - `cv-baseline.pdf` is the exact PDF, kept for visual comparison.
 
 ## Known intended differences
@@ -42,3 +42,6 @@ gate.** Any difference must be explained, not accepted.
   after its 2026-08-19 acceptance at the Journal of Artificial Intelligence Research. The
   bibliography's announced-date sorting puts this entry at J1 and consequently renumbers the
   affected journal and under-review entries; no citation data for those entries changed.
+- 2026-08-20: Added BibLaTeX's `pubstate = {inpress}` to `stan_jair2026b`. The CV now renders
+  `In press.` after the year; its extra line reflows the extracted whitespace around the talk
+  headings and the entry itself, but no other citation data changes.

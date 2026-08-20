@@ -339,6 +339,12 @@ site and the PDF follow. In particular both halves of the under-review rule — 
 unannounced manuscript out of the register, and wording an announced one "submitted to {venue}" —
 read the entry's own `underreview` keyword, not the name of the section it lands in.
 
+An accepted manuscript that has not appeared yet carries BibLaTeX's standard
+`pubstate = {inpress}` field. The printed CV's numeric style renders this as `In press.` and the
+website renders `Accepted / in press (not yet published)` beside the citation. This is separate
+from `underreview`: an in-press entry stays in its ordinary type section, and `preprint` is only a
+keyword for a manuscript version — it is not the publication-status flag.
+
 **A section whose filter matches nothing prints nothing at all** — no heading, no gap — so
 declaring one costs nothing until the first entry arrives. An entry matching no section is still
 shown on the site, labelled `Other`; that is the visible sign that you have no group for it yet.
