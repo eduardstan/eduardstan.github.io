@@ -23,8 +23,8 @@ gate.** Any difference must be explained, not accepted.
 ## Baseline facts
 
 - Pages: 7
-- Extracted text: 399 lines
-- Text sha256 (first 16): c0aef847aec9c40c
+- Extracted text: 410 lines
+- Text sha256 (first 16): 8086261168e72d60
 - `cv-baseline.pdf` is the exact PDF, kept for visual comparison.
 
 ## Known intended differences
@@ -38,3 +38,7 @@ gate.** Any difference must be explained, not accepted.
   Artifacts venue, date, and one DOI. The CV generally suppresses `howpublished` whenever a URL or
   DOI exists, and suppresses `url` whenever a DOI exists. The resulting bibliography reflows from
   7 pages to 7 pages.
+- 2026-08-20: Moved `stan_jair2026b` from Under review to Journal articles (peer-reviewed)
+  after its 2026-08-19 acceptance at the Journal of Artificial Intelligence Research. The
+  bibliography's announced-date sorting puts this entry at J1 and consequently renumbers the
+  affected journal and under-review entries; no citation data for those entries changed.
