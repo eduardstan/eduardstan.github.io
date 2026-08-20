@@ -168,7 +168,6 @@ Languages: Romanian (native), Italian (ﬂuent), English (ﬂuent), Spanish (ﬂ
 TALKS & P RESENTATIONS                                                    I=I NVITED TALKS , O=O RAL SESSIONS , P=P OSTER SESSIONS
 
 Invited talks
-
   [I1]   I. E. Stan. “Modal Isolation Forest: Harnessing Modal Logic in Isolation-based Anomaly Detection”. Annual
          Meeting of the GNCS (Gruppo Nazionale Calcolo Scientiﬁco) / INdAM (Istituto Nazionale di Alta
          Matematica) Project (Rome, Italy). Invited talk. June 25, 2024.
@@ -178,7 +177,6 @@ Invited talks
          due to COVID-19 pandemic)). Invited talk. Nov. 7, 2021.
 
 Conference oral presentations
-
  [O1]    I. E. Stan. “Fitting’s Style Many-Valued Interval Temporal Logic Tableau System: Theory and Implementation”.
          31st International Symposium on Temporal Representation and Reasoning, TIME 2024 (Montpellier, France).
          Oral presentation. Oct. 29, 2024.
@@ -202,16 +200,15 @@ Conference oral presentations
          Sept. 27, 2017.
 
 Poster presentations
-
  [P1]    I. E. Stan. “Evolutionary Explainable Rule Extraction from (Modal) Random Forests”. 26th European
          Conference on Artiﬁcial Intelligence, ECAI 2023 (Kraków, Poland). Poster presentation. Oct. 4, 2023.
 
 P UBLICATIONS                                          J=J OURNAL , C=C ONFERENCE , W=W ORKSHOP, U=U NDER REVIEW, S=S OFTWARE
 
 Journal articles (peer-reviewed)
-
   [J1]   G. Badia, R. Monego, C. Noguera, A. Paparella, G. Sciavicco, and I. E. Stan. “Reasoning in Many-Valued
-         Multi-Modal Logic: A Uniform and General Approach”. In: Journal of Artiﬁcial Intelligence Research (2026).
+         Multi-Modal Logic: A Uniform and General Approach”. In: Journal of Artiﬁcial Intelligence Research (2026). In
+         press.
   [J2]   I. E. Stan, H. Amrani, P. Napoletano, and D. D’Auria. “Authenticated Robotic Teleoperation With Task
          Recognition”. In: IEEE Consumer Electron. Mag. 15.1 (2026), pp. 33–40. DOI: 10.1109/MCE.2025.3546049.
   [J3]   I. E. Stan, D. D’Auria, and P. Napoletano. “A Systematic Literature Review of Innovations, Challenges, and

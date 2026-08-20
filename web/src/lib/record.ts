@@ -172,6 +172,8 @@ export interface Publication {
    * rename, and this decides whether the entry may be announced at all.
    */
   underReview: boolean;
+  /** Whether the entry is accepted but not yet published (`pubstate = {inpress}`). */
+  inPress: boolean;
   title: string;
   authors: string[];
   year: number;
@@ -239,6 +241,7 @@ export function publicationKind(type: string, fields: Record<string, string>): s
  * reads it.
  */
 const UNDER_REVIEW = 'underreview';
+const IN_PRESS = 'inpress';
 
 /** Surname particles that must not be abbreviated away ("D. Della Monica"). */
 const PARTICLES = new Set(['della', 'delle', 'del', 'de', 'di', 'da', 'dos', 'van', 'von', 'la']);
@@ -469,6 +472,7 @@ function toPublication(
     type,
     kind: publicationKind(type, fields),
     underReview: keywordList(fields.keywords).includes(UNDER_REVIEW),
+    inPress: fields.pubstate?.toLowerCase() === IN_PRESS,
     title: deLatex(fields.title ?? ''),
     authors: (fields.author ?? '')
       .split(/\s+and\s+/)

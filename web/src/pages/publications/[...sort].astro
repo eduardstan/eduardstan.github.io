@@ -164,7 +164,10 @@ const description = `${bib.entries.length} entries${span && `, ${span}`}, read f
                     </>
                   ))}
                 </p>
-                <p class="vn">{entry.citation}</p>
+                <p class="vn">
+                  {entry.citation}
+                  {entry.inPress && ' (Accepted / in press — not yet published)'}
+                </p>
                 {
                   /* The citation above is a rendered claim like any other, so it
                      opens to the record it was assembled from: the entry it came
