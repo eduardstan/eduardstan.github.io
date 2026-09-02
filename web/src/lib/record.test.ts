@@ -228,7 +228,7 @@ assert.ok(paper.citation.endsWith('Informatik.'), `publisher missing: ${paper.ci
 
 // Sparse: no volume, no number, no pages, no publisher — a venue and nothing
 // else. It must come out as that venue, not as that venue plus punctuation.
-const sparse = bib.entries.find((entry) => entry.key === 'stan_jair2026')!;
+const sparse = bib.entries.find((entry) => entry.key === 'stan_kr2026')!;
 assert.equal(sparse.citation, `${sparse.venue}.`);
 assert.deepEqual(sparse.citationFields, ['note']);
 assert.equal(sparse.link, undefined, 'a link was invented for an entry with no address field');

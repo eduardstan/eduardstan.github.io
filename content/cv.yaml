@@ -91,8 +91,9 @@ profile:
       to obtain explanations that can be inspected, validated, and monitored. His work targets
       high-impact settings—especially healthcare and telemonitoring—and extends to smart
       environments. He contributes to Italian programmes (ANTHEM/PNC; previously iNEST/PNRR) and
-      serves the community as Associate Editor (_Neurocomputing_, _Frontiers in Artificial
-      Intelligence_), including as Lead Editor of a special issue on explainable AI (XAI) for
+      coordinates an INdAM-GNCS research project and serves the community as Associate Editor
+      (_Neurocomputing_, _Frontiers in Artificial Intelligence_), including as Lead Editor of a
+      special issue on explainable AI (XAI) for
       human-centric healthcare, as well as Area Chair and Organizing/Program Committee member
       for major AI venues. He teaches Databases (B.Sc.), Intelligent Consumer Technologies
       (M.Sc.), and Foundations of AI (2nd-level Master's).
@@ -234,7 +235,7 @@ service:
   - title: Associate Editor
     org: Frontiers in Artificial Intelligence Journal
     detail: Pattern Recognition Section
-    metric: "IF: 4.7, Q2"
+    metric: "IF: 6.7, Q1"
     url: https://www.frontiersin.org/journals/artificial-intelligence/sections/pattern-recognition
     rank_url: https://www.scimagojr.com/journalsearch.php?q=21101062817&tip=sid&clean=0
     announced: 2025-03-03T10:00:00+02:00
@@ -289,6 +290,7 @@ service:
         announced: 2024-06-10
       - year: 2026
         announced: 2025-07-18
+      - 2027
   - title: Program Committee
     org: International Conference on Learning Representations (ICLR)
     metric: "CORE Rank: A*"
@@ -299,6 +301,7 @@ service:
         announced: 2024-08-28
       - year: 2026
         announced: 2025-09-23
+      - 2027
   - title: Program Committee
     org: International Joint Conference on Artificial Intelligence (IJCAI)
     metric: "CORE Rank: A*"
@@ -344,7 +347,22 @@ service:
     metric: "IF: 1.0; Q2"
     url: https://www.sciencedirect.com/journal/information-and-computation
     rank_url: https://www.scimagojr.com/journalsearch.php?q=25509&tip=sid&clean=0
+  - title: Reviewer
+    org: Elsevier International Journal of Approximate Reasoning
+    metric: "IF: 2.8; Q2"
+    url: https://www.sciencedirect.com/journal/international-journal-of-approximate-reasoning
+    rank_url: https://www.scimagojr.com/journalsearch.php?q=24286
+    announced: 2026-09-02
 projects:
+  - title: Contratto semantico neuro-simbolico per reachability rigorosa e certificati in CPS
+    detail: Coordinator (Principal Investigator) — INdAM-GNCS Research Projects 2026
+    url: https://www.altamatematica.it/gncs/
+    dates: 27 Mar 2026–27 Mar 2027
+    announced: 2026-03-27
+    funding: €2,100
+    count: 16 participants (six universities)
+    items:
+      - Bando Progetti di Ricerca GNCS 2026 (CUP E53C25002010001).
   - title: ANTHEM — AdvaNced Technologies for Human-centred Medicine
     detail: Collaborator (University of Milano-Bicocca, ISLab)
     url: https://fondazioneanthem.it/en/
@@ -415,6 +433,13 @@ projects:
       - Contributed to strategic reasoning and automated synthesis themes, strengthening the
         formal-methods research line on explainability and symbolic reasoning.
 awards:
+  - title: First place — Huawei Technologies Italia Challenge
+    detail: HACK4INNOVATION Bicocca · Team CHEAR
+    url: https://www.unimib.it/eventi/hack4innovation-bicocca-0
+    dates: 27 Mar 2026
+    announced: 2026-03-27
+    items:
+      - Real-time audio-visual speech enhancement prototype; €2,000 team prize. Team members: L. Celona, A. Corsico, A. Emami, E. Mosca.
   - title: Finalist (2nd place) & Team Leader
     detail: Huawei Italy University Challenge
     dates: Nov 2021
