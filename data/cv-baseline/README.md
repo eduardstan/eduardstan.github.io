@@ -1,4 +1,4 @@
-# Printed CV baseline — captured 2026-07-29
+# Printed CV baseline — updated 2026-09-02
 
 Captured from `origin/master` at commit 78d915e, BEFORE the adopter-interface redesign.
 
@@ -22,9 +22,9 @@ gate.** Any difference must be explained, not accepted.
 
 ## Baseline facts
 
-- Pages: 7
-- Extracted text: 400 lines
-- Text sha256 (first 16): 2a06365cd8a1d675
+- Pages: 8
+- Extracted text: 413 lines
+- Text sha256 (first 16): 818624538a00eb9c
 - `cv-baseline.pdf` is the exact PDF, kept for visual comparison.
 
 ## Known intended differences
@@ -45,3 +45,4 @@ gate.** Any difference must be explained, not accepted.
 - 2026-08-20: Added BibLaTeX's `pubstate = {inpress}` to `stan_jair2026b`. The CV now renders
   `In press.` after the year; its extra line reflows the extracted whitespace around the talk
   headings and the entry itself, but no other citation data changes.
+- 2026-09-02: Updated the CV record with the 2026 Sensors, Array and Journal of Artificial Intelligence Research publications, a reviewer role, 2027 AAAI and ICLR service, a GNCS project, and a Huawei challenge award. The added records and their detail reflow the document from 7 pages to 8.

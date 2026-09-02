@@ -243,7 +243,7 @@ assert.ok(
 
 // `projects[]` feeds /projects/, including the funding figures the printed CV
 // deliberately omits — the reason they are in this file at all.
-assert.equal(projects.length, 8, `expected 8 research projects, got ${projects.length}`);
+assert.equal(projects.length, 9, `expected 9 research projects, got ${projects.length}`);
 for (const project of projects) {
   text(project.detail, 'projects[].detail');
   text(project.dates, 'projects[].dates');
