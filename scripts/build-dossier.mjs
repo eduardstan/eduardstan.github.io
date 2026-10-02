@@ -5,6 +5,7 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load } from "js-yaml";
 import { metadataDate } from "./dossier-date.mjs";
+import { protectBibtexValues, protectNoBreak } from "./dossier-nobreak.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (p) => readFileSync(resolve(root, p), "utf8");
 const data = load(read("content/cv.yaml"));
@@ -36,27 +37,29 @@ writeFileSync(
   `os.remove("creationdate.timestamp")\nio.output("creationdate.timestamp"):write("\\\\edef\\\\tempa{\\\\string D:${compactDate}000000}\\n\\\\def\\\\tempb{+0000}")\n`
 );
 const esc = (s) =>
-  String(s ?? "")
-    .replace(
-      /[\\&%$#_{}~^]/g,
-      (c) =>
-        ({
-          "\\": "\\textbackslash{}",
-          "&": "\\&",
-          "%": "\\%",
-          $: "\\$",
-          "#": "\\#",
-          _: "\\_",
-          "{": "\\{",
-          "}": "\\}",
-          "~": "\\textasciitilde{}",
-          "^": "\\textasciicircum{}",
-        })[c]
-    )
-    .replace(/—/g, "---")
-    .replace(/–/g, "--")
-    .replace(/‑/g, "{-}")
-    .replace(/⁺/g, "\\textsuperscript{+}");
+  protectNoBreak(
+    String(s ?? "")
+      .replace(
+        /[\\&%$#_{}~^]/g,
+        (c) =>
+          ({
+            "\\": "\\textbackslash{}",
+            "&": "\\&",
+            "%": "\\%",
+            $: "\\$",
+            "#": "\\#",
+            _: "\\_",
+            "{": "\\{",
+            "}": "\\}",
+            "~": "\\textasciitilde{}",
+            "^": "\\textasciicircum{}",
+          })[c]
+      )
+      .replace(/—/g, "---")
+      .replace(/–/g, "--")
+      .replace(/‑/g, "{-}")
+      .replace(/⁺/g, "\\textsuperscript{+}")
+  );
 const escExact = (s) => {
   let openingQuote = true;
   return esc(s).replace(/[\'"]/g, (c) => {
@@ -137,6 +140,10 @@ function parseBib(text) {
   }
   return entries;
 }
+const publicationBib = protectBibtexValues(read("content/publications.bib"));
+const talksBib = protectBibtexValues(read("content/talks.bib"));
+writeFileSync(resolve(out, "publications-dossier.bib"), publicationBib);
+writeFileSync(resolve(out, "talks-dossier.bib"), talksBib);
 const pubs = parseBib(read("content/publications.bib"));
 const talks = parseBib(read("content/talks.bib"));
 if (!Array.isArray(spec.publications) || spec.publications.length > 12 || spec.publications.length < 1)
@@ -248,7 +255,7 @@ writeFileSync(
   resolve(out, "publications.tex"),
   doc(italian ? "Elenco delle pubblicazioni presentate" : "List of submitted publications", pubBody).replace(
     "\\usepackage{enumitem}",
-    `\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\DeclareFieldFormat{eid}{Article~#1}\n${journalEidMacro}\n\\DeclareFieldFormat{issn}{}\n\\addbibresource{../../content/publications.bib}`
+    `\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\DeclareFieldFormat{eid}{Article~#1}\n${journalEidMacro}\n\\DeclareFieldFormat{issn}{}\n\\addbibresource{publications-dossier.bib}`
   )
 );
 writeFileSync(
@@ -262,17 +269,20 @@ writeFileSync(
 let cv = read("cv/cv.tex");
 let shared = read("cv/preamble.tex")
   .replaceAll("../content/", "../../content/")
+  .replace("../../content/publications.bib", "publications-dossier.bib")
+  .replace("../../content/talks.bib", "talks-dossier.bib")
   .replace(
     "\\documentclass[a4paper,11pt]{article}",
     "\\documentclass[a4paper,11pt]{article}\n\\PassOptionsToPackage{hidelinks}{hyperref}\n\\usepackage[a-2b]{pdfx}"
   );
 
 cv = cv.replaceAll("../content/", "../../content/");
+cv = cv.replaceAll("../../content/talks.bib", "talks-dossier.bib").replaceAll("../../content/publications.bib", "publications-dossier.bib");
 writeFileSync(resolve(out, "preamble.tex"), shared);
 copyFileSync(resolve(root, "cv/header.tex"), resolve(out, "header.tex"));
 copyFileSync(resolve(root, "cv/supervision.tex"), resolve(out, "supervision.tex"));
 mkdirSync(resolve(out, "generated"), { recursive: true });
-copyFileSync(resolve(root, "cv/generated/cv-data.tex"), resolve(out, "generated/cv-data.tex"));
+writeFileSync(resolve(out, "generated/cv-data.tex"), protectNoBreak(read("cv/generated/cv-data.tex")));
 cv = cv.replace("\\begin{document}", `\\begin{document}\n${draftFooter}`);
 const cvLine = `\\par\\medskip\\noindent\\textbf{Luogo e data:} ${place ? `${place}, ` : ""}${date || "\\rule{3cm}{0.4pt}"}\\par\\vspace{1em}`;
 const cvEnd = cv.lastIndexOf("\\end{document}");
@@ -366,7 +376,7 @@ if (abstractPath) {
   const body = `\\begin{enumerate}[leftmargin=*]${spec.publications.map((k) => `\\item {\\hyphenpenalty=10000\\exhyphenpenalty=10000\\textbf{\\citetitle{${k}}}\\\\\\citeauthor{${k}}.\\par}\\medskip \\begin{italian}${esc(indexed.get(k).abstract_it)}\\end{italian}`).join("\n")}\\end{enumerate}`;
   const abstractTex = doc("Abstract tradotti in italiano", body).replace(
     "\\usepackage{enumitem}",
-    `\\usepackage{enumitem}\n${noBreakPreamble}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\addbibresource{../../content/publications.bib}`
+    `\\usepackage{enumitem}\n${noBreakPreamble}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\addbibresource{publications-dossier.bib}`
   );
   writeFileSync(resolve(out, "abstracts-it.tex"), abstractTex);
   writeFileSync(

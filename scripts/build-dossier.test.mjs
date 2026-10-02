@@ -7,6 +7,7 @@ import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { metadataDate } from "./dossier-date.mjs";
+import { protectBibtexValues, protectNoBreak } from "./dossier-nobreak.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const script = join(root, "scripts/build-dossier.mjs");
@@ -44,6 +45,17 @@ assert.deepEqual(spec.attachments, [
   "Elenco di tutti i documenti allegati alla domanda",
 ]);
 
+test("protects uppercase acronyms and ISO dates without affecting other hyphenation", () => {
+  assert.equal(
+    protectNoBreak("AAMAS IJCAI TIME CORE XAI XAI2 LTLs LIPIcs C4.5 2020-09-25 2021-09-22 many-valued"),
+    String.raw`\mbox{AAMAS} \mbox{IJCAI} \mbox{TIME} \mbox{CORE} \mbox{XAI} \mbox{XAI2} \mbox{LTLs} LIPIcs C4.5 \mbox{2020-09-25} \mbox{2021-09-22} many-valued`
+  );
+  assert.equal(
+    protectBibtexValues("@article{KEY, title={AAMAS 2020-09-25}, author={AA, Example}, url={https://x.test/AAMAS}}"),
+    "@article{KEY, title={\\mbox{AAMAS} \\mbox{2020-09-25}}, author={AA, Example}, url={https://x.test/AAMAS}}"
+  );
+});
+
 test("parses supported human date forms for PDF metadata", () => {
   for (const [input, expected] of [
     ["2026-10-02", "2026-10-02"],
@@ -69,6 +81,8 @@ test("renders the declaration, optional translations, and rejects bad publicatio
   assert.match(titles, /Luogo e data.*\\rule/);
   assert.match(titles, /BOZZA/);
   assert.match(titles, /\\item \\textbf\{/);
+  assert.match(titles, /\\mbox\{AAMAS\}/);
+  assert.match(titles, /\\mbox\{2020-09-25\}/);
   const attachments = readFileSync(join(output, "attachments.tex"), "utf8");
   assert.match(attachments, /\\char"27\{\}/);
   assert.match(attachments, /\\textquotedblleft\{\}Foundations of Modal Symbolic Learning\\textquotedblright/);
@@ -76,17 +90,20 @@ test("renders the declaration, optional translations, and rejects bad publicatio
   const invited = titles.slice(titles.indexOf("Relazioni su invito"), titles.indexOf("Presentazioni orali"));
   const oral = titles.slice(titles.indexOf("Presentazioni orali"), titles.indexOf("Poster}"));
   const poster = titles.slice(titles.indexOf("Poster}"));
-  assert.match(invited, /NLP meets Modal Logic/);
+  assert.match(invited, /\\mbox\{NLP\} meets Modal Logic/);
   assert.doesNotMatch(invited, /Fitting.s Style/);
   assert.match(oral, /Fitting.s Style/);
   assert.doesNotMatch(oral, /Evolutionary Explainable/);
   assert.match(poster, /Evolutionary Explainable Rule Extraction/);
-  assert.match(poster, /Kraków, Poland, 2023-10-04/);
+  assert.match(poster, /Kraków, Poland, \\mbox\{2023-10-04\}/);
   const cilc = titles.slice(titles.indexOf("Implementation of a Tableau-based Satisfiability Checker"));
-  assert.match(cilc, /32nd Italian Conference on Computational Logic, CILC 2017, Naples, Italy, 2017-09-27/);
+  assert.match(cilc, /32nd Italian Conference on Computational Logic, \\mbox\{CILC\} 2017, Naples, Italy, \\mbox\{2017-09-27\}/);
   assert.equal((cilc.match(/Naples, Italy/g) || []).length, 1);
   assert.doesNotMatch(cilc, /September 26-28, 2017/);
   assert.match(readFileSync(join(output, "publications.tex"), "utf8"), /\\finalnamedelim/);
+  assert.match(readFileSync(join(output, "publications-dossier.bib"), "utf8"), /\\mbox\{/);
+  assert.match(readFileSync(join(output, "preamble.tex"), "utf8"), /publications-dossier\.bib/);
+  assert.match(readFileSync(join(output, "cv.tex"), "utf8"), /talks-dossier\.bib/);
   assert.match(readFileSync(join(output, "publications.tex"), "utf8"), /\\DeclareFieldFormat\{eid\}\{Article~#1\}/);
   assert.match(readFileSync(join(output, "publications.tex"), "utf8"), /\\DeclareFieldFormat\{issn\}\{\}/);
   assert.match(readFileSync(join(output, "publications.tex"), "utf8"), /\\renewbibmacro\*\{journal\+issuetitle\}/);
@@ -96,10 +113,10 @@ test("renders the declaration, optional translations, and rejects bad publicatio
   assert.equal(overridden.status, 0, overridden.stderr);
   const overriddenTitles = readFileSync(join(output, "titles.tex"), "utf8");
   const overriddenCv = readFileSync(join(output, "cv.tex"), "utf8");
-  assert.match(overriddenTitles, /textitalian{Luogo e data:}} Roma, 2026-10-02/);
+  assert.match(overriddenTitles, /textitalian{Luogo e data:}} Roma, \\mbox\{2026-10-02\}/);
   assert.doesNotMatch(overriddenTitles, /BOZZA/);
   const cvEnding = overriddenCv.slice(overriddenCv.lastIndexOf("\\end{document}") - 200);
-  assert.match(cvEnding, /Luogo e data:} Roma, 2026-10-02/);
+  assert.match(cvEnding, /Luogo e data:} Roma, \\mbox\{2026-10-02\}/);
   assert.match(readFileSync(join(output, "titles.xmpdata"), "utf8"), /\\Date\{2026-10-02\}/);
   const italianDate = run(["--place", "Bologna", "--date", "2 ottobre 2026"]);
   assert.equal(italianDate.status, 0, italianDate.stderr);
