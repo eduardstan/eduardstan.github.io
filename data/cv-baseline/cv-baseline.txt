@@ -211,8 +211,7 @@ Conference oral presentations
          with 16th Reasoning Web Summer School (RW 2020) 12th DecisionCAMP 2020 as part of Declarative AI 2020
          (Oslo, Norway (virtual due to COVID-19 pandemic)). Oral presentation. June 30, 2020.
  [O7]    I. E. Stan. “Implementation of a Tableau-based Satisﬁability Checker for HS3”. 32nd Italian Conference on
-         Computational Logic, CILC 2017 Naples, Italy, September 26-28, 2017 (Naples, Italy). Oral presentation.
-         Sept. 27, 2017.
+         Computational Logic, CILC 2017 (Naples, Italy). Oral presentation. Sept. 27, 2017.
 
 Poster presentations
 
@@ -223,9 +222,8 @@ P UBLICATIONS                                        J=J OURNAL , C=C ONFERENCE 
 
 Journal articles (peer-reviewed)
  [J1]   G. Badia, R. Monego, C. Noguera, A. Paparella, G. Sciavicco, and I. E. Stan. “Reasoning in Many-Valued
-        Multi-Modal Logic: A Uniform and General Approach”. In: Journal of Artiﬁcial Intelligence Research 87 (2026).
-        DOI : 10.1613/jair.1.23339.
-
+        Multi-Modal Logic: A Uniform and General Approach”. In: Journal of Artiﬁcial Intelligence Research 87 (2026),
+        Article 9. DOI: 10.1613/jair.1.23339.
  [J2]   P. Cavina, F. Manzella, G. Pagliarini, G. Sciavicco, and I. E. Stan. “Beyond Tabular Data: Feature Extraction and
         Selection for High-Dimensional Data”. In: Array 30 (July 2026), p. 100893. DOI: 10.1016/j.array.2026.100893.
  [J3]   I. E. Stan, H. Amrani, P. Napoletano, and D. D’Auria. “Authenticated Robotic Teleoperation With Task
@@ -236,7 +234,7 @@ Journal articles (peer-reviewed)
  [J5]   I. E. Stan and P. Napoletano. “Predicting Subjective Usability from Kinematic Data in IMU-Based Robotic
         Teleoperation”. In: Sensors 26.15 (Aug. 2026), p. 5002. DOI: 10.3390/s26155002.
  [J6]   I. E. Stan, G. Sciavicco, and P. Napoletano. “Symbols and Neurons: A Review of Symbolic XAI in Deep
-        Learning”. In: Journal of Artiﬁcial Intelligence Research 86 (2026). DOI: 10.1613/jair.1.22096.
+        Learning”. In: Journal of Artiﬁcial Intelligence Research 86 (2026), Article 36. DOI: 10.1613/jair.1.22096.
  [J7]   G. Pagliarini, S. Scaboro, G. Serra, G. Sciavicco, and I. E. Stan. “Neural-symbolic temporal decision trees for
         multivariate time series classiﬁcation”. In: Inf. Comput. 301 (2024), p. 105209. DOI: 10.1016/J.IC.2024.105209.
  [J8]   G. Bechini, E. Losi, L. Manservigi, G. Pagliarini, G. Sciavicco, I. E. Stan, and M. Venturini. “Statistical Rule
@@ -250,8 +248,8 @@ Journal articles (peer-reviewed)
 
 [J11]   E. Lucena-Sánchez, G. Sciavicco, and I. E. Stan. “Feature and Language Selection in Temporal Symbolic
         Regression for Interpretable Air Quality Modelling”. In: Algorithms 14.3 (2021), p. 76. DOI: 10.3390/A14030076.
-[J12]   E. Muñoz-Velasco, M. Pelegrín-García, P. Sala, G. Sciavicco, and I. E. Stan. “On coarser interval temporal
-        logics”. In: Artif. Intell. 266 (2019), pp. 1–26. DOI: 10.1016/J.ARTINT.2018.09.001.
+[J12]   E. Muñoz-Velasco, M. Pelegrín, P. Sala, G. Sciavicco, and I. E. Stan. “On coarser interval temporal logics”. In:
+        Artif. Intell. 266 (2019), pp. 1–26. DOI: 10.1016/J.ARTINT.2018.09.001.
 
 Conference papers (peer-reviewed)
 

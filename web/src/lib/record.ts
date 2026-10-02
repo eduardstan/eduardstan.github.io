@@ -404,6 +404,8 @@ function citationOf(
   const number = take('number');
   const numbered = volume ? (number ? `${volume}(${number})` : volume) : number;
   const pages = take('pages');
+  const eid = take('eid');
+  const eidYear = eid ? take('year') : '';
   const publisher = take('publisher');
 
   if (venueField) used.unshift(venueField);
@@ -411,7 +413,10 @@ function citationOf(
   // venue if it does not. A journal reads "Fuzzy Sets and Systems 456", a
   // conference "…, LIPIcs 355".
   const head = [venue, series ? '' : numbered].filter(Boolean).join(' ');
-  const line = [head, series && [series, numbered].filter(Boolean).join(' '), pages]
+  const venueLine = [head, series && [series, numbered].filter(Boolean).join(' ')]
+    .filter(Boolean)
+    .join(', ');
+  const line = [eidYear ? `${venueLine} (${eidYear})` : venueLine, eid && `Article ${eid}`, pages]
     .filter(Boolean)
     .join(', ');
   // The publisher is already the venue for entries that have nothing else.

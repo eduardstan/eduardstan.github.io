@@ -9,6 +9,19 @@ const read = (p) => readFileSync(resolve(root, p), "utf8");
 const data = load(read("content/cv.yaml"));
 const spec = load(read("content/dossier.yaml"));
 const cli = process.argv.slice(2);
+for (let i = 0; i < cli.length; i++) {
+  if (cli[i] === "--place" || cli[i] === "--date" || cli[i] === "--reviewed") {
+    const flag = cli[i],
+      value = cli[++i];
+    if (!value) throw Error(`${flag} requires a value`);
+    if (flag === "--place") spec.place = value;
+    if (flag === "--date") spec.date = value;
+    if (flag === "--reviewed") {
+      if (!["true", "false"].includes(value)) throw Error("--reviewed must be true or false");
+      spec.reviewed = value === "true";
+    }
+  }
+}
 const keyFlag = cli.indexOf("--check-keys");
 if (keyFlag >= 0) spec.publications = cli[keyFlag + 1].split(",");
 const out = resolve(root, "cv/dossier-build");
@@ -40,13 +53,27 @@ const esc = (s) =>
     .replace(/–/g, "--")
     .replace(/‑/g, "{-}")
     .replace(/⁺/g, "\\textsuperscript{+}");
+const escExact = (s) => {
+  let openingQuote = true;
+  return esc(s).replace(/[\'"]/g, (c) => {
+    if (c === "'") return String.raw`\char"27{}`;
+    const quote = openingQuote ? String.raw`\textquotedblleft{}` : String.raw`\textquotedblright{}`;
+    openingQuote = !openingQuote;
+    return quote;
+  });
+};
 const plain = (s) =>
   String(s ?? "")
     .replace(/\\(?:textit|textbf|emph|url|href)\s*\{([^{}]*)\}/g, "$1")
+    .replace(/\\'\{([aeiouAEIOU])\}/g, (_, vowel) => {
+      const acute = { a: "á", e: "é", i: "í", o: "ó", u: "ú" }[vowel.toLowerCase()];
+      return vowel === vowel.toUpperCase() ? acute.toUpperCase() : acute;
+    })
     .replace(/\\[{}]/g, "")
     .replace(/\\&/g, "&")
     .replace(/\\_/g, "_")
     .replace(/\\%/g, "%")
+    .replace(/[{}]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 function parseBib(text) {
@@ -114,7 +141,7 @@ if (new Set(spec.publications).size !== spec.publications.length) throw Error("d
 for (const k of spec.publications) if (!pubs.has(k)) throw Error(`unknown publication key: ${k}`);
 for (const k of spec.publications) {
   const f = pubs.get(k);
-  const missing = ["doi", "volume", "pages"].filter((field) => !f[field]?.trim());
+  const missing = ["doi", "volume"].filter((field) => !f[field]?.trim()).concat(!f.pages?.trim() && !f.eid?.trim() ? ["pages/eid"] : []);
   if (missing.length) console.warn(`Selected publication ${k} has no ${missing.join(", ")}`);
 }
 if (keyFlag >= 0) {
@@ -127,10 +154,10 @@ const italian = spec.language === "it";
 const date = esc(spec.date),
   place = esc(spec.place),
   name = esc(data.profile.name);
-const line = `\\par\\medskip\\noindent\\textbf{Luogo e data:} ${place ? `${place}, ` : ""}${date || "\\rule{3cm}{0.4pt}"}\\par\\vspace{1em}`;
+const line = `\\par\\medskip\\noindent\\textbf{\\textitalian{Luogo e data:}} ${place ? `${place}, ` : ""}${date || "\\rule{3cm}{0.4pt}"}\\par\\vspace{1em}`;
 const draftFooter = spec.reviewed === false ? String.raw`\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{BOZZA}\renewcommand{\headrulewidth}{0pt}` : "";
 function doc(title, body) {
-  return `\\documentclass[a4paper,11pt]{article}\n\\usepackage[a-2b]{pdfx}\n\\usepackage[margin=25mm]{geometry}\n\\usepackage{fontspec}\n\\setmainfont{TeX Gyre Pagella}\n\\usepackage{enumitem}\n\\usepackage{fancyhdr}\n\\begin{document}\n\\sloppy${draftFooter}\n\\begin{center}{\\Large\\bfseries ${esc(title)}}\\end{center}\n\\noindent\\textbf{${name}}\\par\\medskip\n${body}\n${line}\\end{document}\n`;
+  return `\\documentclass[a4paper,11pt]{article}\n\\usepackage[a-2b]{pdfx}\n\\usepackage[margin=25mm]{geometry}\n\\usepackage{fontspec}\n\\usepackage{polyglossia}\n\\setmainlanguage{english}\n\\setotherlanguage{italian}\n\\setmainfont{TeX Gyre Pagella}\n\\usepackage{enumitem}\n\\usepackage{fancyhdr}\n\\begin{document}\n\\sloppy${draftFooter}\n\\begin{center}{\\Large\\bfseries ${italian ? `\\textitalian{${esc(title)}}` : esc(title)}}\\end{center}\n\\noindent\\textbf{${name}}\\par\\medskip\n${body}\n${line}\\end{document}\n`;
 }
 function item(e) {
   const years = (e.years || [])
@@ -149,20 +176,59 @@ const label = {
   service: "Attività editoriale, organizzazione e revisione",
 };
 const groupedTitles = spec.titles_sections
-  .map((k) => `\\subsection*{${esc(label[k] || k)}}\n\\begin{itemize}[leftmargin=*]${data[k].map(item).join("\n")}\\end{itemize}`)
+  .map((k) => `\\subsection*{\\textitalian{${esc(label[k] || k)}}}\n\\begin{itemize}[leftmargin=*]${data[k].map(item).join("\n")}\\end{itemize}`)
   .join("\n");
-const talkItems = [...talks.entries()].map(([key, f]) => `\\item ${esc(plain(f.title))}${f.year ? `, ${esc(plain(f.year))}` : ""}.`).join("\n");
+const talkGroups = { invited: [], oral: [], poster: [] };
+for (const [key, f] of talks) {
+  const keywords = (f.keywords || "").split(/[\s,]+/).filter(Boolean);
+  const classes = ["invited", "oral", "poster"].filter((kind) => keywords.includes(kind));
+  if (classes.length !== 1) throw Error(`talk ${key} must have exactly one invited/oral/poster keyword`);
+  if (![f.title, f.eventtitle, f.venue, f.date].every((value) => typeof value === "string" && value.trim()))
+    throw Error(`talk ${key} must record title, eventtitle, venue and date`);
+  const date = plain(f.date);
+  const details = [plain(f.eventtitle), plain(f.venue), date].join(", ");
+  talkGroups[classes[0]].push(`\\item \\textbf{${esc(plain(f.title))}}. ${esc(details)}.`);
+}
+const talkSection = `\\section*{\\textitalian{Relazioni a congressi e convegni}}\n${[
+  ["invited", "Relazioni su invito"],
+  ["oral", "Presentazioni orali"],
+  ["poster", "Poster"],
+]
+  .map(([kind, title]) => `\\subsection*{\\textitalian{${title}}}\n\\begin{itemize}[leftmargin=*]${talkGroups[kind].join("\n")}\\end{itemize}`)
+  .join("\n")}`;
+
 const doctorate = data.education.find((entry) => /ph\.?\s*d/i.test(entry.title) && entry.detail);
 const doctorateYear = doctorate?.dates?.match(/(?:19|20)\d{2}/g)?.at(-1);
 const thesisSection = doctorate
-  ? `\n\\subsection*{Tesi di dottorato}\n\\begin{itemize}[leftmargin=*]\\item \\textbf{${esc(plain(doctorate.detail))}}. ${esc(plain(doctorate.org))}${doctorateYear ? `, ${doctorateYear}` : ""}.\\end{itemize}`
+  ? `\n\\subsection*{\\textitalian{Tesi di dottorato}}\n\\begin{itemize}[leftmargin=*]\\item \\textbf{${esc(plain(doctorate.detail))}}. ${esc(plain(doctorate.org))}${doctorateYear ? `, ${doctorateYear}` : ""}.\\end{itemize}`
   : "";
-const titleBody = groupedTitles + `\n\\subsection*{Invited talks}\n\\begin{itemize}[leftmargin=*]${talkItems}\\end{itemize}` + thesisSection;
+const titleBody = groupedTitles + `\n${talkSection}` + thesisSection;
 // BibLaTeX renders the canonical records, in the citation order declared in YAML.
 const citationKeys = spec.publications.join(",");
 const pubBody = `\\nocite{${citationKeys}}\n\\printbibliography[heading=none]`;
+const journalEidMacro = String.raw`\renewbibmacro*{journal+issuetitle}{%
+  \usebibmacro{journal}%
+  \setunit*{\addspace}%
+  \iffieldundef{series}
+    {}
+    {\newunit
+     \printfield{series}%
+     \setunit{\addspace}}%
+  \ifentrytype{article}
+    {\printfield{volume}%
+     \setunit*{\adddot}%
+     \printfield{number}%
+     \setunit{\addspace}%
+     \usebibmacro{issue+date}%
+     \iffieldundef{eid}{}{\setunit{\addcomma\space}\printfield{eid}}}
+    {\usebibmacro{volume+number+eid}%
+     \setunit{\addspace}%
+     \usebibmacro{issue+date}}%
+  \setunit{\addcolon\space}%
+  \printfield{issue}%
+  \newunit}`;
 
-const manifest = spec.attachments.map((x) => `\\item ${esc(x)}`).join("\n");
+const manifest = spec.attachments.map((x) => `\\item \\textitalian{${escExact(x)}}`).join("\n");
 for (const [base, title] of [
   ["titles", "Elenco dei titoli"],
   ["publications", "Elenco delle pubblicazioni presentate"],
@@ -181,7 +247,7 @@ writeFileSync(
   resolve(out, "publications.tex"),
   doc(italian ? "Elenco delle pubblicazioni presentate" : "List of submitted publications", pubBody).replace(
     "\\usepackage{enumitem}",
-    "\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\addbibresource{../../content/publications.bib}"
+    `\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\DeclareFieldFormat{eid}{Article~#1}\n${journalEidMacro}\n\\DeclareFieldFormat{issn}{}\n\\addbibresource{../../content/publications.bib}`
   )
 );
 writeFileSync(
@@ -207,18 +273,88 @@ copyFileSync(resolve(root, "cv/supervision.tex"), resolve(out, "supervision.tex"
 mkdirSync(resolve(out, "generated"), { recursive: true });
 copyFileSync(resolve(root, "cv/generated/cv-data.tex"), resolve(out, "generated/cv-data.tex"));
 cv = cv.replace("\\begin{document}", `\\begin{document}\n${draftFooter}`);
-cv = cv.replace("\\end{document}", "\\end{document}");
+const cvLine = `\\par\\medskip\\noindent\\textbf{Luogo e data:} ${place ? `${place}, ` : ""}${date || "\\rule{3cm}{0.4pt}"}\\par\\vspace{1em}`;
+const cvEnd = cv.lastIndexOf("\\end{document}");
+if (cvEnd < 0) throw Error("CV document has no \\end{document}");
+cv = `${cv.slice(0, cvEnd)}${cvLine}\n${cv.slice(cvEnd)}`;
 writeFileSync(resolve(out, "cv.tex"), cv);
 // Optional external YAML list: [{position, bibkey, abstract_it}].
 const args = cli;
 const ai = args.indexOf("--abstracts");
 const abstractArgument = ai >= 0 ? args[ai + 1] : process.env.DOSSIER_ABSTRACTS;
 if (ai >= 0 && !abstractArgument) throw Error("--abstracts requires a file path");
+// English terms retained in the Italian abstracts, including named logics, methods and models.
+// Their tokens are no-break exceptions in both document languages so Italian patterns cannot
+// split the English vocabulary and citation titles cannot reintroduce a break.
+const englishNoBreakTerms = [
+  "many-valued",
+  "FLew",
+  "frame",
+  "tableau",
+  "framework",
+  "open source",
+  "post hoc",
+  "deep learning",
+  "feedback",
+  "governance",
+  "Symbolic Knowledge Extraction",
+  "Symbolic Knowledge Injection",
+  "XAI",
+  "NLP",
+  "PSpace",
+  "benchmark",
+  "benchmarking",
+  "decision",
+  "decision tree",
+  "temporal decision tree",
+  "random forest",
+  "fuzzy",
+  "FHS",
+  "big data",
+  "data science",
+  "data mining",
+  "pattern",
+  "trip",
+  "record",
+  "SKE",
+  "SKI",
+  "HS3",
+  "HS7",
+  "ID3",
+  "C4.5",
+  "Weka",
+  "J48",
+  "Temporal ID3",
+  "Temporal C4.5",
+  "Temporal J48",
+  "Large Language Models",
+  "LLMs",
+  "LTL",
+  "Gemma 3 27b It",
+  "Llama 4 Maverick",
+  "DeepSeek Chat V3 release 0324",
+  "Qwen 3 32b",
+  "Qwen 3 235b",
+];
+const englishNoBreakWords = [...new Set(englishNoBreakTerms.flatMap((term) => term.match(/[A-Za-z]+/g) || []))]
+  .filter((word) => word.length > 1)
+  .map((word) => word.toLowerCase())
+  .sort();
+const noBreakHyphenation = ["english", "italian"]
+  .map((language) => `\\begingroup\\language=\\l@${language}\\hyphenation{${englishNoBreakWords.join(" ")}}\\endgroup`)
+  .join("\n");
+const noBreakPreamble = `\\makeatletter\n${noBreakHyphenation}\n\\makeatother`;
 const abstractPath = abstractArgument ? resolve(abstractArgument) : undefined;
 if (abstractPath && !existsSync(abstractPath)) throw Error(`abstracts file not found: ${abstractPath}`);
 if (abstractPath) {
   const raw = load(readFileSync(abstractPath, "utf8")) || [];
-  const rows = Array.isArray(raw) ? raw : Object.entries(raw).map(([bibkey, abstract_it]) => ({ bibkey, abstract_it }));
+  const rows = Array.isArray(raw)
+    ? raw
+    : Array.isArray(raw.abstracts)
+      ? raw.abstracts
+      : Object.entries(raw)
+          .filter(([key]) => key !== "status")
+          .map(([bibkey, value]) => (value && typeof value === "object" ? { bibkey, ...value } : { bibkey, abstract_it: value }));
   const indexed = new Map(rows.map((row) => [row.bibkey, row]));
   for (const [i, k] of spec.publications.entries()) {
     const row = indexed.get(k);
@@ -226,10 +362,10 @@ if (abstractPath) {
       throw Error(`selected publication ${k} is missing its Italian abstract`);
     if (row.position !== undefined && Number(row.position) !== i + 1) throw Error(`abstract position for ${k} must be ${i + 1}`);
   }
-  const body = `\\begin{enumerate}[leftmargin=*]${spec.publications.map((k) => `\\item \\textbf{\\citetitle{${k}}}\\\\\\citeauthor{${k}}.\\par\\medskip ${esc(indexed.get(k).abstract_it)}`).join("\n")}\\end{enumerate}`;
+  const body = `\\begin{enumerate}[leftmargin=*]${spec.publications.map((k) => `\\item {\\hyphenpenalty=10000\\exhyphenpenalty=10000\\textbf{\\citetitle{${k}}}\\\\\\citeauthor{${k}}.\\par}\\medskip \\begin{italian}${esc(indexed.get(k).abstract_it)}\\end{italian}`).join("\n")}\\end{enumerate}`;
   const abstractTex = doc("Abstract tradotti in italiano", body).replace(
     "\\usepackage{enumitem}",
-    "\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\addbibresource{../../content/publications.bib}"
+    `\\usepackage{enumitem}\n${noBreakPreamble}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\addbibresource{../../content/publications.bib}`
   );
   writeFileSync(resolve(out, "abstracts-it.tex"), abstractTex);
   writeFileSync(

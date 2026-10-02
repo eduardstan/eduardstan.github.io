@@ -65,6 +65,28 @@
 }
 
 \input{preamble.tex}
+\DeclareFieldFormat{eid}{Article~#1}
+\renewbibmacro*{journal+issuetitle}{%
+  \usebibmacro{journal}%
+  \setunit*{\addspace}%
+  \iffieldundef{series}
+    {}
+    {\newunit
+     \printfield{series}%
+     \setunit{\addspace}}%
+  \ifentrytype{article}
+    {\printfield{volume}%
+     \setunit*{\adddot}%
+     \printfield{number}%
+     \setunit{\addspace}%
+     \usebibmacro{issue+date}%
+     \iffieldundef{eid}{}{\setunit{\addcomma\space}\printfield{eid}}}
+    {\usebibmacro{volume+number+eid}%
+     \setunit{\addspace}%
+     \usebibmacro{issue+date}}%
+  \setunit{\addcolon\space}%
+  \printfield{issue}%
+  \newunit}
 
 % ---------------------------------------------------------------------------
 % DOCUMENT OVERRIDES: layout the template sets one way and this CV another.
