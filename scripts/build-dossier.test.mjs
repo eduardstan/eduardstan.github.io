@@ -94,7 +94,14 @@ test("renders the declaration, optional translations, and rejects bad publicatio
     source,
     JSON.stringify({
       status: "verified-final",
-      abstracts: keys.map((bibkey, i) => ({ position: i + 1, bibkey, abstract_it: `Contesto: traduzione ${i + 1}.` })),
+      abstracts: keys.map((bibkey, i) => ({
+        position: i + 1,
+        bibkey,
+        abstract_it:
+          i === 0
+            ? "Contesto: traduzione 1; benchmark, framework, tableau, post hoc, deep learning, decision tree e random forest."
+            : `Contesto: traduzione ${i + 1}.`,
+      })),
     })
   );
   try {
@@ -103,6 +110,9 @@ test("renders the declaration, optional translations, and rejects bad publicatio
     const abstracts = readFileSync(join(output, "abstracts-it.tex"), "utf8");
     assert.match(abstracts, /\\citetitle/);
     assert.match(abstracts, /\\finalnamedelim/);
+    assert.ok(abstracts.includes("\\language=\\l@english\\hyphenation{benchmark"));
+    assert.ok(abstracts.includes("\\language=\\l@italian\\hyphenation{benchmark"));
+    assert.ok(abstracts.includes("\\hyphenpenalty=10000\\exhyphenpenalty=10000\\textbf{\\citetitle{"));
     assert.doesNotMatch(abstracts, /Background:|Objectives:|Methods:|Results:|Conclusions:/);
     assert.ok(abstracts.indexOf("traduzione 1") < abstracts.indexOf("traduzione 2"));
 

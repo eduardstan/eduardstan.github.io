@@ -283,6 +283,67 @@ const args = cli;
 const ai = args.indexOf("--abstracts");
 const abstractArgument = ai >= 0 ? args[ai + 1] : process.env.DOSSIER_ABSTRACTS;
 if (ai >= 0 && !abstractArgument) throw Error("--abstracts requires a file path");
+// English terms retained in the Italian abstracts, including named logics, methods and models.
+// Their tokens are no-break exceptions in both document languages so Italian patterns cannot
+// split the English vocabulary and citation titles cannot reintroduce a break.
+const englishNoBreakTerms = [
+  "many-valued",
+  "FLew",
+  "frame",
+  "tableau",
+  "framework",
+  "open source",
+  "post hoc",
+  "deep learning",
+  "feedback",
+  "governance",
+  "Symbolic Knowledge Extraction",
+  "Symbolic Knowledge Injection",
+  "XAI",
+  "NLP",
+  "PSpace",
+  "benchmark",
+  "benchmarking",
+  "decision",
+  "decision tree",
+  "temporal decision tree",
+  "random forest",
+  "fuzzy",
+  "FHS",
+  "big data",
+  "data science",
+  "data mining",
+  "pattern",
+  "trip",
+  "record",
+  "SKE",
+  "SKI",
+  "HS3",
+  "HS7",
+  "ID3",
+  "C4.5",
+  "Weka",
+  "J48",
+  "Temporal ID3",
+  "Temporal C4.5",
+  "Temporal J48",
+  "Large Language Models",
+  "LLMs",
+  "LTL",
+  "Gemma 3 27b It",
+  "Llama 4 Maverick",
+  "DeepSeek Chat V3 release 0324",
+  "Qwen 3 32b",
+  "Qwen 3 235b",
+];
+const englishNoBreakWords = [...new Set(englishNoBreakTerms.flatMap((term) => term.match(/[A-Za-z]+/g) || []))]
+  .filter((word) => word.length > 1)
+  .map((word) => word.toLowerCase())
+  .sort();
+const noBreakHyphenation = ["english", "italian"]
+  .map((language) => `\\begingroup\\language=\\l@${language}\\hyphenation{${englishNoBreakWords.join(" ")}}\\endgroup`)
+  .join("\n");
+const noBreakPreamble = `\\makeatletter\n${noBreakHyphenation}\n\\makeatother`;
 const abstractPath = abstractArgument ? resolve(abstractArgument) : undefined;
 if (abstractPath && !existsSync(abstractPath)) throw Error(`abstracts file not found: ${abstractPath}`);
 if (abstractPath) {
@@ -301,10 +362,10 @@ if (abstractPath) {
       throw Error(`selected publication ${k} is missing its Italian abstract`);
     if (row.position !== undefined && Number(row.position) !== i + 1) throw Error(`abstract position for ${k} must be ${i + 1}`);
   }
-  const body = `\\begin{enumerate}[leftmargin=*]${spec.publications.map((k) => `\\item \\textbf{\\citetitle{${k}}}\\\\\\citeauthor{${k}}.\\par\\medskip \\begin{italian}${esc(indexed.get(k).abstract_it)}\\end{italian}`).join("\n")}\\end{enumerate}`;
+  const body = `\\begin{enumerate}[leftmargin=*]${spec.publications.map((k) => `\\item {\\hyphenpenalty=10000\\exhyphenpenalty=10000\\textbf{\\citetitle{${k}}}\\\\\\citeauthor{${k}}.\\par}\\medskip \\begin{italian}${esc(indexed.get(k).abstract_it)}\\end{italian}`).join("\n")}\\end{enumerate}`;
   const abstractTex = doc("Abstract tradotti in italiano", body).replace(
     "\\usepackage{enumitem}",
-    `\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\addbibresource{../../content/publications.bib}`
+    `\\usepackage{enumitem}\n${noBreakPreamble}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\addbibresource{../../content/publications.bib}`
   );
   writeFileSync(resolve(out, "abstracts-it.tex"), abstractTex);
   writeFileSync(
