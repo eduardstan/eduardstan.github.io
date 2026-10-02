@@ -40,7 +40,7 @@ A CADEMIC A PPOINTMENTS / E XPERIENCE
 
 E DUCATION
 •   Ph.D. in Mathematics (Excellent cum laude)                                                                Nov 2019–Feb 2023
-    University of Parma                                                                                             Parma, Italy
+    University of Parma, Foundations of Modal Symbolic Learning                                                     Parma, Italy
 •   M.Sc. in Computer Science (110/110 cum laude)                                                             Oct 2017–Oct 2019
     University of Udine                                                                                             Udine, Italy
 •   B.Sc. in Computer Science (110/110 cum laude)                                                             Oct 2014–Jun 2017
@@ -100,6 +100,8 @@ E DITORIAL , R EVIEWING & C ONFERENCE S ERVICE
     Elsevier Engineering Applications of Artiﬁcial Intelligence Journal [IF: 8.0; Q1]
 •   Reviewer
     IEEE Journal of Biomedical and Health Informatics [IF: 6.7; Q1]
+•   Reviewer
+    AAMAS 2027
 •   Reviewer
     AI Access Foundation Journal of Artiﬁcial Intelligence Research [IF: 4.6; Q1]
 •   Reviewer
@@ -221,8 +223,9 @@ P UBLICATIONS                                        J=J OURNAL , C=C ONFERENCE 
 
 Journal articles (peer-reviewed)
  [J1]   G. Badia, R. Monego, C. Noguera, A. Paparella, G. Sciavicco, and I. E. Stan. “Reasoning in Many-Valued
-        Multi-Modal Logic: A Uniform and General Approach”. In: Journal of Artiﬁcial Intelligence Research (2026). In
-        press.
+        Multi-Modal Logic: A Uniform and General Approach”. In: Journal of Artiﬁcial Intelligence Research 87 (2026).
+        DOI : 10.1613/jair.1.23339.
+
  [J2]   P. Cavina, F. Manzella, G. Pagliarini, G. Sciavicco, and I. E. Stan. “Beyond Tabular Data: Feature Extraction and
         Selection for High-Dimensional Data”. In: Array 30 (July 2026), p. 100893. DOI: 10.1016/j.array.2026.100893.
  [J3]   I. E. Stan, H. Amrani, P. Napoletano, and D. D’Auria. “Authenticated Robotic Teleoperation With Task
@@ -307,52 +310,48 @@ Conference papers (peer-reviewed)
         AIxIA 2022, Udine, Italy, November 28 - December 2, 2022, Proceedings. Ed. by A. Dovier, A. Montanari, and
         A. Orlandini. Vol. 13796. Lecture Notes in Computer Science. Springer, 2022, pp. 47–59. DOI:
         10.1007/978-3-031-27181-6\_4.
-[C13]   G. Pagliarini, S. Scaboro, G. Serra, G. Sciavicco, and I. E. Stan. “Neural-Symbolic Temporal Decision Trees for
-        Multivariate Time Series Classiﬁcation”. In: 29th International Symposium on Temporal Representation and
-        Reasoning, TIME 2022, Virtual Conference, November 7-9, 2022. Ed. by A. Artikis, R. Posenato, and S. Tonetta.
-        Vol. 247. LIPIcs. Schloss Dagstuhl - Leibniz-Zentrum für Informatik, 2022, 13:1–13:15. DOI:
-        10.4230/LIPICS.TIME.2022.13.
-[C14]   I. E. Stan, G. Sciavicco, E. Muñoz-Velasco, G. Pagliarini, M. Milella, and A. Paradiso. “On Modal Logic
+[C13]   I. E. Stan, G. Sciavicco, E. Muñoz-Velasco, G. Pagliarini, M. Milella, and A. Paradiso. “On Modal Logic
         Association Rule Mining”. In: Proceedings of the 23rd Italian Conference on Theoretical Computer Science, ICTCS
         2022, Rome, Italy, September 7-9, 2022. Ed. by U. D. Lago and D. Gorla. Vol. 3284. CEUR Workshop Proceedings.
         CEUR-WS.org, 2022, pp. 53–65. URL: https://ceur-ws.org/Vol-3284/492.pdf.
-[C15]   F. Manzella, G. Pagliarini, G. Sciavicco, and I. E. Stan. “Interval Temporal Random Forests with an Application
+[C14]   F. Manzella, G. Pagliarini, G. Sciavicco, and I. E. Stan. “Interval Temporal Random Forests with an Application
         to COVID-19 Diagnosis”. In: 28th International Symposium on Temporal Representation and Reasoning, TIME 2021,
         Klagenfurt, Austria, September 27-29, 2021. Ed. by C. Combi, J. Eder, and M. Reynolds. Vol. 206. LIPIcs. Schloss
         Dagstuhl - Leibniz-Zentrum für Informatik, 2021, 7:1–7:18. DOI: 10.4230/LIPICS.TIME.2021.7.
-[C16]   W. Conradie, D. D. Monica, E. Muñoz-Velasco, G. Sciavicco, and I. E. Stan. “Time Series Checking with Fuzzy
+[C15]   W. Conradie, D. D. Monica, E. Muñoz-Velasco, G. Sciavicco, and I. E. Stan. “Time Series Checking with Fuzzy
         Interval Temporal Logics”. In: Proceedings of the 21st Italian Conference on Theoretical Computer Science, Ischia,
         Italy, September 14-16, 2020. Ed. by G. Cordasco, L. Gargano, and A. A. Rescigno. Vol. 2756. CEUR Workshop
         Proceedings. CEUR-WS.org, 2020, pp. 250–262. URL: https://ceur-ws.org/Vol-2756/paper%5C_29.pdf.
-[C17]   J. Kaminska, E. Lucena-Sánchez, G. Sciavicco, and I. E. Stan. “Rule Extraction via Dynamic Discretization with
+[C16]   J. Kaminska, E. Lucena-Sánchez, G. Sciavicco, and I. E. Stan. “Rule Extraction via Dynamic Discretization with
         an Application to Air Quality Modelling”. In: Proceedings of the 14th International Rule Challenge, 4th Doctoral
         Consortium, and 6th Industry Track @ RuleML+RR 2020 co-located with 16th Reasoning Web Summer School (RW
         2020) 12th DecisionCAMP 2020 as part of Declarative AI 2020, Oslo, Norway (virtual due to Covid-19 pandemic), 29
         June - 1 July, 2020. Ed. by S. Moschoyiannis, P. Fodor, J. Vanthienen, D. Inclezan, N. Nikolov,
         F. Martín-Recuerda, and I. Toma. Vol. 2644. CEUR Workshop Proceedings. CEUR-WS.org, 2020, pp. 42–57. URL:
         https://ceur-ws.org/Vol-2644/paper11.pdf.
-[C18]   G. Sciavicco and I. E. Stan. “Knowledge Extraction with Interval Temporal Logic Decision Trees”. In: 27th
+[C17]   G. Sciavicco and I. E. Stan. “Knowledge Extraction with Interval Temporal Logic Decision Trees”. In: 27th
         International Symposium on Temporal Representation and Reasoning, TIME 2020, Bozen-Bolzano, Italy, September
         23-25, 2020. Ed. by E. Muñoz-Velasco, A. Ozaki, and M. Theobald. Vol. 178. LIPIcs. Schloss Dagstuhl -
         Leibniz-Zentrum für Informatik, 2020, 9:1–9:16. DOI: 10.4230/LIPICS.TIME.2020.9.
-[C19]   A. Brunello, G. Sciavicco, and I. E. Stan. “Interval Temporal Logic Decision Tree Learning”. In: Logics in
+[C18]   A. Brunello, G. Sciavicco, and I. E. Stan. “Interval Temporal Logic Decision Tree Learning”. In: Logics in
         Artiﬁcial Intelligence - 16th European Conference, JELIA 2019, Rende, Italy, May 7-11, 2019, Proceedings. Ed. by
         F. Calimeri, N. Leone, and M. Manna. Vol. 11468. Lecture Notes in Computer Science. Springer, 2019,
         pp. 778–793. DOI: 10.1007/978-3-030-19570-0\_50.
-[C20]   G. Sciavicco, I. E. Stan, and A. Vaccari. “Towards a General Method for Logical Rule Extraction from Time
+[C19]   G. Sciavicco, I. E. Stan, and A. Vaccari. “Towards a General Method for Logical Rule Extraction from Time
         Series”. In: From Bioinspired Systems and Biomedical Applications to Machine Learning - 8th International
         Work-Conference on the Interplay Between Natural and Artiﬁcial Computation, IWINAC 2019, Almería, Spain, June
-        3-7, 2019, Proceedings, Part II. Ed. by J. M. F. de Vicente, J. R. Á. Sánchez, F. de la Paz López, F. J. Toledo-Moreo,
+        3-7, 2019, Proceedings, Part II. Ed. by J. M. F. de Vicente, J. R. Á. Sánchez, F. de la Paz López, F. J. Toledo-Moreo,
         and H. Adeli. Vol. 11487. Lecture Notes in Computer Science. Springer, 2019, pp. 3–12. DOI:
         10.1007/978-3-030-19651-6\_1.
-[C21]   E. Muñoz-Velasco, G. Sciavicco, and I. E. Stan. “Implementation of a Tableau-based Satisﬁability Checker for
+[C20]   E. Muñoz-Velasco, G. Sciavicco, and I. E. Stan. “Implementation of a Tableau-based Satisﬁability Checker for
         HS3”. In: Joint Proceedings of the 18th Italian Conference on Theoretical Computer Science and the 32nd Italian
-        Conference on Computational Logic co-located with the 2017 IEEE International Workshop on Measurements and
+        Conference on Computational Logic co-located with the 2017 IEEE International Workshop on Measurements and
         Networking (2017 IEEE M&N), Naples, Italy, September 26-28, 2017. Ed. by D. D. Monica, A. Murano, S. Rubin,
         and L. Sauro. Vol. 1949. CEUR Workshop Proceedings. CEUR-WS.org, 2017, pp. 326–340. URL:
         https://ceur-ws.org/Vol-1949/CILCpaper09.pdf.
 
 Workshop papers
+
 [W1]    G. Pagliarini, E. Ponsanesi, G. Sciavicco, and I. E. Stan. “Towards Modern Rule-Based Learning”. In: Short
         Paper Proceedings of the 6th International Workshop on Artiﬁcial Intelligence and Formal Veriﬁcation, Logic, Automata,
         and Synthesis, OVERLAY 2024, Bolzano, Italy, November 28-29, 2024. Ed. by D. Porello, C. Vinci, and M. Zavatteri.
@@ -393,6 +392,7 @@ Workshop papers
         https://ceur-ws.org/Vol-2509/paper10.pdf.
 
 Under review
+
  [U1]   G. Pagliarini, M. Perrotta, G. Sciavicco, and I. E. Stan. From forests to minimal formulas: A logic-driven framework
         to explain ensemble models. 35th International Joint Conference on Artiﬁcial Intelligence, IJCAI 2026 (Manuscript
         under review). 2026.
@@ -402,13 +402,12 @@ Under review
         on Principles of Knowledge Representation and Reasoning (Manuscript under review). 2026.
 
 Software & artifacts
+
  [S1]   M. Milella, G. Pagliarini, G. Sciavicco, and I. E. Stan. ModalAssociationRules.jl. DROPS Artifacts, Oct. 2025. DOI:
         10.4230/ARTIFACTS.24783.
- [S2]   M. Milella, G. Pagliarini, G. Sciavicco, and I. E. Stan. Sole.jl. DROPS Artifacts, Oct. 2025. DOI:
+ [S2]   M. Milella, G. Pagliarini, G. Sciavicco, and I. E. Stan. Sole.jl. DROPS Artifacts, Oct. 2025. DOI:
         10.4230/ARTIFACTS.24782.
-
-
-Data protection and permitted use. I authorize the processing of my personal data contained in this CV for purposes connected
+Data protection and permitted use. I authorize the processing of my personal data contained in this CV for purposes connected
 with evaluation and selection procedures, in accordance with Regulation (EU) 2016/679 (GDPR) and Italian legislation (Legislative
 Decree 196/2003 as amended by Legislative Decree 101/2018).
 

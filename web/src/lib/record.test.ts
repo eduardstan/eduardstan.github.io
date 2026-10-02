@@ -233,16 +233,13 @@ assert.equal(sparse.citation, `${sparse.venue}.`);
 assert.deepEqual(sparse.citationFields, ['note']);
 assert.equal(sparse.link, undefined, 'a link was invented for an entry with no address field');
 
-// BibLaTeX's standard pubstate is the shared accepted-but-not-yet-published status.
-const inPress = bib.entries.find((entry) => entry.key === 'stan_jair2026b')!;
-assert.equal(inPress.fields.pubstate, 'inpress', `${inPress.key}: status field changed`);
-assert.equal(inPress.inPress, true, `${inPress.key}: in-press status was not read`);
-assert.equal(inPress.underReview, false, `${inPress.key}: acceptance regressed to under review`);
-assert.deepEqual(
-  bib.entries.filter((entry) => entry.inPress).map((entry) => entry.key),
-  ['stan_jair2026b'],
-  'unexpected in-press publication status',
-);
+// The JAIR article is published, not in press or under review.
+const jair = bib.entries.find((entry) => entry.key === 'stan_jair2026b')!;
+assert.equal(jair.inPress, false, `${jair.key}: published status regressed to in press`);
+assert.equal(jair.underReview, false, `${jair.key}: published status regressed to under review`);
+assert.equal(jair.fields.volume, '87', `${jair.key}: volume missing`);
+assert.equal(jair.doi, '10.1613/jair.1.23339', `${jair.key}: DOI changed`);
+assert.equal(jair.authors[2], 'C. Noguera');
 // No volume but pages present — the comma before the pages is the only one.
 const noVolume = bib.entries.find((entry) => entry.key === '11122906')!;
 assert.equal(noVolume.citation, 'IEEE Journal of Biomedical and Health Informatics, 1-22.');

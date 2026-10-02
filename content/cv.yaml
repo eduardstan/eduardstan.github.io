@@ -169,6 +169,7 @@ education:
     org: University of Parma
     url: https://www.unipr.it/
     dates: Nov 2019–Feb 2023
+    detail: Foundations of Modal Symbolic Learning
   - title: M.Sc. in Computer Science (110/110 cum laude)
     place: Udine, Italy
     org: University of Udine
@@ -290,7 +291,8 @@ service:
         announced: 2024-06-10
       - year: 2026
         announced: 2025-07-18
-      - 2027
+      - year: 2027
+        announced: 2026-06-23
   - title: Program Committee
     org: International Conference on Learning Representations (ICLR)
     metric: "CORE Rank: A*"
@@ -301,7 +303,8 @@ service:
         announced: 2024-08-28
       - year: 2026
         announced: 2025-09-23
-      - 2027
+      - year: 2027
+        announced: 2026-09-01
   - title: Program Committee
     org: International Joint Conference on Artificial Intelligence (IJCAI)
     metric: "CORE Rank: A*"
@@ -332,6 +335,9 @@ service:
     url: https://www.embs.org/jbhi/
     rank_url: https://www.scimagojr.com/journalsearch.php?q=21100256982&tip=sid&clean=0
     announced: 2024-08-21T10:00:00+02:00
+  - title: Reviewer
+    org: AAMAS 2027
+    announced: 2026-10-01
   - title: Reviewer
     org: AI Access Foundation Journal of Artificial Intelligence Research
     metric: "IF: 4.6; Q1"
