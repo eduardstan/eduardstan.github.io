@@ -230,13 +230,13 @@ Journal articles (peer-reviewed)
         Selection for High-Dimensional Data”. In: Array 30 (July 2026), p. 100893. DOI: 10.1016/j.array.2026.100893.
  [J3]   I. E. Stan, H. Amrani, P. Napoletano, and D. D’Auria. “Authenticated Robotic Teleoperation With Task
         Recognition”. In: IEEE Consumer Electron. Mag. 15.1 (2026), pp. 33–40. DOI: 10.1109/MCE.2025.3546049.
- [J4]   I. E. Stan and P. Napoletano. “Predicting Subjective Usability from Kinematic Data in IMU-Based Robotic
-        Teleoperation”. In: Sensors 26.15 (Aug. 2026), p. 5002. DOI: 10.3390/s26155002.
- [J5]   I. E. Stan, G. Sciavicco, and P. Napoletano. “Symbols and Neurons: A Review of Symbolic XAI in Deep
-        Learning”. In: Journal of Artiﬁcial Intelligence Research 86 (2026). DOI: 10.1613/jair.1.22096.
- [J6]   I. E. Stan, D. D’Auria, and P. Napoletano. “A Systematic Literature Review of Innovations, Challenges, and
+ [J4]   I. E. Stan, D. D’Auria, and P. Napoletano. “A Systematic Literature Review of Innovations, Challenges, and
         Future Directions in Telemonitoring and Wearable Health Technologies”. In: IEEE Journal of Biomedical and
-        Health Informatics (2025), pp. 1–22. DOI: 10.1109/JBHI.2025.3598056.
+        Health Informatics 30.3 (2026), pp. 2630–2645. DOI: 10.1109/JBHI.2025.3598056.
+ [J5]   I. E. Stan and P. Napoletano. “Predicting Subjective Usability from Kinematic Data in IMU-Based Robotic
+        Teleoperation”. In: Sensors 26.15 (Aug. 2026), p. 5002. DOI: 10.3390/s26155002.
+ [J6]   I. E. Stan, G. Sciavicco, and P. Napoletano. “Symbols and Neurons: A Review of Symbolic XAI in Deep
+        Learning”. In: Journal of Artiﬁcial Intelligence Research 86 (2026). DOI: 10.1613/jair.1.22096.
  [J7]   G. Pagliarini, S. Scaboro, G. Serra, G. Sciavicco, and I. E. Stan. “Neural-symbolic temporal decision trees for
         multivariate time series classiﬁcation”. In: Inf. Comput. 301 (2024), p. 105209. DOI: 10.1016/J.IC.2024.105209.
  [J8]   G. Bechini, E. Losi, L. Manservigi, G. Pagliarini, G. Sciavicco, I. E. Stan, and M. Venturini. “Statistical Rule
@@ -351,7 +351,6 @@ Conference papers (peer-reviewed)
         https://ceur-ws.org/Vol-1949/CILCpaper09.pdf.
 
 Workshop papers
-
 [W1]    G. Pagliarini, E. Ponsanesi, G. Sciavicco, and I. E. Stan. “Towards Modern Rule-Based Learning”. In: Short
         Paper Proceedings of the 6th International Workshop on Artiﬁcial Intelligence and Formal Veriﬁcation, Logic, Automata,
         and Synthesis, OVERLAY 2024, Bolzano, Italy, November 28-29, 2024. Ed. by D. Porello, C. Vinci, and M. Zavatteri.
@@ -392,21 +391,21 @@ Workshop papers
         https://ceur-ws.org/Vol-2509/paper10.pdf.
 
 Under review
-
- [U1]   G. Pagliarini, M. Perrotta, G. Sciavicco, and I. E. Stan. From forests to minimal formulas: A logic-driven framework
+[U1]    G. Pagliarini, M. Perrotta, G. Sciavicco, and I. E. Stan. From forests to minimal formulas: A logic-driven framework
         to explain ensemble models. 35th International Joint Conference on Artiﬁcial Intelligence, IJCAI 2026 (Manuscript
         under review). 2026.
- [U2]   I. E. Stan, D. Baiardi, S. Verga, G. Galimberti, and P. Napoletano. Towards Wearable Teleoperation for
+[U2]    I. E. Stan, D. Baiardi, S. Verga, G. Galimberti, and P. Napoletano. Towards Wearable Teleoperation for
         Human-to-Robot Teaching. IEEE Transactions on Human-Machine Systems (Manuscript under review). 2026.
- [U3]   I. E. Stan and P. Napoletano. A Semantics-First Contract for Neuro-Symbolic Reasoning. International Conference
+[U3]    I. E. Stan and P. Napoletano. A Semantics-First Contract for Neuro-Symbolic Reasoning. International Conference
         on Principles of Knowledge Representation and Reasoning (Manuscript under review). 2026.
 
-Software & artifacts
-
+Software
  [S1]   M. Milella, G. Pagliarini, G. Sciavicco, and I. E. Stan. ModalAssociationRules.jl. DROPS Artifacts, Oct. 2025. DOI:
         10.4230/ARTIFACTS.24783.
  [S2]   M. Milella, G. Pagliarini, G. Sciavicco, and I. E. Stan. Sole.jl. DROPS Artifacts, Oct. 2025. DOI:
         10.4230/ARTIFACTS.24782.
+ [S3]   G. Pagliarini, F. Manzella, G. Sciavicco, and I. E. Stan. ModalDecisionTrees.jl: interpretable models for native
+        time-series & image classiﬁcation. 2023. URL: https://github.com/aclai-lab/ModalDecisionTrees.jl.
 Data protection and permitted use. I authorize the processing of my personal data contained in this CV for purposes connected
 with evaluation and selection procedures, in accordance with Regulation (EU) 2016/679 (GDPR) and Italian legislation (Legislative
 Decree 196/2003 as amended by Legislative Decree 101/2018).

@@ -164,10 +164,12 @@ const description = `${bib.entries.length} entries${span && `, ${span}`}, read f
                     </>
                   ))}
                 </p>
-                <p class="vn">
-                  {entry.citation}
-                  {entry.inPress && ' (Accepted / in press — not yet published)'}
-                </p>
+                {entry.citation || entry.inPress ? (
+                  <p class="vn">
+                    {entry.citation}
+                    {entry.inPress && ' (Accepted / in press — not yet published)'}
+                  </p>
+                ) : null}
                 {
                   /* The citation above is a rendered claim like any other, so it
                      opens to the record it was assembled from: the entry it came
@@ -180,8 +182,12 @@ const description = `${bib.entries.length} entries${span && `, ${span}`}, read f
                     <b>{SOURCES.bibliography}</b> — @{entry.type}
                     {'{'}
                     {entry.key}
-                    {'}'}; venue from <b>{entry.venueField ?? 'no venue field'}</b>, citation from{' '}
-                    {entry.citationFields.join(', ')};{' '}
+                    {'}'}; venue from <b>{entry.venueField ?? 'no venue field'}</b>;
+                    {entry.citationFields.length ? (
+                      <> citation from {entry.citationFields.join(', ')};</>
+                    ) : (
+                      ' no citation fields;'
+                    )}{' '}
                     {entry.link ? (
                       <>
                         link from <b>{entry.link.field}</b>

@@ -1,6 +1,6 @@
 # Printed CV baseline — updated 2026-10-02
 
-Refreshed from `fm/site-ship-facts`, based on `origin/master` at commit `256fd1c`.
+Refreshed for the Software section and ModalDecisionTrees.jl record on `fm/site-ship-software`.
 
 ## Why this exists
 
@@ -23,8 +23,8 @@ gate.** Any difference must be explained, not accepted.
 ## Baseline facts
 
 - Pages: 8
-- Extracted text: 412 lines
-- Text sha256 (first 16): dc1b2136e8e754dc
+- Extracted text: 419 lines
+- Text sha256 (first 16): 5598987f3e78eea5
 - `cv-baseline.pdf` is the exact PDF, kept for visual comparison.
 
 ## Known intended differences
@@ -47,3 +47,7 @@ gate.** Any difference must be explained, not accepted.
   headings and the entry itself, but no other citation data changes.
 - 2026-09-02: Updated the CV record with the 2026 Sensors, Array and Journal of Artificial Intelligence Research publications, a reviewer role, 2027 AAAI and ICLR service, a GNCS project, and a Huawei challenge award. The added records and their detail reflow the document from 7 pages to 8.
 - 2026-10-02: Marked `stan_jair2026b` as published using JAIR's volume, DOI, URL and author metadata, removing `pubstate = {inpress}` and the `preprint` keyword; added the dated 2027 AAAI and ICLR invitations and AAMAS reviewer service; removed the TIME 2022 conference version retained as the 2024 journal article; and added the PhD thesis title. The removed duplicate renumbers subsequent conference citations; the publication, service and thesis updates reflow text. The document remains 8 pages.
+
+- 2026-10-02: Renamed the printed and site publication group from Software & artifacts to Software and added the ModalDecisionTrees.jl software record (2023). The existing Sole.jl and ModalAssociationRules.jl entries remain unchanged. Software still has its own `S` numbering; the new citation adds S3 without changing the order or keys of other entries. The heading and citation reflow the bibliography's spacing; the document remains 8 pages.
+
+- 2026-10-02: Updated the JBHI systematic-review record to IEEE's issue data (volume 30, issue 3, pages 2630–2645, 2026) after Crossref confirmed it. This replaces the online-first year and placeholder pagination; its `announced` date, if present, is unchanged. The document remains 8 pages.
