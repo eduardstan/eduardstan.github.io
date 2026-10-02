@@ -230,13 +230,13 @@ Journal articles (peer-reviewed)
         Selection for High-Dimensional Data”. In: Array 30 (July 2026), p. 100893. DOI: 10.1016/j.array.2026.100893.
  [J3]   I. E. Stan, H. Amrani, P. Napoletano, and D. D’Auria. “Authenticated Robotic Teleoperation With Task
         Recognition”. In: IEEE Consumer Electron. Mag. 15.1 (2026), pp. 33–40. DOI: 10.1109/MCE.2025.3546049.
- [J4]   I. E. Stan and P. Napoletano. “Predicting Subjective Usability from Kinematic Data in IMU-Based Robotic
-        Teleoperation”. In: Sensors 26.15 (Aug. 2026), p. 5002. DOI: 10.3390/s26155002.
- [J5]   I. E. Stan, G. Sciavicco, and P. Napoletano. “Symbols and Neurons: A Review of Symbolic XAI in Deep
-        Learning”. In: Journal of Artiﬁcial Intelligence Research 86 (2026). DOI: 10.1613/jair.1.22096.
- [J6]   I. E. Stan, D. D’Auria, and P. Napoletano. “A Systematic Literature Review of Innovations, Challenges, and
+ [J4]   I. E. Stan, D. D’Auria, and P. Napoletano. “A Systematic Literature Review of Innovations, Challenges, and
         Future Directions in Telemonitoring and Wearable Health Technologies”. In: IEEE Journal of Biomedical and
-        Health Informatics (2025), pp. 1–22. DOI: 10.1109/JBHI.2025.3598056.
+        Health Informatics 30.3 (2026), pp. 2630–2645. DOI: 10.1109/JBHI.2025.3598056.
+ [J5]   I. E. Stan and P. Napoletano. “Predicting Subjective Usability from Kinematic Data in IMU-Based Robotic
+        Teleoperation”. In: Sensors 26.15 (Aug. 2026), p. 5002. DOI: 10.3390/s26155002.
+ [J6]   I. E. Stan, G. Sciavicco, and P. Napoletano. “Symbols and Neurons: A Review of Symbolic XAI in Deep
+        Learning”. In: Journal of Artiﬁcial Intelligence Research 86 (2026). DOI: 10.1613/jair.1.22096.
  [J7]   G. Pagliarini, S. Scaboro, G. Serra, G. Sciavicco, and I. E. Stan. “Neural-symbolic temporal decision trees for
         multivariate time series classiﬁcation”. In: Inf. Comput. 301 (2024), p. 105209. DOI: 10.1016/J.IC.2024.105209.
  [J8]   G. Bechini, E. Losi, L. Manservigi, G. Pagliarini, G. Sciavicco, I. E. Stan, and M. Venturini. “Statistical Rule

@@ -24,7 +24,7 @@ gate.** Any difference must be explained, not accepted.
 
 - Pages: 8
 - Extracted text: 419 lines
-- Text sha256 (first 16): 62de463ffc4ba7ec
+- Text sha256 (first 16): 5598987f3e78eea5
 - `cv-baseline.pdf` is the exact PDF, kept for visual comparison.
 
 ## Known intended differences
@@ -50,3 +50,4 @@ gate.** Any difference must be explained, not accepted.
 
 - 2026-10-02: Renamed the printed and site publication group from Software & artifacts to Software and added the ModalDecisionTrees.jl software record (2023). The existing Sole.jl and ModalAssociationRules.jl entries remain unchanged. Software still has its own `S` numbering; the new citation adds S3 without changing the order or keys of other entries. The heading and citation reflow the bibliography's spacing; the document remains 8 pages.
 
+- 2026-10-02: Updated the JBHI systematic-review record to IEEE's issue data (volume 30, issue 3, pages 2630–2645, 2026) after Crossref confirmed it. This replaces the online-first year and placeholder pagination; its `announced` date, if present, is unchanged. The document remains 8 pages.
