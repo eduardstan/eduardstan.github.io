@@ -152,9 +152,12 @@ const groupedTitles = spec.titles_sections
   .map((k) => `\\subsection*{${esc(label[k] || k)}}\n\\begin{itemize}[leftmargin=*]${data[k].map(item).join("\n")}\\end{itemize}`)
   .join("\n");
 const talkItems = [...talks.entries()].map(([key, f]) => `\\item ${esc(plain(f.title))}${f.year ? `, ${esc(plain(f.year))}` : ""}.`).join("\n");
-const titleBody =
-  groupedTitles +
-  `\n\\subsection*{Invited talks}\n\\begin{itemize}[leftmargin=*]${talkItems}\\end{itemize}\n\\subsection*{Tesi di dottorato}\n\\begin{itemize}[leftmargin=*]\\item \\textbf{${esc(spec.thesis.title)}}. ${esc(spec.thesis.institution)}, ${esc(spec.thesis.year)}.\\end{itemize}`;
+const doctorate = data.education.find((entry) => /ph\.?\s*d/i.test(entry.title) && entry.detail);
+const doctorateYear = doctorate?.dates?.match(/(?:19|20)\d{2}/g)?.at(-1);
+const thesisSection = doctorate
+  ? `\n\\subsection*{Tesi di dottorato}\n\\begin{itemize}[leftmargin=*]\\item \\textbf{${esc(plain(doctorate.detail))}}. ${esc(plain(doctorate.org))}${doctorateYear ? `, ${doctorateYear}` : ""}.\\end{itemize}`
+  : "";
+const titleBody = groupedTitles + `\n\\subsection*{Invited talks}\n\\begin{itemize}[leftmargin=*]${talkItems}\\end{itemize}` + thesisSection;
 // BibLaTeX renders the canonical records, in the citation order declared in YAML.
 const citationKeys = spec.publications.join(",");
 const pubBody = `\\nocite{${citationKeys}}\n\\printbibliography[heading=none]`;
@@ -178,7 +181,7 @@ writeFileSync(
   resolve(out, "publications.tex"),
   doc(italian ? "Elenco delle pubblicazioni presentate" : "List of submitted publications", pubBody).replace(
     "\\usepackage{enumitem}",
-    "\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\addbibresource{../../content/publications.bib}"
+    "\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\addbibresource{../../content/publications.bib}"
   )
 );
 writeFileSync(
@@ -188,7 +191,7 @@ writeFileSync(
     `\\begin{enumerate}[leftmargin=*]${manifest}\\end{enumerate}`
   )
 );
-// CV variant: shared authored layout, same generated macros, with the declared thesis added.
+// CV variant: shared authored layout and generated macros; education already carries the thesis.
 let cv = read("cv/cv.tex");
 let shared = read("cv/preamble.tex")
   .replaceAll("../content/", "../../content/")
@@ -203,18 +206,17 @@ copyFileSync(resolve(root, "cv/header.tex"), resolve(out, "header.tex"));
 copyFileSync(resolve(root, "cv/supervision.tex"), resolve(out, "supervision.tex"));
 mkdirSync(resolve(out, "generated"), { recursive: true });
 copyFileSync(resolve(root, "cv/generated/cv-data.tex"), resolve(out, "generated/cv-data.tex"));
-cv = cv.replace(
-  "\\cvpart{Education}{Education}",
-  `\\cvpart{Education}{Education}\n\\section{Doctoral thesis}\\noindent\\textbf{${esc(spec.thesis.title)}}. ${esc(spec.thesis.institution)}, ${esc(spec.thesis.year)}.`
-);
 cv = cv.replace("\\begin{document}", `\\begin{document}\n${draftFooter}`);
 cv = cv.replace("\\end{document}", "\\end{document}");
 writeFileSync(resolve(out, "cv.tex"), cv);
 // Optional external YAML list: [{position, bibkey, abstract_it}].
 const args = cli;
 const ai = args.indexOf("--abstracts");
-const abstractPath = ai >= 0 ? resolve(args[ai + 1]) : spec.abstracts_path;
-if (abstractPath && existsSync(abstractPath)) {
+const abstractArgument = ai >= 0 ? args[ai + 1] : process.env.DOSSIER_ABSTRACTS;
+if (ai >= 0 && !abstractArgument) throw Error("--abstracts requires a file path");
+const abstractPath = abstractArgument ? resolve(abstractArgument) : undefined;
+if (abstractPath && !existsSync(abstractPath)) throw Error(`abstracts file not found: ${abstractPath}`);
+if (abstractPath) {
   const raw = load(readFileSync(abstractPath, "utf8")) || [];
   const rows = Array.isArray(raw) ? raw : Object.entries(raw).map(([bibkey, abstract_it]) => ({ bibkey, abstract_it }));
   const indexed = new Map(rows.map((row) => [row.bibkey, row]));
@@ -227,13 +229,15 @@ if (abstractPath && existsSync(abstractPath)) {
   const body = `\\begin{enumerate}[leftmargin=*]${spec.publications.map((k) => `\\item \\textbf{\\citetitle{${k}}}\\\\\\citeauthor{${k}}.\\par\\medskip ${esc(indexed.get(k).abstract_it)}`).join("\n")}\\end{enumerate}`;
   const abstractTex = doc("Abstract tradotti in italiano", body).replace(
     "\\usepackage{enumitem}",
-    "\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\addbibresource{../../content/publications.bib}"
+    "\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\addbibresource{../../content/publications.bib}"
   );
   writeFileSync(resolve(out, "abstracts-it.tex"), abstractTex);
   writeFileSync(
     resolve(out, "abstracts-it.xmpdata"),
     `\\Title{Abstract tradotti in italiano}\n\\Author{${data.profile.name}}\n\\Language{it-IT}\n${spec.date ? `\\Date{${spec.date}}\n` : ""}`
   );
-} else if (ai >= 0) throw Error(`abstracts file not found: ${abstractPath}`);
-else for (const suffix of [".tex", ".xmpdata", ".pdf"]) rmSync(resolve(out, `abstracts-it${suffix}`), { force: true });
+} else {
+  for (const suffix of [".tex", ".xmpdata", ".pdf"]) rmSync(resolve(out, `abstracts-it${suffix}`), { force: true });
+  console.log("Italian abstracts skipped: pass --abstracts <path> or set DOSSIER_ABSTRACTS.");
+}
 console.log(`Rendered dossier (${spec.publications.length} publication entries, ${titles.length} title entries) to ${out}`);

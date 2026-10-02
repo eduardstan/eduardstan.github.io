@@ -5,13 +5,8 @@ place: ""
 date: ""
 selection_status: FINAL - owner reviews before signing
 reviewed: false
-abstracts_path: /home/eduard/fm/secondmates/site-mate/data/site-scout-abs12/abstracts-it-final12.yaml
 titles_sections: [education, appointments, teaching, projects, awards, service]
 # Talks come from content/talks.bib. Include every declared talk section.
-thesis:
-  title: Foundations of modal symbolic learning
-  institution: University of Parma
-  year: 2023
 publications:
   - stan_jair2026b
   - stan_jair2026
