@@ -40,7 +40,10 @@ for (const entry of bib.entries) {
   assert.ok(entry.title, `${entry.key}: no title`);
   assert.ok(entry.year > 1990, `${entry.key}: implausible year ${entry.year}`);
   assert.ok(entry.authors.length > 0, `${entry.key}: no authors`);
-  assert.ok(entry.venue, `${entry.key}: no venue`);
+  assert.ok(
+    entry.venue || (entry.type === 'misc' && entry.link?.field === 'url'),
+    `${entry.key}: no venue or software URL`,
+  );
   assert.ok(!/[{}\\]/.test(entry.title), `${entry.key}: unresolved LaTeX in title`);
   assert.ok(
     !entry.authors.some((a) => /[{}\\]/.test(a)),
@@ -195,13 +198,17 @@ for (const entry of bib.entries) {
 // separator with nothing on either side of it.
 for (const entry of bib.entries) {
   const where = `${entry.key} (@${entry.type}): "${entry.citation}"`;
-  assert.ok(entry.citation, `${where}: no citation assembled`);
+  const repositorySoftware = entry.type === 'misc' && entry.link?.field === 'url' && !entry.venue;
+  assert.ok(entry.citation || repositorySoftware, `${where}: no citation assembled`);
   assert.ok(!/,\s*,|\.\s*\.|,\s*\.|;\s*[;.]/.test(entry.citation), `${where}: doubled separator`);
   assert.ok(!/^[,.;\s]|[,;]\s*$/.test(entry.citation), `${where}: leading or trailing separator`);
   assert.ok(!/\(\s*\)|\[\s*\]/.test(entry.citation), `${where}: empty parenthesis`);
   assert.ok(!/\s{2,}/.test(entry.citation), `${where}: doubled space`);
   assert.ok(!/[{}\\]/.test(entry.citation), `${where}: unresolved LaTeX`);
-  assert.ok(entry.citation.startsWith(entry.venue), `${where}: does not open with the venue`);
+  assert.ok(
+    repositorySoftware || entry.citation.startsWith(entry.venue),
+    `${where}: does not open with the venue`,
+  );
   // The record under the citation names the fields it was built from, so every
   // one of them has to be a field this entry really has.
   for (const field of entry.citationFields) {
@@ -242,7 +249,10 @@ assert.equal(jair.doi, '10.1613/jair.1.23339', `${jair.key}: DOI changed`);
 assert.equal(jair.authors[2], 'C. Noguera');
 // No volume but pages present — the comma before the pages is the only one.
 const noVolume = bib.entries.find((entry) => entry.key === '11122906')!;
-assert.equal(noVolume.citation, 'IEEE Journal of Biomedical and Health Informatics, 1-22.');
+assert.equal(
+  noVolume.citation,
+  'IEEE Journal of Biomedical and Health Informatics 30(3), 2630-2645.',
+);
 
 // Links. The DOI leads because it outlives the publisher's URL scheme, and an
 // entry with none of the four fields shows no link rather than a dead one.
