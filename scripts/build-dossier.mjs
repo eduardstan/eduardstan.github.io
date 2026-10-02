@@ -269,20 +269,19 @@ writeFileSync(
 let cv = read("cv/cv.tex");
 let shared = read("cv/preamble.tex")
   .replaceAll("../content/", "../../content/")
-  .replace("../../content/publications.bib", "publications-dossier.bib")
-  .replace("../../content/talks.bib", "talks-dossier.bib")
   .replace(
     "\\documentclass[a4paper,11pt]{article}",
     "\\documentclass[a4paper,11pt]{article}\n\\PassOptionsToPackage{hidelinks}{hyperref}\n\\usepackage[a-2b]{pdfx}"
   );
 
 cv = cv.replaceAll("../content/", "../../content/");
-cv = cv.replaceAll("../../content/talks.bib", "talks-dossier.bib").replaceAll("../../content/publications.bib", "publications-dossier.bib");
+// Keep the dossier CV's biblatex inputs byte-identical to the public CV's canonical records.
+// No-break TeX wrappers are safe in rendered dossier lists but invalidate BibLaTeX date parsing.
 writeFileSync(resolve(out, "preamble.tex"), shared);
 copyFileSync(resolve(root, "cv/header.tex"), resolve(out, "header.tex"));
 copyFileSync(resolve(root, "cv/supervision.tex"), resolve(out, "supervision.tex"));
 mkdirSync(resolve(out, "generated"), { recursive: true });
-writeFileSync(resolve(out, "generated/cv-data.tex"), protectNoBreak(read("cv/generated/cv-data.tex")));
+writeFileSync(resolve(out, "generated/cv-data.tex"), read("cv/generated/cv-data.tex"));
 cv = cv.replace("\\begin{document}", `\\begin{document}\n${draftFooter}`);
 const cvLine = `\\par\\medskip\\noindent\\textbf{Luogo e data:} ${place ? `${place}, ` : ""}${date || "\\rule{3cm}{0.4pt}"}\\par\\vspace{1em}`;
 const cvEnd = cv.lastIndexOf("\\end{document}");

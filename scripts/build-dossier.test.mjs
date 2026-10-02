@@ -102,8 +102,26 @@ test("renders the declaration, optional translations, and rejects bad publicatio
   assert.doesNotMatch(cilc, /September 26-28, 2017/);
   assert.match(readFileSync(join(output, "publications.tex"), "utf8"), /\\finalnamedelim/);
   assert.match(readFileSync(join(output, "publications-dossier.bib"), "utf8"), /\\mbox\{/);
-  assert.match(readFileSync(join(output, "preamble.tex"), "utf8"), /publications-dossier\.bib/);
-  assert.match(readFileSync(join(output, "cv.tex"), "utf8"), /talks-dossier\.bib/);
+  const cvPreamble = readFileSync(join(output, "preamble.tex"), "utf8");
+  assert.match(cvPreamble, /\.\.\/\.\.\/content\/publications\.bib/);
+  assert.match(cvPreamble, /\.\.\/\.\.\/content\/talks\.bib/);
+  assert.doesNotMatch(cvPreamble, /(?:talks|publications)-dossier\.bib/);
+  const cvTex = readFileSync(join(output, "cv.tex"), "utf8");
+  assert.match(cvTex, /\.\.\/\.\.\/content\/talks\.bib/);
+  assert.match(cvTex, /\.\.\/\.\.\/content\/publications\.bib/);
+  assert.doesNotMatch(cvTex, /(?:talks|publications)-dossier\.bib/);
+  assert.equal(
+    readFileSync(join(output, "generated/cv-data.tex"), "utf8"),
+    readFileSync(join(root, "cv/generated/cv-data.tex"), "utf8"),
+    "dossier CV macros must remain identical to the public CV"
+  );
+  // The generated list copies may add only no-break wrappers. Removing those wrappers must
+  // recover each canonical bibliography byte-for-byte, including every field and entry order.
+  for (const name of ["talks", "publications"]) {
+    const canonical = readFileSync(join(root, `content/${name}.bib`), "utf8");
+    const generated = readFileSync(join(output, `${name}-dossier.bib`), "utf8");
+    assert.equal(generated.replace(/\\mbox\{([^{}]*)\}/g, "$1"), canonical, `${name} dossier copy changed beyond no-break markup`);
+  }
   assert.match(readFileSync(join(output, "publications.tex"), "utf8"), /\\DeclareFieldFormat\{eid\}\{Article~#1\}/);
   assert.match(readFileSync(join(output, "publications.tex"), "utf8"), /\\DeclareFieldFormat\{issn\}\{\}/);
   assert.match(readFileSync(join(output, "publications.tex"), "utf8"), /\\renewbibmacro\*\{journal\+issuetitle\}/);
