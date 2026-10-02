@@ -351,7 +351,6 @@ Conference papers (peer-reviewed)
         https://ceur-ws.org/Vol-1949/CILCpaper09.pdf.
 
 Workshop papers
-
 [W1]    G. Pagliarini, E. Ponsanesi, G. Sciavicco, and I. E. Stan. “Towards Modern Rule-Based Learning”. In: Short
         Paper Proceedings of the 6th International Workshop on Artiﬁcial Intelligence and Formal Veriﬁcation, Logic, Automata,
         and Synthesis, OVERLAY 2024, Bolzano, Italy, November 28-29, 2024. Ed. by D. Porello, C. Vinci, and M. Zavatteri.
@@ -392,21 +391,21 @@ Workshop papers
         https://ceur-ws.org/Vol-2509/paper10.pdf.
 
 Under review
-
- [U1]   G. Pagliarini, M. Perrotta, G. Sciavicco, and I. E. Stan. From forests to minimal formulas: A logic-driven framework
+[U1]    G. Pagliarini, M. Perrotta, G. Sciavicco, and I. E. Stan. From forests to minimal formulas: A logic-driven framework
         to explain ensemble models. 35th International Joint Conference on Artiﬁcial Intelligence, IJCAI 2026 (Manuscript
         under review). 2026.
- [U2]   I. E. Stan, D. Baiardi, S. Verga, G. Galimberti, and P. Napoletano. Towards Wearable Teleoperation for
+[U2]    I. E. Stan, D. Baiardi, S. Verga, G. Galimberti, and P. Napoletano. Towards Wearable Teleoperation for
         Human-to-Robot Teaching. IEEE Transactions on Human-Machine Systems (Manuscript under review). 2026.
- [U3]   I. E. Stan and P. Napoletano. A Semantics-First Contract for Neuro-Symbolic Reasoning. International Conference
+[U3]    I. E. Stan and P. Napoletano. A Semantics-First Contract for Neuro-Symbolic Reasoning. International Conference
         on Principles of Knowledge Representation and Reasoning (Manuscript under review). 2026.
 
-Software & artifacts
-
+Software
  [S1]   M. Milella, G. Pagliarini, G. Sciavicco, and I. E. Stan. ModalAssociationRules.jl. DROPS Artifacts, Oct. 2025. DOI:
         10.4230/ARTIFACTS.24783.
  [S2]   M. Milella, G. Pagliarini, G. Sciavicco, and I. E. Stan. Sole.jl. DROPS Artifacts, Oct. 2025. DOI:
         10.4230/ARTIFACTS.24782.
+ [S3]   G. Pagliarini, F. Manzella, G. Sciavicco, and I. E. Stan. ModalDecisionTrees.jl: interpretable models for native
+        time-series & image classiﬁcation. 2023. URL: https://github.com/aclai-lab/ModalDecisionTrees.jl.
 Data protection and permitted use. I authorize the processing of my personal data contained in this CV for purposes connected
 with evaluation and selection procedures, in accordance with Regulation (EU) 2016/679 (GDPR) and Italian legislation (Legislative
 Decree 196/2003 as amended by Legislative Decree 101/2018).
