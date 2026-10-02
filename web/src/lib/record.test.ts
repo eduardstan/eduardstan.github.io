@@ -215,12 +215,19 @@ for (const entry of bib.entries) {
     assert.ok(entry.fields[field], `${where}: cites a field it does not have (${field})`);
   }
   // A field that is present and belongs in a citation must reach it.
-  for (const field of ['volume', 'number', 'pages'] as const) {
+  for (const field of ['volume', 'number', 'pages', 'eid'] as const) {
     if (entry.fields[field]) {
       assert.ok(entry.citationFields.includes(field), `${where}: dropped ${field}`);
     }
   }
 }
+
+// JAIR uses an electronic article identifier rather than a page span.
+const jair2026 = bib.entries.find((entry) => entry.key === 'stan_jair2026b')!;
+assert.equal(jair2026.citation, 'Journal of Artificial Intelligence Research 87, Article 9.');
+assert.ok(jair2026.citationFields.includes('eid'));
+const jair2026b = bib.entries.find((entry) => entry.key === 'stan_jair2026')!;
+assert.equal(jair2026b.citation, 'Journal of Artificial Intelligence Research 86, Article 36.');
 
 // An @article and an @inproceedings read differently: the volume belongs to the
 // journal in one and to the series in the other, and neither may print it twice.

@@ -4,9 +4,9 @@
 `content/cv.yaml`, `content/publications.bib`, `content/talks.bib` and generated CV macros as the
 site and printed CV. It creates temporary TeX under `cv/dossier-build/` (ignored) and never
 commits PDFs. Run `npm ci`, `node scripts/build-cv-data.mjs`, then `node scripts/build-dossier.mjs`. For Italian abstracts, set `DOSSIER_ABSTRACTS=/path/to/abstracts-it.yaml` or pass `--abstracts /path/to/abstracts-it.yaml`.
-Build the generated files with XeLaTeX in the TeX Live 2024 container from
-`cv/dossier-build/`; use `latexmk -xelatex -shell-escape titles.tex publications.tex attachments.tex cv.tex`; include `abstracts-it.tex` only when an abstracts source was supplied. The shell escape is required by `pdfx` for PDF creation metadata. The generator fixes that metadata date to the declared date, or to 2000-01-01 when the declaration leaves the date blank; the visible signature-date line stays blank. Validate every produced PDF with veraPDF before signing. The files are unsigned; the owner adds a
-PAdES signature separately. No signature box or identity data is generated.
+For the owner's final package, run `/home/eduard/fm/secondmates/site-mate/data/rtt_san_raffaele_roma_2026/rebuild.sh`; it clones a clean `origin/master` scratch checkout, uses the verified-final Italian abstracts file and the locally available `ghcr.io/xu-cheng/texlive-full:20240101` image without pulling images, validates all five PDFs with veraPDF, and copies them into the sibling `package/` directory. Optional arguments are `--place <text>`, `--date <text>` and `--final`; the first two affect only that run, and `--final` sets `reviewed: true`. `DOSSIER_REPO_URL` and `DOSSIER_BRANCH` exist only to test the script against a local mirror; production defaults to the project GitHub repository and `master`.
+
+For a manual build, use XeLaTeX in the TeX Live 2024 CI container from `cv/dossier-build/`; run `latexmk -xelatex -shell-escape titles.tex publications.tex attachments.tex cv.tex abstracts-it.tex` when translations are supplied. The shell escape is required by `pdfx` for PDF creation metadata. The generator fixes that metadata date to the declared date, or to 2000-01-01 when the declaration leaves the date blank; the visible signature-date line stays blank. CI pins TeX Live 2024; the owner reports identical extracted text for the prior local TeX Live 2023 and CI builds. The files are unsigned; the owner adds a PAdES signature separately. No signature box or identity data is generated.
 
 ## Why these documents exist
 
@@ -33,7 +33,7 @@ claims made by the renderer. The scientific CV remains English as requested; lis
   pages, year, place where present, and DOI); the files themselves remain canonical.
 - `attachments` is a manifest of labels, not a claim that a document exists. The owner must assemble
   the application forms, identity/tax copies and publication PDFs separately.
-- Every output includes the profile name and a `Luogo e data` line. There is deliberately no
+- Every output, including `cv.pdf`, includes the profile name and a `Luogo e data` line. The title list groups `content/talks.bib` records into invited (`invited`), oral (`oral`) and poster (`poster`) subsections using only the declared keywords. Every record must declare exactly one classification and all four display fields (`title`, `eventtitle`, `venue`, `date`); incomplete or conflicting records stop generation. There is deliberately no
   handwritten-signature box.
 
 Italian abstracts come from an external YAML file, not copied into this repository. Supply its path with `--abstracts /path/to/abstracts-it.yaml` or the `DOSSIER_ABSTRACTS` environment variable. The CLI option takes precedence. If neither is given, the generator prints a skip message and omits the abstracts PDF; CI does not require this owner-local file. The generator accepts rows with `position`, `bibkey` and `abstract_it`, e.g.:
@@ -44,7 +44,7 @@ Italian abstracts come from an external YAML file, not copied into this reposito
   abstract_it: "Abstract tradotto in italiano..."
 ```
 
-The generator rereads the external file on every run; do not cache its contents. It follows the selected key order, requires a nonempty
+The generator rereads the external file on every run; do not cache its contents. CLI overrides `--place <text>`, `--date <text>` and `--reviewed true|false` apply to that invocation only; they do not edit `content/dossier.yaml`. `--reviewed false` keeps the `BOZZA` footer. It follows the selected key order, requires a nonempty
 abstract for every selected work, and checks any supplied positions. Each numbered abstract entry
 prints the English title and authors from BibTeX before the translation. The call requires translated abstracts for foreign-language submitted texts, so confirm all five PDFs exist before filing.
 
