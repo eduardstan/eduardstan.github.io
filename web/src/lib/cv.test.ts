@@ -284,11 +284,17 @@ assert.ok(
 // them must render rather than print its delimiters. Because there is one entry
 // shape, this is now every value of every entry of every section, with no list
 // of field names to fall behind the file.
-const stringsOf = (entry: Entry): unknown[] => [
-  ...Object.values(entry).filter((value) => typeof value === 'string'),
-  ...(entry.items ?? []),
-  ...(entry.rows ?? []).flatMap((row) => Object.values(row)),
-];
+const stringsOf = (entry: Entry): unknown[] => {
+  assert.ok(
+    (entry.items ?? []).every((item) => typeof item === 'string'),
+    `items for "${entry.title}" must be strings`,
+  );
+  return [
+    ...Object.values(entry).filter((value) => typeof value === 'string'),
+    ...(entry.items ?? []),
+    ...(entry.rows ?? []).flatMap((row) => Object.values(row)),
+  ];
+};
 const rendered = [
   profile.bio!.short,
   profile.bio!.long,

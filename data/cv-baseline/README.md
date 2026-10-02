@@ -23,8 +23,8 @@ gate.** Any difference must be explained, not accepted.
 ## Baseline facts
 
 - Pages: 8
-- Extracted text: 417 lines
-- Text sha256 (first 16): fd64edcafffd647b
+- Extracted text: 415 lines
+- Text sha256 (first 16): 930166c0a71b2106
 - `cv-baseline.pdf` is the exact PDF, kept for visual comparison.
 
 ## Known intended differences
@@ -56,3 +56,14 @@ gate.** Any difference must be explained, not accepted.
 
 - 2026-10-02: Formatted BibLaTeX `eid` values as `Article n` and moved each after the issue-year, matching owner PDFs 01 and 02. The public CV now reads `87 (2026), Article 9` and `86 (2026), Article 36`; only the two JAIR citation lines reflow, and the document remains 8 pages.
 - 2026-10-02: Removed the duplicated venue and event date range from the CILC 2017 talk's `eventtitle`; the separate venue and talk date remain. The CEUR-WS.org event proceedings record confirms the conference name and the Naples, Italy, September 26–28, 2017 event dates. The printed CV no longer repeats the venue/date after the talk title; the document remains 8 pages.
+
+- 2026-10-02: Fixed the Huawei award's YAML item, which had parsed as a mapping because its
+  sentence contained an unquoted colon; the PDF no longer contains the stray `[object Object]`
+  overflow and now prints the award detail. Mapped the middle dot through `\textperiodcentered{}`:
+  the rendered glyph is a dot and text extraction now returns `·` instead of `ů`. Added the
+  requested DAI4Health course row, expanded AAMAS reviewer details with its ICORE2026 rank,
+  added NeurIPS reviewer service with its ICORE2026 rank, and moved reviewer journals before
+  conferences while preserving order inside each group. Their added lines shift the awards and
+  research-projects page break and reflow surrounding extracted whitespace. The Udine `€1000`
+  glyph remains visually correct; the `eurosym` text extraction emits `e1000`, unchanged in
+  meaning and not a glyph defect. The CV remains 8 pages.

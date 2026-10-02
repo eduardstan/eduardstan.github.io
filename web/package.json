@@ -8,7 +8,7 @@
   },
   "scripts": {
     "astro": "astro",
-    "build": "astro build && pagefind --site dist",
+    "build": "astro build && pagefind --site dist && node --test src/lib/cv-output.test.mjs",
     "check": "astro check",
     "dev": "astro dev",
     "prebuild": "npm run stage-media",

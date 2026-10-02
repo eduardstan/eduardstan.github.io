@@ -62,6 +62,7 @@ const ESCAPES = {
 const TYPOGRAPHY = [
   ["—", "---"], // em dash
   ["–", "--"], // en dash
+  ["·", "\\textperiodcentered{}"], // middle dot (cfr-lm's text glyph extraction is mis-mapped)
   ["‑", "{-}"], // non-breaking hyphen: suppress the line break here
   ["⁺", "$^{+}$"], // superscript plus, e.g. Erasmus+
   ["€", "\\euro{}"], // euro sign
@@ -159,6 +160,11 @@ const arg = (value) => renderInline(value ?? "");
 /** `\resumeItemListStart ... \resumeItemListEnd`, or nothing when there are no items. */
 function itemList(items) {
   if (!items || !items.length) return "";
+  for (const [index, item] of items.entries()) {
+    if (typeof item !== "string") {
+      throw new Error(`items[${index}] must be a string; quote YAML values containing a colon.`);
+    }
+  }
   const body = items.map((i) => `  \\item ${renderInline(i)}`).join("\n");
   return `\\resumeItemListStart\n${body}\n\\resumeItemListEnd`;
 }
