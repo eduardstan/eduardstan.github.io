@@ -224,10 +224,18 @@ for (const entry of bib.entries) {
 
 // JAIR uses an electronic article identifier rather than a page span.
 const jair2026 = bib.entries.find((entry) => entry.key === 'stan_jair2026b')!;
-assert.equal(jair2026.citation, 'Journal of Artificial Intelligence Research 87, Article 9.');
+assert.equal(
+  jair2026.citation,
+  'Journal of Artificial Intelligence Research 87 (2026), Article 9.',
+);
+assert.ok(jair2026.citationFields.includes('year'));
 assert.ok(jair2026.citationFields.includes('eid'));
 const jair2026b = bib.entries.find((entry) => entry.key === 'stan_jair2026')!;
-assert.equal(jair2026b.citation, 'Journal of Artificial Intelligence Research 86, Article 36.');
+assert.equal(
+  jair2026b.citation,
+  'Journal of Artificial Intelligence Research 86 (2026), Article 36.',
+);
+assert.ok(jair2026b.citationFields.includes('year'));
 
 // An @article and an @inproceedings read differently: the volume belongs to the
 // journal in one and to the series in the other, and neither may print it twice.

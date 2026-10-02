@@ -23,8 +23,8 @@ gate.** Any difference must be explained, not accepted.
 ## Baseline facts
 
 - Pages: 8
-- Extracted text: 411 lines
-- Text sha256 (first 16): dfbd0edc32a43787
+- Extracted text: 417 lines
+- Text sha256 (first 16): fd64edcafffd647b
 - `cv-baseline.pdf` is the exact PDF, kept for visual comparison.
 
 ## Known intended differences
@@ -51,5 +51,8 @@ gate.** Any difference must be explained, not accepted.
 - 2026-10-02: Renamed the printed and site publication group from Software & artifacts to Software and added the ModalDecisionTrees.jl software record (2023). The existing Sole.jl and ModalAssociationRules.jl entries remain unchanged. Software still has its own `S` numbering; the new citation adds S3 without changing the order or keys of other entries. The heading and citation reflow the bibliography's spacing; the document remains 8 pages.
 
 - 2026-10-02: Updated the JBHI systematic-review record to IEEE's issue data (volume 30, issue 3, pages 2630–2645, 2026) after Crossref confirmed it. This replaces the online-first year and placeholder pagination; its `announced` date, if present, is unchanged. The document remains 8 pages.
-- 2026-10-02: Added the JAIR article identifiers from the owner-provided final PDFs: Article 9 for volume 87 (`stan_jair2026b`) and Article 36 for volume 86 (`stan_jair2026`). The BibLaTeX-rendered public CV now includes `9` and `36` after the respective volumes.
-- 2026-10-02: Corrected the author of `DBLP:journals/ai/Munoz-VelascoPS19` from `Mercedes Pelegrín-García` to `Mercedes Pelegrín`, as printed on owner PDF 03 and reported by Crossref for DOI `10.1016/j.artint.2018.09.001`. This also reflows that citation across two lines. The baseline was refreshed after review; the only changed hunks are the two JAIR identifiers and this author correction with its line-wrap consequence. The document remains 8 pages.
+- 2026-10-02: Added the JAIR article identifiers from the owner-provided final PDFs: Article 9 for volume 87 (`stan_jair2026b`) and Article 36 for volume 86 (`stan_jair2026`). The BibLaTeX-rendered public CV now prints `Article 9` and `Article 36` after the respective volumes.
+- 2026-10-02: Corrected the author of `DBLP:journals/ai/Munoz-VelascoPS19` from `Mercedes Pelegrín-García` to `Mercedes Pelegrín`, as printed on owner PDF 03 and reported by Crossref for DOI `10.1016/j.artint.2018.09.001`. This also reflows that citation across two lines. That baseline refresh included the author correction and the two JAIR article identifiers; the document remained 8 pages.
+
+- 2026-10-02: Formatted BibLaTeX `eid` values as `Article n` and moved each after the issue-year, matching owner PDFs 01 and 02. The public CV now reads `87 (2026), Article 9` and `86 (2026), Article 36`; only the two JAIR citation lines reflow, and the document remains 8 pages.
+- 2026-10-02: Removed the duplicated venue and event date range from the CILC 2017 talk's `eventtitle`; the separate venue and talk date remain. The CEUR-WS.org event proceedings record confirms the conference name and the Naples, Italy, September 26–28, 2017 event dates. The printed CV no longer repeats the venue/date after the talk title; the document remains 8 pages.

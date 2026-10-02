@@ -287,8 +287,7 @@ Standard BibTeX. Export from Zotero, Mendeley, DBLP or Google Scholar and drop t
 Nothing is filtered: every entry is shown on the site, including manuscripts under review.
 Both `journal` and BibLaTeX's `journaltitle` are read, so a Better BibTeX BibLaTeX export works.
 For a journal article with an electronic article identifier and no page span, use BibLaTeX's
-`eid` field (for example, `eid = {9}`). The printed CV renders that identifier after the volume;
-the site labels it `Article 9`. Do not repeat it in `pages`.
+`eid` field (for example, `eid = {9}`). The printed CV, dossier list and site render it after the year, e.g. `87 (2026), Article 9`. Do not repeat it in `pages`.
 
 ### How they are grouped: `publications:` and `talks:` in `cv.yaml`
 

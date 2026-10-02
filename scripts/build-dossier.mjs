@@ -154,10 +154,10 @@ const italian = spec.language === "it";
 const date = esc(spec.date),
   place = esc(spec.place),
   name = esc(data.profile.name);
-const line = `\\par\\medskip\\noindent\\textbf{Luogo e data:} ${place ? `${place}, ` : ""}${date || "\\rule{3cm}{0.4pt}"}\\par\\vspace{1em}`;
+const line = `\\par\\medskip\\noindent\\textbf{\\textitalian{Luogo e data:}} ${place ? `${place}, ` : ""}${date || "\\rule{3cm}{0.4pt}"}\\par\\vspace{1em}`;
 const draftFooter = spec.reviewed === false ? String.raw`\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{BOZZA}\renewcommand{\headrulewidth}{0pt}` : "";
 function doc(title, body) {
-  return `\\documentclass[a4paper,11pt]{article}\n\\usepackage[a-2b]{pdfx}\n\\usepackage[margin=25mm]{geometry}\n\\usepackage{fontspec}\n\\setmainfont{TeX Gyre Pagella}\n\\usepackage{enumitem}\n\\usepackage{fancyhdr}\n\\begin{document}\n\\sloppy${draftFooter}\n\\begin{center}{\\Large\\bfseries ${esc(title)}}\\end{center}\n\\noindent\\textbf{${name}}\\par\\medskip\n${body}\n${line}\\end{document}\n`;
+  return `\\documentclass[a4paper,11pt]{article}\n\\usepackage[a-2b]{pdfx}\n\\usepackage[margin=25mm]{geometry}\n\\usepackage{fontspec}\n\\usepackage{polyglossia}\n\\setmainlanguage{english}\n\\setotherlanguage{italian}\n\\setmainfont{TeX Gyre Pagella}\n\\usepackage{enumitem}\n\\usepackage{fancyhdr}\n\\begin{document}\n\\sloppy${draftFooter}\n\\begin{center}{\\Large\\bfseries ${italian ? `\\textitalian{${esc(title)}}` : esc(title)}}\\end{center}\n\\noindent\\textbf{${name}}\\par\\medskip\n${body}\n${line}\\end{document}\n`;
 }
 function item(e) {
   const years = (e.years || [])
@@ -176,7 +176,7 @@ const label = {
   service: "Attività editoriale, organizzazione e revisione",
 };
 const groupedTitles = spec.titles_sections
-  .map((k) => `\\subsection*{${esc(label[k] || k)}}\n\\begin{itemize}[leftmargin=*]${data[k].map(item).join("\n")}\\end{itemize}`)
+  .map((k) => `\\subsection*{\\textitalian{${esc(label[k] || k)}}}\n\\begin{itemize}[leftmargin=*]${data[k].map(item).join("\n")}\\end{itemize}`)
   .join("\n");
 const talkGroups = { invited: [], oral: [], poster: [] };
 for (const [key, f] of talks) {
@@ -189,25 +189,46 @@ for (const [key, f] of talks) {
   const details = [plain(f.eventtitle), plain(f.venue), date].join(", ");
   talkGroups[classes[0]].push(`\\item \\textbf{${esc(plain(f.title))}}. ${esc(details)}.`);
 }
-const talkSection = `\\section*{Relazioni a congressi e convegni}\n${[
+const talkSection = `\\section*{\\textitalian{Relazioni a congressi e convegni}}\n${[
   ["invited", "Relazioni su invito"],
   ["oral", "Presentazioni orali"],
   ["poster", "Poster"],
 ]
-  .map(([kind, title]) => `\\subsection*{${title}}\n\\begin{itemize}[leftmargin=*]${talkGroups[kind].join("\n")}\\end{itemize}`)
+  .map(([kind, title]) => `\\subsection*{\\textitalian{${title}}}\n\\begin{itemize}[leftmargin=*]${talkGroups[kind].join("\n")}\\end{itemize}`)
   .join("\n")}`;
 
 const doctorate = data.education.find((entry) => /ph\.?\s*d/i.test(entry.title) && entry.detail);
 const doctorateYear = doctorate?.dates?.match(/(?:19|20)\d{2}/g)?.at(-1);
 const thesisSection = doctorate
-  ? `\n\\subsection*{Tesi di dottorato}\n\\begin{itemize}[leftmargin=*]\\item \\textbf{${esc(plain(doctorate.detail))}}. ${esc(plain(doctorate.org))}${doctorateYear ? `, ${doctorateYear}` : ""}.\\end{itemize}`
+  ? `\n\\subsection*{\\textitalian{Tesi di dottorato}}\n\\begin{itemize}[leftmargin=*]\\item \\textbf{${esc(plain(doctorate.detail))}}. ${esc(plain(doctorate.org))}${doctorateYear ? `, ${doctorateYear}` : ""}.\\end{itemize}`
   : "";
 const titleBody = groupedTitles + `\n${talkSection}` + thesisSection;
 // BibLaTeX renders the canonical records, in the citation order declared in YAML.
 const citationKeys = spec.publications.join(",");
 const pubBody = `\\nocite{${citationKeys}}\n\\printbibliography[heading=none]`;
+const journalEidMacro = String.raw`\renewbibmacro*{journal+issuetitle}{%
+  \usebibmacro{journal}%
+  \setunit*{\addspace}%
+  \iffieldundef{series}
+    {}
+    {\newunit
+     \printfield{series}%
+     \setunit{\addspace}}%
+  \ifentrytype{article}
+    {\printfield{volume}%
+     \setunit*{\adddot}%
+     \printfield{number}%
+     \setunit{\addspace}%
+     \usebibmacro{issue+date}%
+     \iffieldundef{eid}{}{\setunit{\addcomma\space}\printfield{eid}}}
+    {\usebibmacro{volume+number+eid}%
+     \setunit{\addspace}%
+     \usebibmacro{issue+date}}%
+  \setunit{\addcolon\space}%
+  \printfield{issue}%
+  \newunit}`;
 
-const manifest = spec.attachments.map((x) => `\\item ${escExact(x)}`).join("\n");
+const manifest = spec.attachments.map((x) => `\\item \\textitalian{${escExact(x)}}`).join("\n");
 for (const [base, title] of [
   ["titles", "Elenco dei titoli"],
   ["publications", "Elenco delle pubblicazioni presentate"],
@@ -226,7 +247,7 @@ writeFileSync(
   resolve(out, "publications.tex"),
   doc(italian ? "Elenco delle pubblicazioni presentate" : "List of submitted publications", pubBody).replace(
     "\\usepackage{enumitem}",
-    "\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\addbibresource{../../content/publications.bib}"
+    `\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\DeclareFieldFormat{eid}{Article~#1}\n${journalEidMacro}\n\\DeclareFieldFormat{issn}{}\n\\addbibresource{../../content/publications.bib}`
   )
 );
 writeFileSync(
@@ -280,10 +301,10 @@ if (abstractPath) {
       throw Error(`selected publication ${k} is missing its Italian abstract`);
     if (row.position !== undefined && Number(row.position) !== i + 1) throw Error(`abstract position for ${k} must be ${i + 1}`);
   }
-  const body = `\\begin{enumerate}[leftmargin=*]${spec.publications.map((k) => `\\item \\textbf{\\citetitle{${k}}}\\\\\\citeauthor{${k}}.\\par\\medskip ${esc(indexed.get(k).abstract_it)}`).join("\n")}\\end{enumerate}`;
+  const body = `\\begin{enumerate}[leftmargin=*]${spec.publications.map((k) => `\\item \\textbf{\\citetitle{${k}}}\\\\\\citeauthor{${k}}.\\par\\medskip \\begin{italian}${esc(indexed.get(k).abstract_it)}\\end{italian}`).join("\n")}\\end{enumerate}`;
   const abstractTex = doc("Abstract tradotti in italiano", body).replace(
     "\\usepackage{enumitem}",
-    "\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\addbibresource{../../content/publications.bib}"
+    `\\usepackage{enumitem}\n\\usepackage[backend=biber,style=numeric,sorting=none,maxnames=99,minnames=99,maxbibnames=99,minbibnames=99,maxcitenames=99,mincitenames=99]{biblatex}\n\\renewcommand*{\\finalnamedelim}{\\addspace e\\space}\n\\addbibresource{../../content/publications.bib}`
   );
   writeFileSync(resolve(out, "abstracts-it.tex"), abstractTex);
   writeFileSync(
