@@ -1,0 +1,39 @@
+# Single owner-edited dossier declaration. Machine-readable; see docs/dossier.md.
+name: san-raffaele-rtt
+language: it
+place: ""
+date: ""
+selection_status: FINAL - owner reviews before signing
+reviewed: false
+abstracts_path: /home/eduard/fm/secondmates/site-mate/data/site-scout-abs12/abstracts-it-final12.yaml
+titles_sections: [education, appointments, teaching, projects, awards, service]
+# Talks come from content/talks.bib. Include every declared talk section.
+thesis:
+  title: Foundations of modal symbolic learning
+  institution: University of Parma
+  year: 2023
+publications:
+  - stan_jair2026b
+  - stan_jair2026
+  - DBLP:journals/ai/Munoz-VelascoPS19
+  - DBLP:conf/ecai/ManzellaPSS23
+  - DBLP:journals/iandc/PagliariniSSSS24
+  - DBLP:journals/fss/ConradieMMSS23
+  - DBLP:journals/artmed/ManzellaPSS23
+  - stan_array2026
+  - DBLP:journals/algorithms/Lucena-SanchezS21
+  - DBLP:conf/time/ManzellaPSS21
+  - DBLP:conf/time/SciaviccoS20
+  - DBLP:conf/time/BellodiCPSS25
+
+attachments:
+  - Domanda di partecipazione (Allegato A)
+  - Copia del codice fiscale
+  - Copia di un documento d’identità in corso di validità
+  - Curriculum scientifico
+  - Titoli utili alla valutazione comparativa, con elenco datato
+  - Elenco delle pubblicazioni scientifiche presentate
+  - Copie PDF delle pubblicazioni elencate
+  - Dichiarazione sostitutiva sui titoli (Allegato B)
+  - Dichiarazione sostitutiva di conformità delle copie (Allegato C)
+  - Elenco di tutti i documenti allegati alla domanda

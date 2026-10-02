@@ -211,6 +211,10 @@ a second place to write one is the drift this design closed.
 The site owner's mobile number must not be committed or included in the CV. The personal Gmail
 address is approved for publication.
 
+## Application dossier outputs
+
+The application dossier declaration, generator, call criteria and local build/verification procedure are documented in [`docs/dossier.md`](docs/dossier.md); the owner-selected publication list in `content/dossier.yaml` is marked final but still requires review before signing.
+
 ## CV pipeline
 
 The CV's facts live in exactly one place and both the PDF and the site are generated from it:
