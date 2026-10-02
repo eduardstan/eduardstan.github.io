@@ -336,7 +336,7 @@ service:
     rank_url: https://www.scimagojr.com/journalsearch.php?q=21100256982&tip=sid&clean=0
     announced: 2024-08-21T10:00:00+02:00
   - title: Reviewer
-    org: AAMAS 2027 (International Conference on Autonomous Agents and Multiagent Systems)
+    org: AAMAS 2027
     announced: 2026-10-01
   - title: Reviewer
     org: AI Access Foundation Journal of Artificial Intelligence Research
