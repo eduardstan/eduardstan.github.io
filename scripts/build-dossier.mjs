@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync, rmSyn
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load } from "js-yaml";
+import { metadataDate } from "./dossier-date.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (p) => readFileSync(resolve(root, p), "utf8");
 const data = load(read("content/cv.yaml"));
@@ -26,7 +27,10 @@ const keyFlag = cli.indexOf("--check-keys");
 if (keyFlag >= 0) spec.publications = cli[keyFlag + 1].split(",");
 const out = resolve(root, "cv/dossier-build");
 mkdirSync(out, { recursive: true });
-const compactDate = String(spec.date || "2000-01-01").replaceAll("-", "");
+const parsedDate = metadataDate(spec.date);
+if (spec.date && !parsedDate) console.warn(`Warning: could not parse dossier date ${JSON.stringify(spec.date)}; using 2000-01-01 for PDF metadata.`);
+const metadataIsoDate = parsedDate || "2000-01-01";
+const compactDate = metadataIsoDate.replaceAll("-", "");
 writeFileSync(
   resolve(out, "creationdate.lua"),
   `os.remove("creationdate.timestamp")\nio.output("creationdate.timestamp"):write("\\\\edef\\\\tempa{\\\\string D:${compactDate}000000}\\n\\\\def\\\\tempb{+0000}")\n`
@@ -151,8 +155,8 @@ if (keyFlag >= 0) {
 for (const k of spec.titles_sections) if (!Array.isArray(data[k])) throw Error(`unknown title section: ${k}`);
 if (!Array.isArray(spec.attachments) || !spec.attachments.length) throw Error("attachments manifest must not be empty");
 const italian = spec.language === "it";
-const date = esc(spec.date),
-  place = esc(spec.place),
+const date = escExact(spec.date),
+  place = escExact(spec.place),
   name = esc(data.profile.name);
 const line = `\\par\\medskip\\noindent\\textbf{\\textitalian{Luogo e data:}} ${place ? `${place}, ` : ""}${date || "\\rule{3cm}{0.4pt}"}\\par\\vspace{1em}`;
 const draftFooter = spec.reviewed === false ? String.raw`\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{BOZZA}\renewcommand{\headrulewidth}{0pt}` : "";
@@ -236,12 +240,9 @@ for (const [base, title] of [
 ])
   writeFileSync(
     resolve(out, `${base}.xmpdata`),
-    `\\Title{${title}}\n\\Author{${data.profile.name}}\n\\Language{it-IT}\n${spec.date ? `\\Date{${spec.date}}\n` : ""}`
+    `\\Title{${title}}\n\\Author{${data.profile.name}}\n\\Language{it-IT}\n\\Date{${metadataIsoDate}}\n`
   );
-writeFileSync(
-  resolve(out, "cv.xmpdata"),
-  `\\Title{Scientific CV}\n\\Author{${data.profile.name}}\n\\Language{en-US}\n${spec.date ? `\\Date{${spec.date}}\n` : ""}`
-);
+writeFileSync(resolve(out, "cv.xmpdata"), `\\Title{Scientific CV}\n\\Author{${data.profile.name}}\n\\Language{en-US}\n\\Date{${metadataIsoDate}}\n`);
 writeFileSync(resolve(out, "titles.tex"), doc(italian ? "Elenco dei titoli" : "List of titles", titleBody));
 writeFileSync(
   resolve(out, "publications.tex"),
@@ -370,7 +371,7 @@ if (abstractPath) {
   writeFileSync(resolve(out, "abstracts-it.tex"), abstractTex);
   writeFileSync(
     resolve(out, "abstracts-it.xmpdata"),
-    `\\Title{Abstract tradotti in italiano}\n\\Author{${data.profile.name}}\n\\Language{it-IT}\n${spec.date ? `\\Date{${spec.date}}\n` : ""}`
+    `\\Title{Abstract tradotti in italiano}\n\\Author{${data.profile.name}}\n\\Language{it-IT}\n\\Date{${metadataIsoDate}}\n`
   );
 } else {
   for (const suffix of [".tex", ".xmpdata", ".pdf"]) rmSync(resolve(out, `abstracts-it${suffix}`), { force: true });
