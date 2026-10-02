@@ -206,6 +206,10 @@ teaching:
         Key topics: NLP foundations; agentic AI (overview); ethical/legal/privacy aspects of AI in
           healthcare
         Hours: 10 h/yr
+      - Course: Practical Applications of AI in Healthcare
+        Programme / Level: 2nd-level Master (DAI4Health)
+        Key topics: Telemonitoring and wearable devices
+        Hours: 6 h/yr
   - title: Teaching Assistant
     place: Ferrara, Italy
     org: University of Ferrara
@@ -336,9 +340,6 @@ service:
     rank_url: https://www.scimagojr.com/journalsearch.php?q=21100256982&tip=sid&clean=0
     announced: 2024-08-21T10:00:00+02:00
   - title: Reviewer
-    org: AAMAS 2027
-    announced: 2026-10-01
-  - title: Reviewer
     org: AI Access Foundation Journal of Artificial Intelligence Research
     metric: "IF: 4.6; Q1"
     url: https://www.jair.org/
@@ -359,6 +360,21 @@ service:
     url: https://www.sciencedirect.com/journal/international-journal-of-approximate-reasoning
     rank_url: https://www.scimagojr.com/journalsearch.php?q=24286
     announced: 2026-09-02
+  - title: Reviewer
+    org: International Conference on Autonomous Agents and Multiagent Systems (AAMAS)
+    metric: "CORE Rank: A"
+    url: https://www.ifaamas.org/
+    rank_url: https://portal.core.edu.au/conf-ranks/922/
+    years:
+      - year: 2027
+        announced: 2026-10-01
+  - title: Reviewer
+    org: Conference on Neural Information Processing Systems (NeurIPS)
+    metric: "CORE Rank: A*"
+    url: https://neurips.cc/
+    rank_url: https://portal.core.edu.au/conf-ranks/98/
+    years:
+      - 2026
 projects:
   - title: Contratto semantico neuro-simbolico per reachability rigorosa e certificati in CPS
     detail: Coordinator (Principal Investigator) — INdAM-GNCS Research Projects 2026
@@ -445,7 +461,7 @@ awards:
     dates: 27 Mar 2026
     announced: 2026-03-27
     items:
-      - Real-time audio-visual speech enhancement prototype; €2,000 team prize. Team members: L. Celona, A. Corsico, A. Emami, E. Mosca.
+      - "Real-time audio-visual speech enhancement prototype; €2,000 team prize. Team members: L. Celona, A. Corsico, A. Emami, E. Mosca."
   - title: Finalist (2nd place) & Team Leader
     detail: Huawei Italy University Challenge
     dates: Nov 2021

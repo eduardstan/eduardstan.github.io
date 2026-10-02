@@ -22,6 +22,14 @@ import {
   where,
 } from "./build-cv-data.mjs";
 
+test("rendering the repository CV never leaks object coercions into generated TeX", () => {
+  const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const cv = load(readFileSync(join(root, "content/cv.yaml"), "utf8"));
+  assert.doesNotMatch(render(cv), /\[object Object\]/);
+  assert.doesNotMatch(readFileSync(join(root, "cv/generated/cv-data.tex"), "utf8"), /\[object Object\]/);
+  assert.throws(() => entry({ title: "Bad item", items: [{ label: "value" }] }), /items\[0\] must be a string/);
+});
+
 test("an underscore inside a word stays literal and does not open a span", () => {
   // The probe that exposed the bug: a_b used to pair with the opener of
   // _italic_ and italicise everything between them.
