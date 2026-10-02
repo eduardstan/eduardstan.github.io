@@ -6,6 +6,7 @@ import { load } from "js-yaml";
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
+import { metadataDate } from "./dossier-date.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const script = join(root, "scripts/build-dossier.mjs");
@@ -42,6 +43,20 @@ assert.deepEqual(spec.attachments, [
   'Tesi di dottorato "Foundations of Modal Symbolic Learning" (Università degli Studi di Parma, 2023), file PDF',
   "Elenco di tutti i documenti allegati alla domanda",
 ]);
+
+test("parses supported human date forms for PDF metadata", () => {
+  for (const [input, expected] of [
+    ["2026-10-02", "2026-10-02"],
+    ["2 ottobre 2026", "2026-10-02"],
+    ["2 Ottobre 2026", "2026-10-02"],
+    ["2 ottòbre 2026", "2026-10-02"],
+    ["02/10/2026", "2026-10-02"],
+    ["2 October 2026", "2026-10-02"],
+  ])
+    assert.equal(metadataDate(input), expected, input);
+  assert.equal(metadataDate("29 febbraio 2025"), null);
+  assert.equal(metadataDate("not a date"), null);
+});
 
 test("renders the declaration, optional translations, and rejects bad publication selections", () => {
   const withoutAbstracts = run();
@@ -85,6 +100,21 @@ test("renders the declaration, optional translations, and rejects bad publicatio
   assert.doesNotMatch(overriddenTitles, /BOZZA/);
   const cvEnding = overriddenCv.slice(overriddenCv.lastIndexOf("\\end{document}") - 200);
   assert.match(cvEnding, /Luogo e data:} Roma, 2026-10-02/);
+  assert.match(readFileSync(join(output, "titles.xmpdata"), "utf8"), /\\Date\{2026-10-02\}/);
+  const italianDate = run(["--place", "Bologna", "--date", "2 ottobre 2026"]);
+  assert.equal(italianDate.status, 0, italianDate.stderr);
+  assert.match(readFileSync(join(output, "titles.tex"), "utf8"), /Bologna, 2 ottobre 2026/);
+  assert.match(readFileSync(join(output, "cv.xmpdata"), "utf8"), /\\Date\{2026-10-02\}/);
+  const unsafeDate = run(["--place", "O'Neil & Co_", "--date", "2 ottobre 2026 & 10%_"]);
+  assert.equal(unsafeDate.status, 0, unsafeDate.stderr);
+  const unsafeTex = readFileSync(join(output, "titles.tex"), "utf8");
+  assert.match(unsafeTex, /O\\char"27\{\}Neil \\& Co\\_/);
+  assert.match(unsafeTex, /2 ottobre 2026 \\& 10\\%\\_/);
+  const invalidDate = run(["--date", "yesterday"]);
+  assert.equal(invalidDate.status, 0, invalidDate.stderr);
+  assert.match(invalidDate.stderr, /could not parse dossier date/);
+  assert.match(readFileSync(join(output, "creationdate.lua"), "utf8"), /D:20000101000000/);
+  assert.match(readFileSync(join(output, "titles.xmpdata"), "utf8"), /\\Date\{2000-01-01\}/);
   assert.equal(load(readFileSync(join(root, "content/dossier.yaml"), "utf8")).place, "");
   assert.equal(run(["--reviewed", "yes"]).status, 1);
 
