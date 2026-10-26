@@ -67,3 +67,5 @@ gate.** Any difference must be explained, not accepted.
   research-projects page break and reflow surrounding extracted whitespace. The Udine `€1000`
   glyph remains visually correct; the `eurosym` text extraction emits `e1000`, unchanged in
   meaning and not a glyph defect. The CV remains 8 pages.
+
+- 2026-10-26: Added the IJCAI 2027 Program Committee year to `content/cv.yaml`. The IJCAI line changes from 2025–2026 to 2025–2027, one line changes, and the document remains 8 pages. `cv-baseline.txt` was updated with that line from the CI log diff of run 40342098415, and `cv-baseline.pdf` was not regenerated because the build machine has no LaTeX.
